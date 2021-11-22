@@ -1,0 +1,15 @@
+{
+  "name": "pug-plugin",
+  "version": "0.0.1",
+  "description": "The pug plugin for webpack to handles pug files from webpack entries and save it as HTML.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "files": [
+    "README.md"
+  ]
+}
