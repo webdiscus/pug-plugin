@@ -1,10 +1,19 @@
-# Pug plugin
+[![npm version](https://badge.fury.io/js/pug-plugin.svg)](https://badge.fury.io/js/pug-plugin)
+[![node](https://img.shields.io/node/v/pug-plugin)](https://nodejs.org)
+[![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-plugin/peer/webpack)](https://webpack.js.org/)
+[![codecov](https://codecov.io/gh/webdiscus/pug-plugin/branch/master/graph/badge.svg?token=Q6YMEN536M)](https://codecov.io/gh/webdiscus/pug-plugin)
+[![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
-## The concept (yet not implemented!)
+### **NEW:** first version is released!
 
-This is just a announcement of the pug plugin for webpack.
+# [pug-plugin](https://www.npmjs.com/package/pug-plugin)
+
+Handles `.pug` templates directly from webpack `entry` via `pug-loader` and save rendered HTML to destination directory.
+
+## The motivation
+
 The goal of this plugin is do same working as `mini-css-extract-plugin`. 
-This mean that will be possible add more pug files directly in webpack `entry` and stop `"plugin hell"` in `webpack.plugins`
+This mean that is possible add more pug files directly in webpack `entry` and stop `"plugin hell"` in `webpack.plugins`
 for huge amount of static pug files.
 
 For example, my project has over 30 static pug files them will be rendered to 30 static HTML. 
@@ -58,7 +67,7 @@ This is very bad praxis! Each time will be created new instance of the plugin, i
 
 ## I will stop this "hell"!
 
-My idee is use for pug templates correct default native place  - webpack `entry`, like it used for Sass files.
+The pug templates are in the webpack config `entry`, like it used for Sass files.
 
 ## 
 
@@ -85,7 +94,8 @@ const config = {
   },
 
   plugins: [
-    new PugPlugin(options), // needs only one instance of the pug plugin to handles all pug files from webpack entry
+    // zero config 
+    new PugPlugin(), // needs only one instance of the pug plugin to handles all pug files from webpack entry
     // ...
   ],
 
@@ -93,26 +103,41 @@ const config = {
     rules: [
       {
         test: /\.pug$/,
-        loader: PugPlugin.loader, // the pug loader, later it will be the code from my `@webdiscus/pug-loader`
+        loader: PugPlugin.loader, // the pug loader is powerful `@webdiscus/pug-loader`
       },
       // ...
     ],
   },
 }
+
+module.exports = config;
 ```
 
-Of course, will be supports of extended webpack `entry` syntax, e.g.:
+Of course, supports of extended webpack `entry` syntax, e.g.:
 ```
 entry: {
   about: { import: './about.pug', filename: 'pages/[name].html' },
 },
 ```
 
-## Use the modern and faster pug-loader now
 
-See my [`pug-loader`](https://github.com/webdiscus/pug-loader).
+## Also See
 
-## P.S.
-I am already experimenting with solutions to this problem.
+- [`pug GitHub`][pug]
+- [`pug API Reference`][pug-api]
+- [`pug-loader`][pug-loader]
 
-Those who are interested in solving this problem, like (star) this project now, so that I know that this project is relevant and would speed up the development.
+<!-- prettier-ignore-start -->
+[pug]: https://github.com/pugjs/pug
+[pug-api]: https://pugjs.org/api/reference.html
+[pug-loader]: https://github.com/webdiscus/pug-loader
+<!-- prettier-ignore-end -->
+
+## Testing
+
+`npm run test` will run the unit and integration tests.\
+`npm run test:coverage` will run the tests with coverage.
+
+## License
+
+[ISC](https://github.com/webdiscus/pug-loader/blob/master/LICENSE)

@@ -1,15 +1,69 @@
 {
   "name": "pug-plugin",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "The pug plugin for webpack to handles pug files from webpack entries and save it as HTML.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "pug",
+    "html",
+    "template",
+    "extract",
+    "webpack",
+    "entry",
+    "pug-loader",
+    "pug-plugin",
+    "html-loader",
+    "HtmlWebpackPlugin"
+  ],
   "license": "ISC",
+  "author": "webdiscus (https://github.com/webdiscus)",
+  "maintainers": [
+    "webdiscus (https://github.com/webdiscus)"
+  ],
+  "funding": {
+    "type": "patreon",
+    "url": "https://patreon.com/biodiscus"
+  },
+  "homepage": "https://github.com/webdiscus/pug-plugin",
+  "bugs": {
+    "url": "https://github.com/webdiscus/pug-plugin/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webdiscus/pug-plugin.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles --config ./test/jest.config.js",
+    "test:coverage": "jest --detectOpenHandles --collectCoverage --config ./test/jest.config.js"
+  },
   "files": [
-    "README.md"
-  ]
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=12.14"
+  },
+  "peerDependencies": {
+    "webpack": ">=5.32.0"
+  },
+  "dependencies": {
+    "@webdiscus/pug-loader": "^1.4.5",
+    "webpack-merge": "^5.8.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@types/jest": "^27.0.3",
+    "html-loader": "^3.0.1",
+    "jest": "^27.3.1",
+    "jstransformer-markdown-it": "^2.1.0",
+    "prettier": "^2.4.1",
+    "rimraf": "^3.0.2",
+    "webpack": "^5.64.1"
+  }
 }
