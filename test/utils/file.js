@@ -12,9 +12,9 @@ export const readDirRecursiveSync = function (dir = './', returnAbsolutePath = t
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   dir = path.resolve(dir);
 
-  // Get files within the current directory and add a path key to the file objects
+  // get files within the current directory and add a path key to the file objects
   const files = entries.filter((file) => !file.isDirectory()).map((file) => path.join(dir, file.name));
-  // Get folders within the current directory
+  // get folders within the current directory
   const folders = entries.filter((folder) => folder.isDirectory());
 
   for (const folder of folders) {
@@ -51,10 +51,10 @@ export const copyRecursiveSync = function (src, dest) {
  * @param {string} file
  * @return {any}
  */
-export const readJsonSync = (file) => {
+/*export const readJsonSync = (file) => {
   const content = fs.readFileSync(file, 'utf-8');
   return JSON.parse(content);
-};
+};*/
 
 /**
  * Return content of file as string.
@@ -72,8 +72,8 @@ export const readTextFileSync = (file) => {
  * @param {string} file
  * @return {any}
  */
-export const execScriptSync = (file) => {
+/*export const execScriptSync = (file) => {
   const result = execSync('node ' + file);
   // replace last newline in result
   return result.toString().replace(/\n$/, '');
-};
+};*/

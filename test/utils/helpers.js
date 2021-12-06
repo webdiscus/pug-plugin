@@ -34,3 +34,14 @@ export const compareFileListAndContent = (PATHS, relTestCasePath, done) => {
     done();
   });
 };
+
+export const exceptionContain = function (PATHS, relTestCasePath, containString, done) {
+  compile(PATHS, relTestCasePath, {})
+    .then(() => {
+      throw new Error('the test should throw an error');
+    })
+    .catch((error) => {
+      expect(error.toString()).toContain(containString);
+      done();
+    });
+};

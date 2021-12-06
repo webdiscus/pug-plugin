@@ -1,9 +1,10 @@
-const { merge } = require('webpack-merge');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const { merge } = require('webpack-merge');
 
 const colstr = require('./color-string');
-const { isFunction, shallowEqual } = require('./utils');
+const { plugin, isFunction, shallowEqual } = require('./utils');
+const { extractHtml, extractCss } = require('./modules');
 
 /** @typedef {import('webpack').Compiler} Compiler */
 /** @typedef {import('webpack').Compilation} Compilation */
@@ -14,13 +15,14 @@ const { isFunction, shallowEqual } = require('./utils');
 /**
  * @typedef {Object} ModuleOptions
  * @property {boolean} [enabled = true] Enable/disable the plugin.
+ * @property {RegExp} test The search for a match of entry files.
+ * @property {string} [sourcePath = options.context] The absolute path to sources.
+ * @property {string} [outputPath = options.output.path] The output directory for an asset.
  * @property {string | function(PathData, AssetInfo): string} [filename = '[name].html'] The file name of output file.
  *   See https://webpack.js.org/configuration/output/#outputfilename.
- * @property {string} [sourcePath = options.context] The absolute path to sources.
- * @property {string} [outputPath = options.output.path] The output directory for HTML.
  *   Must be an absolute or a relative by the context path.
- * @property {function(string, AssetEntry, Compilation): string} [postprocess = null] The post process for extracted content from entry.
- * @property {boolean} [verbose = false] Show the compilation information.
+ * @property {function(string, AssetEntry, Compilation): string | null} [postprocess = null] The post process for extracted content from entry.
+ * @property {boolean} [verbose = false] Show the information at processing entry files.
  */
 
 /**
@@ -37,7 +39,7 @@ const { isFunction, shallowEqual } = require('./utils');
  *   and save the file relative by output path, defined in webpack.options.output.path.
  * @property {string | function(PathData, AssetInfo): string} filenameTemplate The filename template.
  * @property {string} filename The asset filename.
- *  The template strings support only this substitutions: [id], [name], [contenthash], [contenthash:xx]
+ *  The template strings support only this substitutions: [name], [base], [path], [ext], [id], [contenthash], [contenthash:nn]
  *  See https://webpack.js.org/configuration/output/#outputfilename
  * @property {string} import
  * @property {string} outputPath
@@ -48,8 +50,6 @@ const { isFunction, shallowEqual } = require('./utils');
  * @property {boolean} [verbose = false] Show an information by handles of the entry in a postprocess.
  * @property {RawSource} RawSource The reference of the class compiler.webpack.sources.RawSource.
  */
-
-const plugin = 'pug-plugin';
 
 /**
  * @var {PugPluginOptions} defaultOptions
@@ -203,11 +203,13 @@ class PugPlugin {
             // generates the html string from source code
             result = new Function('', source)();
             if (result == null) this.entryException(entry);
+
             // detect result of ES module
             if (result.default) result = result.default;
 
             if (isFunction(result)) {
               try {
+                // pug-loader.method: compile
                 // note: all external variables are already assigned to locals in the template function via pug-loader,
                 // the argument must be empty object to avoid error by reading property from undefined
                 result = result({});
@@ -220,7 +222,7 @@ class PugPlugin {
               try {
                 result = entry.postprocess(result, entry, compilation);
               } catch (error) {
-                this.postprocessException(entry, error);
+                this.postprocessException(error, entry);
               }
             }
 
@@ -235,17 +237,23 @@ class PugPlugin {
     });
   }
 
-  executeAssetSourceException(error, entry) {
-    throw new Error(`\n\n[${plugin}] Asset source execution failed.\n` + `The file '${entry.import}'.\n` + error);
-  }
-
-  postprocessException(error, entry) {
-    throw new Error(`\n\n[${plugin}] Postprocess execution failed.\n` + `The file '${entry.import}'.\n` + error);
+  /**
+   * @param {AssetEntry} entry
+   */
+  verboseEntry(entry) {
+    if (!this.hasVerboseOut) console.log('\n');
+    this.hasVerboseOut = true;
+    console.log(
+      `[${colstr.yellow(plugin)}] Compile the entry ${colstr.green(entry.name)}\n` +
+        ` - filename: ${typeof entry.filename === 'function' ? colstr.cyan('[Function]') : entry.filename}\n` +
+        ` - import: ${entry.import}\n` +
+        ` - output: ${entry.file}\n`
+    );
   }
 
   publicPathException() {
     throw new Error(
-      `\n\n[${plugin}] This plugin yet not support 'auto' publicPath.\n` +
+      `\n[${plugin}] This plugin yet not support 'auto' publicPath.\n` +
         `Define a publicPath in the webpack configuration, e.g. output: { publicPath: '/' }.\n`
     );
   }
@@ -271,19 +279,31 @@ class PugPlugin {
   }
 
   /**
+   * @param {Error} error
    * @param {AssetEntry} entry
    */
-  verboseEntry(entry) {
-    if (!this.hasVerboseOut) console.log('\n');
-    this.hasVerboseOut = true;
-    console.log(
-      `[${colstr.yellow(plugin)}] Compile the entry ${colstr.green(entry.name)}\n` +
-        ` - filename: ${typeof entry.filename === 'function' ? colstr.cyan('[Function]') : entry.filename}\n` +
-        ` - import: ${entry.import}\n` +
-        ` - output: ${entry.file}\n`
+  executeAssetSourceException(error, entry) {
+    throw new Error(
+      `\n[${plugin}] Asset source execution failed by the entry '${entry.name}'.\n` +
+        `The file '${entry.import}'.\n` +
+        error
+    );
+  }
+
+  /**
+   * @param {Error} error
+   * @param {AssetEntry} entry
+   */
+  postprocessException(error, entry) {
+    throw new Error(
+      `\n[${plugin}] Postprocess execution failed by the entry '${entry.name}'.\n` +
+        `The file '${entry.import}'.\n` +
+        error
     );
   }
 }
 
 module.exports = PugPlugin;
+module.exports.extractCss = extractCss;
+module.exports.extractHtml = extractHtml;
 module.exports.loader = require.resolve('@webdiscus/pug-loader');

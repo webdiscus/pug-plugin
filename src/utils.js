@@ -1,3 +1,5 @@
+const plugin = 'pug-plugin';
+
 const isFunction = (value) => typeof value === 'function';
 
 /**
@@ -20,18 +22,18 @@ const shallowEqual = function (obj1, obj2) {
   return true;
 };
 
-const AUTO_PUBLIC_PATH = '__pug_plugin_public_path_auto__';
-const ABSOLUTE_PUBLIC_PATH = 'webpack:///pug-plugin/';
-const SINGLE_DOT_PATH_SEGMENT = '__pug_plugin_single_dot_path_segment__';
+//const AUTO_PUBLIC_PATH = '__pug_plugin_public_path_auto__';
+//const ABSOLUTE_PUBLIC_PATH = 'webpack:///pug-plugin/';
+//const SINGLE_DOT_PATH_SEGMENT = '__pug_plugin_single_dot_path_segment__';
 
 // todo Implement 'auto' publicPath, following is just research code from mini-css-extract-plugin:
-const getPublicPath = (compilation) => {
+/*const getPublicPath = (compilation) => {
   let { publicPath } = compilation.outputOptions || { publicPath: '' };
-  /*if (typeof options.publicPath === 'string') {
-    publicPath = options.publicPath;
-  } else if (isFunction(options.publicPath)) {
-    publicPath = options.publicPath(this.resourcePath, this.rootContext);
-  }*/
+  //if (typeof options.publicPath === 'string') {
+  //  publicPath = options.publicPath;
+  //} else if (isFunction(options.publicPath)) {
+  //  publicPath = options.publicPath(this.resourcePath, this.rootContext);
+  //}
 
   if (publicPath === 'auto') {
     publicPath = AUTO_PUBLIC_PATH;
@@ -43,10 +45,10 @@ const getPublicPath = (compilation) => {
     : `${ABSOLUTE_PUBLIC_PATH}${publicPath.replace(/\./g, SINGLE_DOT_PATH_SEGMENT)}`;
 
   return publicPathForExtract;
-};
+};*/
 
 // todo Resolve 'auto' publicPath into real path, following is just research code from mini-css-extract-plugin:
-function resolvePublicPath(filename, outputPath, enforceRelative) {
+/*function resolvePublicPath(filename, outputPath, enforceRelative) {
   let depth = -1;
   let append = '';
 
@@ -72,14 +74,15 @@ function resolvePublicPath(filename, outputPath, enforceRelative) {
   }
 
   return depth > 0 ? `${'../'.repeat(depth)}${append}` : enforceRelative ? `./${append}` : append;
-}
+}*/
 
 module.exports = {
+  plugin,
   isFunction,
   shallowEqual,
-  AUTO_PUBLIC_PATH,
-  ABSOLUTE_PUBLIC_PATH,
-  SINGLE_DOT_PATH_SEGMENT,
-  getPublicPath,
-  resolvePublicPath,
+  //AUTO_PUBLIC_PATH,
+  //ABSOLUTE_PUBLIC_PATH,
+  //SINGLE_DOT_PATH_SEGMENT,
+  //getPublicPath,
+  //resolvePublicPath,
 };

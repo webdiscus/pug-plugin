@@ -42,12 +42,19 @@ export const compile = (PATHS, testCasePath, webpackOpts) => {
 
   const compiler = webpack(config);
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     compiler.run((error, stats) => {
-      if (error) throw new Error('[webpack compiler] ' + error);
-      if (stats.hasErrors()) throw new Error('[webpack compiler stats] ' + stats.toString());
+      if (error) {
+        reject('[webpack compiler] ' + error);
+        return;
+      }
 
-      resolve(stats.hasErrors());
+      if (stats.hasErrors()) {
+        reject('[webpack compiler stats] ' + stats.toString());
+        return;
+      }
+
+      resolve(stats);
     });
   });
 };

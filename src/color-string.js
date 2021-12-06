@@ -1,50 +1,61 @@
 const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  underscore: '\x1b[4m',
-  blink: '\x1b[5m',
-  reverse: '\x1b[7m',
-  hidden: '\x1b[8m',
+  reset: '0',
+  bold: '1',
+  bright: '1',
+  dim: '2',
+  underscore: '4',
+  blink: '5',
+  reverse: '7',
+  hidden: '8',
 
-  black: '\x1b[30m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-  white: '\x1b[37m',
-  bgBlack: '\x1b[40m',
-  bgRed: '\x1b[41m',
-  bgGreen: '\x1b[42m',
-  bgYellow: '\x1b[43m',
-  bgBlue: '\x1b[44m',
-  bgMagenta: '\x1b[45m',
-  bgCyan: '\x1b[46m',
-  bgWhite: '\x1b[47m',
+  black: '30',
+  red: '31',
+  green: '32',
+  yellow: '33',
+  blue: '34',
+  magenta: '35',
+  cyan: '36',
+  white: '37',
+
+  bgBlack: '40',
+  bgRed: '41',
+  bgGreen: '42',
+  bgYellow: '43',
+  bgBlue: '44',
+  bgMagenta: '45',
+  bgCyan: '46',
+  bgWhite: '47',
 };
 
-const strColor = function (str, color) {
-  if (!colors[color]) color = 'white';
-  return colors[color] + str + colors.reset;
+/**
+ * @param {string} str The text string.
+ * @param {string} code The code of color.
+ * @param {string} bgCode The code of background color.
+ * @return {string}
+ */
+const strColor = (str, code, bgCode = '') => {
+  if (!code) code = colors.white;
+
+  return (bgCode ? `\x1b[${bgCode};${code}m` : `\x1b[${code}m`) + str + `\x1b[${colors.reset}m`;
 };
 
 module.exports = {
-  black: (str) => strColor(str, 'black'),
-  red: (str) => strColor(str, 'red'),
-  green: (str) => strColor(str, 'green'),
-  yellow: (str) => strColor(str, 'yellow'),
-  blue: (str) => strColor(str, 'blue'),
-  magenta: (str) => strColor(str, 'magenta'),
-  cyan: (str) => strColor(str, 'cyan'),
-  white: (str) => strColor(str, 'white'),
-  bgBlack: (str) => strColor(str, 'bgBlack'),
-  bgRed: (str) => strColor(str, 'bgRed'),
-  bgGreen: (str) => strColor(str, 'bgGreen'),
-  bgYellow: (str) => strColor(str, 'bgYellow'),
-  bgBlue: (str) => strColor(str, 'bgBlue'),
-  bgMagenta: (str) => strColor(str, 'bgMagenta'),
-  bgCyan: (str) => strColor(str, 'bgCyan'),
-  bgWhite: (str) => strColor(str, 'bgWhite'),
+  black: (str) => strColor(str, colors.black),
+  red: (str) => strColor(str, colors.red),
+  green: (str) => strColor(str, colors.green),
+  yellow: (str) => strColor(str, colors.yellow),
+  blue: (str) => strColor(str, colors.blue),
+  magenta: (str) => strColor(str, colors.magenta),
+  cyan: (str) => strColor(str, colors.cyan),
+  white: (str) => strColor(str, colors.white),
+  bgBlack: (str, color) => strColor(str, color, colors.bgBlack),
+  bgRed: (str, color) => strColor(str, color, colors.bgRed),
+  bgGreen: (str, color) => strColor(str, color, colors.bgGreen),
+  bgYellow: (str, color) => strColor(str, color, colors.bgYellow),
+  bgBlue: (str, color) => strColor(str, color, colors.bgBlue),
+  bgMagenta: (str, color) => strColor(str, color, colors.bgMagenta),
+  bgCyan: (str, color) => strColor(str, color, colors.bgCyan),
+  bgWhite: (str, color) => strColor(str, color, colors.bgWhite),
 };
+
+module.exports.colors = colors;
