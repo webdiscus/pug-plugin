@@ -1,0 +1,18 @@
+html
+  head
+    link(rel='icon' href=require('~Images/favicon.ico'))
+  body
+    //- require file as string
+    img.s1(src=require('~Images/image.jpeg'))
+    img.s2(src=require('image.jpeg'))
+    img.s3(src=require('../../src/assets/images/image.jpeg'))
+    img.s4(src=require('./image.jpeg'))
+    img.s5(src=require('../assets/images/image.jpeg'))
+
+    //- require file as variable
+    - var file = 'image.jpeg'
+    img.v1(src=require(file))
+    img.v2(src=require(`${file}`))
+    img.v3(src=require('./' + file))
+    img.v4(src=require('./' + `${file}`))
+    img.v5(src=require(`./${file}`))

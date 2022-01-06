@@ -10,8 +10,8 @@ module.exports = {
   },
 
   entry: {
-    index: 'src/index.pug',
-    about: 'src/about.jade',
+    index: './src/index.pug',
+    about: './src/about.jade',
   },
 
   plugins: [

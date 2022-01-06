@@ -1,0 +1,26 @@
+doctype html
+html
+  head
+    title= title
+    meta(charset='utf-8')
+    link(rel='icon' href=require('~Images/favicon.ico'))
+
+    //- source styles required directly in template
+    link(rel='stylesheet' href=require('~Styles/main.scss'))
+    link(rel='stylesheet' href=require('~Styles/faq.css'))
+
+    //- the compiled CSS from public path
+    link(rel='stylesheet' href='/styles.css')
+    link(rel='stylesheet' href='/about-styles.css')
+
+    script(src='/main.js')
+
+  body
+    #app-root
+      //- The application content from PUG templates will be added via JavaScript.
+          This supports `live reload` after edit.
+
+    #static-content
+      div Here is the content from static generated HTML.
+      div After edit you must reload the site manual.
+      img(src=require('~Images/image.jpeg'))

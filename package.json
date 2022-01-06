@@ -1,18 +1,23 @@
 {
   "name": "pug-plugin",
-  "version": "1.1.1",
-  "description": "The pug plugin for webpack to handle pug files from webpack entries and save them as HTML.",
+  "version": "1.2.0",
+  "description": "The pug plugin to handle the pug, html, css, scss files in webpack entry and extract css from pug.",
   "keywords": [
     "pug",
     "html",
     "template",
+    "css",
+    "scss",
+    "styles",
     "extract",
     "webpack",
     "entry",
-    "pug-loader",
+    "assets",
+    "resource",
+    "plugin",
+    "loader",
     "pug-plugin",
-    "html-loader",
-    "HtmlWebpackPlugin"
+    "pug-loader"
   ],
   "license": "ISC",
   "author": "webdiscus (https://github.com/webdiscus)",
@@ -53,20 +58,23 @@
     "webpack": ">=5.32.0"
   },
   "dependencies": {
-    "@webdiscus/pug-loader": "^1.5.1",
+    "@webdiscus/pug-loader": "^1.6.0",
+    "ansis": "^1.3.2",
     "webpack-merge": "^5.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/preset-env": "^7.16.4",
-    "@types/jest": "^27.0.3",
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "^7.16.8",
+    "@types/jest": "^27.4.0",
     "css-loader": "^6.5.1",
-    "html-loader": "^3.0.1",
-    "jest": "^27.4.3",
+    "html-loader": "^3.1.0",
+    "jest": "^27.4.7",
+    "mini-css-extract-plugin": "^2.4.6",
     "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
-    "sass": "^1.44.0",
-    "sass-loader": "^12.3.0",
-    "webpack": "^5.64.4"
+    "sass": "^1.47.0",
+    "sass-loader": "^12.4.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.65.0"
   }
 }

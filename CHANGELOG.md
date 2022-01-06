@@ -1,7 +1,17 @@
 # Change log
 
+## 1.2.0 (2022-01-11)
+- added support `webpack serve`
+- added support require of style source directly in pug, e.g.:
+  ```pug
+  link(rel='stylesheet' href=require('~Styles/main.scss'))
+  ```
+- added ansi styling by console output
+- improve performance
+- code optimisation
+
 ## 1.1.1 (2021-12-10)
-- update pug-loader: fixed path issues on windows 
+- update pug-loader: fixed path issues on Windows 
 
 ## 1.1.0 (2021-12-07)
 In this release was follow features tested, described and activated:

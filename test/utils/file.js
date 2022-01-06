@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 /**
  * Get files with relative paths.
@@ -46,17 +45,6 @@ export const copyRecursiveSync = function (src, dest) {
 };
 
 /**
- * Return object of JSON file.
- *
- * @param {string} file
- * @return {any}
- */
-/*export const readJsonSync = (file) => {
-  const content = fs.readFileSync(file, 'utf-8');
-  return JSON.parse(content);
-};*/
-
-/**
  * Return content of file as string.
  *
  * @param {string} file
@@ -65,15 +53,3 @@ export const copyRecursiveSync = function (src, dest) {
 export const readTextFileSync = (file) => {
   return fs.readFileSync(file, 'utf-8');
 };
-
-/**
- * Return output of javascript file.
- *
- * @param {string} file
- * @return {any}
- */
-/*export const execScriptSync = (file) => {
-  const result = execSync('node ' + file);
-  // replace last newline in result
-  return result.toString().replace(/\n$/, '');
-};*/

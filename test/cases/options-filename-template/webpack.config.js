@@ -11,10 +11,10 @@ module.exports = {
 
   entry: {
     index: {
-      import: 'src/index.pug',
+      import: './src/index.pug',
       filename: '[name].html',
     },
-    about: 'src/about.pug',
+    about: './src/about.pug',
   },
 
   plugins: [

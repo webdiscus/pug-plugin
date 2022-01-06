@@ -2,6 +2,14 @@ import path from 'path';
 import { readDirRecursiveSync, readTextFileSync } from './file';
 import { compile } from './webpack';
 
+/**
+ * This is the patch for some environments, like `jest`.
+ * The `jest` hasn't in global scope the `btoa` function which used in `css-loader`.
+ */
+if (typeof global.btoa === 'undefined') {
+  global.btoa = (input) => Buffer.from(input, 'latin1').toString('base64');
+}
+
 export const getCompareFileList = function (receivedPath, expectedPath) {
   return {
     received: readDirRecursiveSync(receivedPath, false).sort(),

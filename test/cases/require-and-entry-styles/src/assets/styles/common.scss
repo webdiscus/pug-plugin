@@ -1,0 +1,10 @@
+$primary-color: red;
+$secondary-color: green;
+
+body {
+  color: $primary-color;
+}
+
+p {
+  color: $secondary-color;
+}

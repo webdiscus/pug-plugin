@@ -2,7 +2,6 @@ const path = require('path');
 const PugPlugin = require('../../../');
 
 const basePath = path.resolve(__dirname);
-const sourcePath = path.join(basePath, 'src/');
 
 module.exports = {
   mode: 'production',
@@ -21,14 +20,14 @@ module.exports = {
 
   entry: {
     //
-    index: 'src/pages/index.pug',
-    'assets/css/styles': 'src/pages/index.css',
+    index: './src/pages/index.pug',
+    'assets/css/styles': './src/pages/index.css',
     //
-    about: 'src/pages/about/template.pug',
-    'assets/css/about': 'src/pages/about/styles.css',
+    about: './src/pages/about/template.pug',
+    'assets/css/about': './src/pages/about/styles.css',
     //
-    'pages/page01': 'src/pages/page01/template.pug',
-    'assets/css/page01': 'src/pages/page01/styles.css',
+    'pages/page01': './src/pages/page01/template.pug',
+    'assets/css/page01': './src/pages/page01/styles.css',
   },
 
   plugins: [
@@ -59,7 +58,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              sourceMap: true,
+              //sourceMap: true,
             },
           },
         ],

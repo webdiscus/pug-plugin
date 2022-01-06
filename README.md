@@ -1,4 +1,4 @@
-[![npm version](https://badge.fury.io/js/pug-plugin.svg)](https://badge.fury.io/js/pug-plugin)
+[![npm](https://img.shields.io/npm/v/pug-plugin?logo=npm&color=brightgreen "npm package")](https://www.npmjs.com/package/pug-plugin "download npm package")
 [![node](https://img.shields.io/node/v/pug-plugin)](https://nodejs.org)
 [![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-plugin/peer/webpack)](https://webpack.js.org/)
 [![codecov](https://codecov.io/gh/webdiscus/pug-plugin/branch/master/graph/badge.svg?token=Q6YMEN536M)](https://codecov.io/gh/webdiscus/pug-plugin)
@@ -7,13 +7,15 @@
 # [pug-plugin](https://www.npmjs.com/package/pug-plugin)
 
 Webpack plugin for the [Pug](https://pugjs.org) templates.\
-This plugin extract HTML and CSS from `pug` `html` `scss` `css` files defined by `webpack entry` into output directory.
+This plugin extract HTML and CSS from `pug` `html` `scss` `css` files defined by `webpack entry` 
+and dynamically replace in a template the required source filename of CSS, image with a public hashed name. 
 
 Using the `pug-plugin` and `pug` `html` `scss` `css` assets in the `webpack entry` no longer requires additional plugins such as:
 - [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
 - [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)
 - [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts)
-  or [webpack-fix-style-only-entries](https://github.com/fqborges/webpack-fix-style-only-entries) (bug fix plugins for `mini-css-extract-plugin`)
+  or [webpack-fix-style-only-entries](https://github.com/fqborges/webpack-fix-style-only-entries) \
+  (bug fix plugins for `mini-css-extract-plugin`)
 - [pug-loader](https://github.com/webdiscus/pug-loader) (this loader is already included in the `pug-plugin`)
 
 > The plugin can be used not only for `pug` but also for simply extracting `HTML` or `CSS` from  `webpack entry`, independent of pug usage.
@@ -21,9 +23,42 @@ Using the `pug-plugin` and `pug` `html` `scss` `css` assets in the `webpack entr
 <a id="install" name="install" href="#install"></a>
 ## Install
 
-```console
+```bash
 npm install pug-plugin --save-dev
 ```
+
+## Quick Start
+
+The minimal configuration in `webpack.config.js`:
+```js
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+
+module.exports = {
+  output: {
+    path: path.join(__dirname, 'public/'),
+    publicPath: '/', // must be defined any path, `auto` is not supported
+  },
+
+  entry: {
+    index: './src/pages/index.pug', // ==> public/index.html
+  },
+
+  plugins: [
+    new PugPlugin(), // add the plugin
+  ],
+
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: PugPlugin.loader, // add the pug-loader
+      },
+    ],
+  },
+};
+```
+> **Note**: this configuration work without `html-webpack-plugin`.
 
 ## Motivation
 
@@ -133,7 +168,7 @@ module.exports = {
         test: /\.(sass|scss)$/,
         sourcePath: path.join(__dirname, 'src/assets/sass/'),
         outputPath: path.join(__dirname, 'public/assets/css/'),
-        filename: isProduction ? '[name][contenthash:8].css' : '[name].css'
+        filename: isProduction ? '[name].[contenthash:8].css' : '[name].css'
       },
     ],
   };
@@ -185,6 +220,15 @@ module.exports = {
     ]
   };
   ```
+- extract CSS via `require()` directly in pug and replace the source filename with a public hashed name. In this case is no need to define the style in the webpack entry:
+  ```pug
+  link(rel='stylesheet' href=require('~Styles/main.scss'))
+  ```
+  output
+  ```html
+  <link rel="stylesheet" href="/assets/css/main.6f4d012e.css">
+  ```
+  [see complete example of usage](#require-style)
 
 <a id="options" name="options" href="#options"></a>
 ## Plugin options
@@ -329,12 +373,104 @@ module.exports = {
 };
 ```
 
-### Extract CSS file from SASS
+<a id="require-style" name="require-style" href="#require-style"></a>
+### Extract CSS via `require` in pug
 
-Dependencies: 
-- `css-loader` this loader translates CSS into JS strings
-- `sass-loader` need to handle the `.scss` file type
-- `sass` needed for `sass-loader` to compile Sass CSS
+Dependencies:
+- `css-loader` handles `.css` files and prepare CSS for any CSS extractor
+- `sass-loader` handles `.scss` files
+- `sass` compiles Sass to CSS
+
+Install: `npm install css-loader sass sass-loader --save-dev`
+
+In this case no need to define the style in webpack entry. 
+The CSS will be extracted from a style source required directly in the pug template.
+
+The pug template `src/templates/index.pug`:
+```pug
+html
+  head
+    link(href=require('~Styles/my-style.scss'))
+  body
+    p Hello World!
+```
+Add to the `webpack.config.js` following:
+```js
+module.exports = {
+  entry: {
+    // ...
+    index: 'src/templates/index.pug', // the pug file with required style
+  },
+  
+  plugins: [
+    // ...
+    // handle pug and style files defined in webpack.entry
+    new PugPlugin({
+      modules: [
+        PugPlugin.extractCss(), // enable CSS extraction
+      ],
+    }),
+  ],
+
+  module: {
+    rules: [
+      // ...
+      {
+        test: /\.pug$/,
+        loader: PugPlugin.loader, // the pug-loader is already included in the PugPlugin
+      },
+      {
+        test: /\.(css|sass|scss)$/,
+        type: 'asset/resource', // extract css in pug via require
+        generator: {
+          filename: 'assets/css/[name].[hash:8].css', // save extracted css in public path
+        },
+        use: [ 'css-loader', 'sass-loader' ], // extract css from a style source
+      }
+    ],
+  },
+}
+
+```
+
+The generated HTML:
+```html
+<html>
+  <head>
+    <link rel="stylesheet" href="/assets/css/main.f57966f4.css">
+  </head>
+  <body>
+    <p>Hello World!</p>
+  </body>
+</html>
+```
+
+> **Note**: don't needed any additional plugin, like `mini-css-extract-plugin`.
+
+## ! ACHTUNG ! ATTENTION !
+### STOP import styles in JavaScript! This is very BAD praxis.
+**DON'T DO IT :** `import ./src/styles.scss` This is popular but `dirty way`!
+
+### Clarification
+The importing of styles in JavaScript triggers the events in Webpack which call the `mini-css-extract-plugin` loader 
+to extract CSS from imported style source. Then the `html-webpack-plugin` using a magic add the `<link href="styles.css">` with filename of extracted CSS to any HTML file in head at last position.
+Your can't define in which HTML file will be added style and in which order. You are not in control of this process!
+This process requires two different plugins and has poor performance.\
+The single `pug-plugin` does it with right way, in one step and much faster.
+
+> ### Correct ways
+> - add a source style file directly in pug via `require`, like `link(href=require('~Styles/styles.scss'))`
+> - add a compiled css file directly in pug, like `link(href='/assets/styles.css')` and add the source of the style in webpack entry.\
+>   Yes, in this case may be needed additional assets manifest plugin to replace original filename with hashed name. But this is the right way.\
+>   In the future, will be added support to automatically replace the asset file name with a hashed one.
+
+
+### Extract CSS from SASS defined in webpack entry
+
+Dependencies:
+- `css-loader` handles `.css` files and prepare CSS for any CSS extractor
+- `sass-loader` handles `.scss` files
+- `sass` compiles Sass to CSS
 
 Install: `npm install css-loader sass sass-loader --save-dev`
 
@@ -354,10 +490,10 @@ module.exports = {
   plugins: [
     new PugPlugin({
       modules: [
-        // add the module to extract CSS into output file
+        // add the module to extract CSS
         // see options https://github.com/webdiscus/pug-plugin#options
         PugPlugin.extractCss({
-          filename: isProduction ? '[name][contenthash:8].css' : '[name].css',
+          filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
         })
       ],
     }),
@@ -454,7 +590,7 @@ module.exports = {
         },
         // add the module to extract CSS into output file
         PugPlugin.extractCss({
-          filename: isProduction ? '[name][contenthash:8].css' : '[name].css',
+          filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
           sourcePath: 'src/assets/sass/',
           outputPath: 'assets/css/',
         })

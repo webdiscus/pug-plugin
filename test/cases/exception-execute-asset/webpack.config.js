@@ -11,7 +11,7 @@ module.exports = {
 
   entry: {
     // test error by execution template function
-    index: 'src/index.pug',
+    index: './src/index.pug',
   },
 
   plugins: [new PugPlugin({})],

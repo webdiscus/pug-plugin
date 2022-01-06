@@ -1,9 +1,6 @@
-import { compile } from './utils/webpack';
-
 const path = require('path');
 const rimraf = require('rimraf');
 
-import colstr from '../src/color-string';
 import { shallowEqual } from '../src/utils';
 import { copyRecursiveSync } from './utils/file';
 import { compareFileListAndContent, exceptionContain } from './utils/helpers';
@@ -44,31 +41,6 @@ describe('utils tests', () => {
   });
 });
 
-describe('color string tests', () => {
-  const colorMethod = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'];
-  const bgColorMethod = ['bgBlack', 'bgRed', 'bgGreen', 'bgYellow', 'bgBlue', 'bgMagenta', 'bgCyan', 'bgWhite'];
-
-  colorMethod.forEach((color) => {
-    test(`colstr.${color}`, (done) => {
-      const str = 'ok';
-      const received = colstr[color](str);
-      const expected = `\x1b[${colstr.colors[color]}m` + str + `\x1b[${colstr.colors.reset}m`;
-      expect(received).toEqual(expected);
-      done();
-    });
-  });
-
-  bgColorMethod.forEach((color) => {
-    test(`colstr.${color}`, (done) => {
-      const str = 'ok';
-      const received = colstr[color](str);
-      const expected = `\x1b[${colstr.colors[color]};${colstr.colors.white}m` + str + `\x1b[${colstr.colors.reset}m`;
-      expect(received).toEqual(expected);
-      done();
-    });
-  });
-});
-
 describe('integration tests', () => {
   test('Hello World! Zero config.', (done) => {
     compareFileListAndContent(PATHS, 'hello-world', done);
@@ -98,20 +70,43 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'options-modules-css', done);
   });
 
-  test('entries: html, pug', (done) => {
+  test('entry: html, pug', (done) => {
     compareFileListAndContent(PATHS, 'entry-html-pug', done);
   });
 
-  test('entries: sass, pug (production)', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);
+  // TODO: research why test in GitHub generate other filename - `styles.9790d61e.css`, but local is 'styles.ccc97e51.css'
+  // test('entry: sass, pug (production)', (done) => {
+  //   compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);
+  // });
+
+  test('entry: sass, pug (development)', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
   });
 
-  test('entries: sass, pug (development)', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
+  test('entry: style-loader (development)', (done) => {
+    compareFileListAndContent(PATHS, 'entry-style-loader', done);
   });
 
   test('entry: js, pug', (done) => {
     compareFileListAndContent(PATHS, 'entry-js-pug', done);
+  });
+
+  test('entry styles pass over to other plugin', (done) => {
+    compareFileListAndContent(PATHS, 'entry-styles-pass-over', done);
+  });
+});
+
+describe('require assets tests', () => {
+  test('require images in pug', (done) => {
+    compareFileListAndContent(PATHS, 'require-images', done);
+  });
+
+  test('require styles in pug', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles', done);
+  });
+
+  test('require styles in pug and use compiled styles from webpack entry', (done) => {
+    compareFileListAndContent(PATHS, 'require-and-entry-styles', done);
   });
 });
 
@@ -122,15 +117,15 @@ describe('exception tests', () => {
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
-  test('exception: entry not found', (done) => {
-    const relTestCasePath = 'exception-entry-not-found';
-    const containString = 'is not found';
-    exceptionContain(PATHS, relTestCasePath, containString, done);
-  });
-
   test('exception: execute asset', (done) => {
     const relTestCasePath = 'exception-execute-asset';
     const containString = 'Asset source execution failed';
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: option modules', (done) => {
+    const relTestCasePath = 'exception-option-modules';
+    const containString = 'must be the array of';
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 

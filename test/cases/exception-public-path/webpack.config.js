@@ -11,7 +11,7 @@ module.exports = {
   },
 
   entry: {
-    index: 'src/index.pug',
+    index: './src/index.pug',
   },
 
   plugins: [

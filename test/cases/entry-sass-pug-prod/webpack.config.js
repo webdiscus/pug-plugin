@@ -2,6 +2,7 @@ const path = require('path');
 const PugPlugin = require('../../../');
 
 const isProduction = true;
+
 module.exports = {
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? false : 'source-map',
@@ -12,15 +13,15 @@ module.exports = {
   },
 
   entry: {
-    styles: 'src/assets/main.scss',
-    index: 'src/index.pug',
+    styles: './src/assets/main.scss',
+    index: './src/index.pug',
   },
 
   plugins: [
     new PugPlugin({
       modules: [
         PugPlugin.extractCss({
-          filename: isProduction ? '[name][contenthash:8].css' : '[name].css',
+          filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
         }),
       ],
     }),
@@ -40,7 +41,8 @@ module.exports = {
         use: [
           {
             loader: 'css-loader',
-            options: {},
+            // test CommonJS
+            options: { esModule: false },
           },
           {
             loader: 'sass-loader',
