@@ -52,7 +52,7 @@ module.exports = {
         type: 'asset/resource', // add this for usage in pug, like `link(href=require('~Styles/my-style.scss'))`
         generator: {
           // save required styles
-          filename: 'assets/css/[name].[hash].css[query]',
+          filename: 'assets/css/[name].[hash:8].css',
         },
         use: [
           {

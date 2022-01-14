@@ -327,8 +327,7 @@ module.exports = {
         loader: PugPlugin.loader,
         // this loader options are optional, but recommended for faster compilation
         options: {
-          method: 'render',
-          esModule: true,
+          method: 'render'
         },
       },
     ],
@@ -367,6 +366,12 @@ module.exports = {
       {
         test: /\.html$/,
         loader: 'html-loader',
+        options: {
+          // disable processing of resources in static HTML, leave as is
+          sources: false,
+          // webpack use CommonJS module
+          esModule: false,
+        },
       },
     ],
   },
@@ -604,14 +609,19 @@ module.exports = {
         test: /\.pug$/,
         loader: PugPlugin.loader,
         options: {
-          method: 'render',
-          esModule: true,
+          method: 'render'
         },
       },
       // html
       {
         test: /\.html$/,
         loader: 'html-loader',
+        options: {
+          // disable processing of resources in static HTML, leave as is
+          sources: false,
+          // webpack use CommonJS module
+          esModule: false,
+        },
       },
       // styles
       {
@@ -624,6 +634,112 @@ module.exports = {
             loader: 'sass-loader',
           },
         ],
+      },
+    ],
+  },
+};
+```
+
+## Special rare case
+###Usage `pug-plugin` and `pug-loader` with `html` render method.
+
+> Don't use it if you don't know why you need it.\
+> It's only the example of the solution for possible trouble by usage the `html-loader`.\
+> Usually is used the `render` or `compile` method in `pug-loader` options.
+
+For example, by usage in pug both static and dynamic resources.
+
+index.pug
+```pug
+html
+  head
+    //- Static resource URL from public web path should not be parsed, leave as is.
+    link(rel='stylesheet' href='/absolute/assets/about.css')
+    //- Required resource must be processed.
+        Output to /assets/css/styles.8c1234fc.css
+    link(rel='stylesheet' href=require('./styles.scss'))
+  body
+    h1 Hello World!
+    
+    //- Static resource URL from public web path should not be parsed, leave as is.
+    img(src='relative/assets/logo.jpeg')
+    //- Required resource must be processed.
+        Output to /assets/images/image.f472de4f4.jpg
+    img(src=require('./image.jpeg'))
+
+```
+
+webpack.config.js
+```js
+const fs = require('fs');
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+
+module.exports = {
+  mode: 'production',
+
+  output: {
+    path: path.join(__dirname, 'public/'),
+    publicPath: '/',
+  },
+
+  entry: {
+    index: './src/index.pug',
+  },
+
+  plugins: [
+    new PugPlugin({
+      modules: [PugPlugin.extractCss()],
+    }),
+  ],
+
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        use: [
+          {
+            loader: 'html-loader',
+            options: {
+              // Webpack use CommonJS module
+              esModule: false,
+              sources: {
+                // MEGA IMPORTANT!
+                // Static resource URL from public web path should not be parsed.
+                // Leave as is:
+                //   img(src='/assets/image.jpg')
+                //   link(rel='stylesheet' href='assets/styles.css')
+                // Must be processed:
+                //   img(src=require('./image.jpg'))
+                //   link(rel='stylesheet' href=require('./styles.css'))
+                urlFilter: (attribute, value) => path.isAbsolute(value) && fs.existsSync(value),
+              },
+            },
+          },
+          {
+            loader: PugPlugin.loader,
+            options: {
+              method: 'html', // usually is used the `render` method
+            },
+          },
+        ],
+      },
+
+      {
+        test: /\.(css|sass|scss)$/,
+        type: 'asset/resource', // process required scss/css in pug
+        generator: {
+          filename: 'assets/css/[name].[contenthash:8].css',
+        },
+        use: ['css-loader', 'sass-loader'],
+      },
+
+      {
+        test: /\.(png|jpg|jpeg)/,
+        type: 'asset/resource', // process required images in pug
+        generator: {
+          filename: 'assets/images/[name].[hash:8][ext]',
+        },
       },
     ],
   },

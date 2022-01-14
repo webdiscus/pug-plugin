@@ -24,7 +24,7 @@ module.exports = {
 
   entry: {
     styles: './src/assets/styles/common.scss',
-    'about-styles': './src/assets/styles/about.css',
+    'assets/css/about': './src/assets/styles/about.css',
     main: './src/main.js',
     // main: {
     //   import: './src/main.js',
@@ -54,7 +54,6 @@ module.exports = {
         loader: PugPlugin.loader, // the pug-loader is already included in the PugPlugin
         options: {
           method: 'render',
-          esModule: true,
         },
       },
       // image resources processing via require() in pug
@@ -62,7 +61,7 @@ module.exports = {
         test: /\.(png|jpg|jpeg|ico)/,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/img/[name].[hash][ext][query]',
+          filename: 'assets/img/[name].[hash][ext]',
         },
       },
 
@@ -72,7 +71,7 @@ module.exports = {
         type: 'asset/resource', // add this for usage in pug, like `link(href=require('~Styles/my-style.scss'))`
         generator: {
           // save required styles
-          filename: 'assets/css/[name].[hash].css[query]',
+          filename: 'assets/css/[name].[hash].css',
         },
         use: [
           {
@@ -89,6 +88,10 @@ module.exports = {
       {
         test: /\.html$/,
         loader: 'html-loader',
+        options: {
+          // disable processing of resources in static HTML, leave as is
+          sources: false,
+        },
       },
     ],
   },

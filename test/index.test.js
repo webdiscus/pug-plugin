@@ -41,9 +41,9 @@ describe('utils tests', () => {
   });
 });
 
-describe('integration tests', () => {
-  test('Hello World! Zero config.', (done) => {
-    compareFileListAndContent(PATHS, 'hello-world', done);
+describe('options', () => {
+  test('options.enabled = false', (done) => {
+    compareFileListAndContent(PATHS, 'options-enabled', done);
   });
 
   test('options.test (extensions)', (done) => {
@@ -68,6 +68,12 @@ describe('integration tests', () => {
 
   test('options.modules (extractCss)', (done) => {
     compareFileListAndContent(PATHS, 'options-modules-css', done);
+  });
+});
+
+describe('integration tests', () => {
+  test('Hello World! Zero config.', (done) => {
+    compareFileListAndContent(PATHS, 'hello-world', done);
   });
 
   test('entry: html, pug', (done) => {
@@ -101,6 +107,14 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-images', done);
   });
 
+  test('require assets in pug, method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-assets-method-render', done);
+  });
+
+  test('require assets in pug, method html', (done) => {
+    compareFileListAndContent(PATHS, 'require-assets-method-html', done);
+  });
+
   test('require styles in pug', (done) => {
     compareFileListAndContent(PATHS, 'require-styles', done);
   });
@@ -111,15 +125,27 @@ describe('require assets tests', () => {
 });
 
 describe('exception tests', () => {
-  test('exception: publicPath auto', (done) => {
-    const relTestCasePath = 'exception-public-path';
-    const containString = `This plugin yet not support 'auto' publicPath.`;
+  test('exception: publicPath undefined', (done) => {
+    const relTestCasePath = 'exception-public-path-undefined';
+    const containString = `This plugin yet not support 'auto' or undefined`;
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
-  test('exception: execute asset', (done) => {
-    const relTestCasePath = 'exception-execute-asset';
-    const containString = 'Asset source execution failed';
+  test('exception: publicPath auto', (done) => {
+    const relTestCasePath = 'exception-public-path-auto';
+    const containString = `This plugin yet not support 'auto' or undefined`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: execute template function', (done) => {
+    const relTestCasePath = 'exception-execute-template';
+    const containString = 'Failed to execute template function';
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: execute source code', (done) => {
+    const relTestCasePath = 'exception-execute-source';
+    const containString = 'Failed to execute source code';
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 

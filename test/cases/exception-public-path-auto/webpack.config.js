@@ -6,7 +6,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    // exception: publicPath
+    // exception: 'auto' publicPath in not supported
     publicPath: 'auto',
   },
 
@@ -22,7 +22,6 @@ module.exports = {
 
   module: {
     rules: [
-      // Templates
       {
         test: /\.pug$/,
         loader: PugPlugin.loader,

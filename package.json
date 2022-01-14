@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "The pug plugin to handle the pug, html, css, scss files in webpack entry and extract css from pug.",
   "keywords": [
     "pug",
@@ -75,6 +75,6 @@
     "sass": "^1.47.0",
     "sass-loader": "^12.4.0",
     "style-loader": "^3.3.1",
-    "webpack": "^5.65.0"
+    "webpack": "^5.66.0"
   }
 }

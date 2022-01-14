@@ -1,7 +1,8 @@
+const vm = require('vm');
 const path = require('path');
 const ansis = require('ansis');
 const { merge } = require('webpack-merge');
-const { plugin, isFunction, requireResource } = require('./utils');
+const { plugin, isFunction, resource } = require('./utils');
 const { extractHtml, extractCss } = require('./modules');
 
 /** @typedef {import('webpack').Compiler} Compiler */
@@ -51,6 +52,7 @@ const { extractHtml, extractCss } = require('./modules');
 
 /**
  * @typedef {Object} EntryAssetInfo
+ * @property {boolean} [verbose = false]
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
  * @property {string} entryFile The entry file.
  * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
@@ -113,8 +115,8 @@ class PugPlugin {
     const { RawSource } = compiler.webpack.sources;
 
     // TODO resolve 'auto' publicPath
-    if (webpackOutputPublicPath === 'auto') this.publicPathException();
-    requireResource.publicPath = webpackOutputPublicPath;
+    if (webpackOutputPublicPath == null || webpackOutputPublicPath === 'auto') this.publicPathException();
+    resource.publicPath = webpackOutputPublicPath;
 
     // enable library type `jsonp` for compilation JS from source into HTML string via Function()
     if (compiler.options.output.enabledLibraryTypes.indexOf('jsonp') < 0) {
@@ -220,19 +222,16 @@ class PugPlugin {
           compiledResult = '';
 
         // don't hot update chunks
-        // TODO research whether the chunk can be the instance of HotUpdateChunk
         if (chunk instanceof HotUpdateChunk) return;
 
         const entry = this.getEntryByName(chunk.name);
-
         // process only entries supported by this plugin
         if (!entry) return;
 
-        requireResource.resources = {};
+        resource.files = {};
         for (const module of chunkGraph.getChunkModules(chunk)) {
           if (module.type === 'asset/resource') {
-            requireResource.resources[module.resource] = module.buildInfo.filename;
-
+            resource.files[module.resource] = module.buildInfo.filename;
             this.entryAssets.push({
               entryFile: entry.importFile,
               sourceFile: module.resource,
@@ -240,15 +239,10 @@ class PugPlugin {
             });
           } else if (module.type === MODULE_TYPE) {
             source = module.originalSource().source().toString();
-            source = this.getFunctionCode(source);
           }
         }
 
-        if (~source.indexOf('___CSS_LOADER_')) {
-          compiledResult = this.extractCss(source, { sourceFile: entry.importFile, moduleId: chunk.id });
-        } else {
-          compiledResult = this.extractHtml(source, entry);
-        }
+        compiledResult = this.extract(source, entry.importFile);
 
         result.push({
           render: () => new RawSource(compiledResult),
@@ -292,7 +286,6 @@ class PugPlugin {
               // the asset required in pug
               module = this.getModule(filename);
               if (!module) continue;
-              postprocess = module.postprocess;
 
               // extract required resource which is not presents in webpack entry
               entryAsset = this.entryAssets.find((item) => item.assetFile === filename);
@@ -302,31 +295,25 @@ class PugPlugin {
                 continue;
               }
 
+              postprocess = module.postprocess;
               assetFile = filename;
               source = assets[filename].source().toString();
-              source = this.getFunctionCode(source);
 
-              if (~source.indexOf('___CSS_LOADER_')) {
-                const importFile = path.join(webpackOutputPath, filename);
-                if (verbose) {
-                  entryAsset.assetFile = path.join(webpackOutputPath, assetFile);
-                  this.verboseExtractAsset(entryAsset);
-                }
-                result = this.extractCss(source, { sourceFile: importFile, moduleId: filename });
+              if (verbose) {
+                entryAsset.assetFile = path.join(webpackOutputPath, assetFile);
+                this.verboseExtractAsset(entryAsset);
               }
+              result = this.extract(source, entryAsset.sourceFile);
             }
 
             const info = {
               isEntry: !!entry,
+              verbose: entry ? entry.verbose : module.verbose,
               entryFile: entry ? entry.file : entryAsset.entryFile,
               filename: entry ? entry.filenameTemplate : module.filename,
               sourceFile: entry ? entry.importFile : entryAsset.sourceFile,
               assetFile,
             };
-
-            if (result == null) {
-              this.entryException('The extract from source is undefined.', source, info);
-            }
 
             if (postprocess) {
               try {
@@ -348,53 +335,74 @@ class PugPlugin {
   }
 
   /**
-   * Extract the html from source code.
-   *
-   * @param {string} source
-   * @param {AssetEntry} entry
-   * @returns {string}
-   */
-  extractHtml(source, entry) {
-    let result = new Function('require', source)(requireResource);
-    if (isFunction(result)) {
-      try {
-        return result();
-      } catch (error) {
-        this.executeAssetSourceException(error, entry);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Extract the css and source map from code generated by`css-loader`.
+   * Extract the content from source generated by loaders such as `css-loader`, `html-loader`.
    *
    * @param {string} source The source generated by `css-loader`.
    * @param {string} sourceFile The full path of source file.
-   * @param {string} moduleId The id of the css module.
    * @returns {string}
    */
-  extractCss(source, { sourceFile, moduleId }) {
-    // fix path in `require()` by `css-loader` options: { esModule: false }
-    // replace `import from` with `require()` by `css-loader` options: { esModule: true }
-    const matches = ~source.indexOf('require(')
-      ? source.matchAll(/.+?(\w+) = require\("(.+)"\);/g)
-      : source.matchAll(/import (.+) from "(.+)";/g);
+  extract(source, sourceFile) {
+    resource.context = path.dirname(sourceFile);
+    //console.log('\nBEVOR: ', source);
+    source = this.toCommonJS(source);
+    //console.log('\nAFTER: ', source);
 
-    for (const [match, variable, file] of matches) {
-      const fullPath = path.join(path.dirname(sourceFile), file);
-      const relPath = path.relative(__dirname, fullPath);
-      const replace = `var ${variable} = require('${relPath}');`;
-      source = source.replace(match, replace);
+    let result;
+    const contextObject = vm.createContext({
+      require: resource.require,
+      // the `module.id` is required for `css-loader`
+      module: { id: sourceFile },
+    });
+
+    const script = new vm.Script(source, { filename: sourceFile });
+    try {
+      result = script.runInContext(contextObject);
+    } catch (error) {
+      this.compileCodeException(error, sourceFile, source);
     }
 
-    // generate the export object of the `css-loader` from source
-    // this object has the own method `toString()` for concatenation of all source strings
-    // see node_modules/css-loader/dist/runtime/sourceMaps.js
-    const result = new Function('require, module', source)(require, { id: moduleId });
+    if (isFunction(result)) {
+      // execute a template function generated by `html-loader`
+      try {
+        return result();
+      } catch (error) {
+        this.executeTemplateFunctionException(error, sourceFile, source);
+      }
+    }
 
+    // generated result of the `css-loader` has the own method `toString()` to concatenate code strings
+    // see node_modules/css-loader/dist/runtime/sourceMaps.js
     return result.toString();
+  }
+
+  /**
+   * Transform source of a module to the CommonJS module.
+   * @param {string} source
+   * @returns {string}
+   */
+  toCommonJS(source) {
+    if (source.indexOf('export default') >= 0) {
+      // import to require
+      const importMatches = source.matchAll(/import (.+) from "(.+)";/g);
+      for (const [match, variable, file] of importMatches) {
+        source = source.replace(match, `var ${variable} = require('${file}');`);
+      }
+      // new URL to require
+      const urlMatches = source.matchAll(/= new URL\("(.+?)"(?:.*?)\);/g);
+      for (const [match, file] of urlMatches) {
+        source = source.replace(match, `= require('${file}');`);
+      }
+
+      // TODO: implement clever method to replace module `export default`, but not in any string, e.g.:
+      //   - export default '<h1>Code example: `var code = "hello";export default code;` </h1>';
+
+      // cases:
+      //   export default '<h1>Hello World!</h1>';
+      //   var code = '<h1>Hello World!</h1>';export default code;
+      source = source.replace(/export default (.+);/, 'module.exports = $1;');
+    }
+
+    return source;
   }
 
   /**
@@ -428,21 +436,6 @@ class PugPlugin {
   isChunkModuleInEntry(module) {
     const importFile = module.resource;
     return importFile ? this.entries.find((entry) => entry.importFile === importFile) !== undefined : false;
-  }
-
-  /**
-   * Transform source of module to function code.
-   * @param {string} source
-   * @returns {string}
-   */
-  getFunctionCode(source) {
-    if (~source.indexOf('export default')) {
-      source = source.replace('export default', `return`);
-    } else if (~source.indexOf('module.exports')) {
-      source = source.replace(/module.exports\s*=/, `return `);
-    }
-
-    return source;
   }
 
   /**
@@ -496,47 +489,55 @@ class PugPlugin {
    */
   publicPathException() {
     throw new Error(
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} This plugin yet not support 'auto' publicPath.\n` +
-        `Define a publicPath in the webpack configuration, e.g. output: { publicPath: '/' }.\n`
+      `\n${ansis.black.bgRedBright(`[${plugin}]`)} This plugin yet not support 'auto' or undefined ${ansis.yellow(
+        'output.publicPath'
+      )}.\n` +
+        `Define a publicPath in the webpack configuration, for example: \n` +
+        `${ansis.magenta("output: { publicPath: '/' }")}\n` +
+        `  or as a function (will be called in compilation time)\n` +
+        `${ansis.magenta("output: { publicPath: (obj) => '/' }")}.\n`
     );
   }
 
   /**
-   * @param {string} errorMessage
+   * @param {Error} error
+   * @param {string} sourceFile
    * @param {string} source
-   * @param {EntryAssetInfo} info
    * @throws {Error}
    */
-  entryException(errorMessage, source, info) {
-    let error =
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} Fail by entry file ${ansis.cyan(info.assetFile)}. ` +
-      errorMessage +
-      '\n' +
-      ansis.yellow(`Possible reasons:`) +
-      '\n';
-
-    const [unresolvedRequire] = /(<[^>]+require\(.+\).+?>)/.exec(source) || [];
-    if (unresolvedRequire) {
-      error += ` - the extracted JavaScript contain not resolved ${ansis.cyanBright('require()')}:\n`;
-      error += ansis.magenta(unresolvedRequire);
-    } else {
-      error += ` - the extracted JavaScript is not executable:\n`;
-      error += ansis.cyanBright(source);
-      error += '\n';
-    }
-
-    throw new Error(ansis.white(error) + '\n');
+  compileCodeException(error, sourceFile, source) {
+    throw new Error(
+      `\n${ansis.black.bgRedBright(`[${plugin}]`)} Failed to execute source code'.\n` +
+        `The source file: '${ansis.cyan(sourceFile)}'.\n` +
+        error
+    );
   }
 
   /**
    * @param {Error} error
-   * @param {AssetEntry} entry
+   * @param {string} sourceFile
+   * @param {string} source
    * @throws {Error}
    */
-  executeAssetSourceException(error, entry) {
+  executeTemplateFunctionException(error, sourceFile, source) {
+    let reasons = '';
+
+    if (source.indexOf('require(') >= 0) {
+      reasons +=
+        `- missed webpack configuration in 'module.rule' for required resource type, e.g.:\n` +
+        `  for link(href=require('./style.css'))\n` +
+        `  in webpack 'module.rule' must be defined the option 'type'\n` +
+        `  {\n` +
+        `    test: /\.(css|sass|scss)$/,\n` +
+        `    ${ansis.red.bgWhite("type: 'asset/resource', // <== possible this is missed")}\n` +
+        `    use: [ 'css-loader', 'sass-loader' ],\n` +
+        `  }\n`;
+    }
+
     throw new Error(
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} Asset source execution failed by the entry '${entry.name}'.\n` +
-        `The file '${entry.importFile}'.\n` +
+      `\n${ansis.black.bgRedBright(`[${plugin}]`)} Failed to execute template function'.\n` +
+        `The source file: '${ansis.cyan(sourceFile)}'.\n` +
+        (reasons ? `Possible reason:\n` + reasons : '') +
         error
     );
   }

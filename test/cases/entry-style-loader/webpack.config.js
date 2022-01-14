@@ -21,6 +21,8 @@ module.exports = {
     new PugPlugin({
       modules: [
         PugPlugin.extractCss({
+          // test verbose in extractCss
+          verbose: true,
           filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
         }),
       ],
