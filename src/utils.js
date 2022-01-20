@@ -1,7 +1,25 @@
+// add polyfill for node.js >= 12.0.0 && < 15.0.0
+require('./polyfills/string.replaceAll');
+
 const path = require('path');
+const ansis = require('ansis');
 const plugin = 'pug-plugin';
 
+const isWin = path.sep === '\\';
 const isFunction = (value) => typeof value === 'function';
+
+/**
+ * Replace the backslash to forwards-slash in the tag attribute.
+ * Webpack generates in Windows wrong backslash in URL, e.g.:
+ * <img src="\assets\image.jpg">
+ *
+ * @param {string} str
+ * @returns {string}
+ */
+const fixBackslashInUrl = (str) => {
+  if (typeof str !== 'string') return str;
+  return str.replaceAll(/="(.+?)"/g, (value) => value.replace(/\\+/g, '/'));
+};
 
 const resource = {
   /**
@@ -28,17 +46,21 @@ const resource = {
   require: (file) => {
     const self = resource;
     const context = self.context || __dirname;
-    const normalizedPath = path.join(file);
-    const assetFile = self.files[normalizedPath];
+    const assetFile = self.files[file];
+    const fullPath = path.isAbsolute(file) ? file : path.join(context, file);
 
     if (assetFile) {
       // resolve required asset filename
       return path.join(self.publicPath, assetFile);
+    } else if (/\.js[a-z0-9]*$/i.test(file)) {
+      // require only js code or data
+      return require(fullPath);
     }
 
-    const fullPath = path.isAbsolute(file) ? path.join(file) : path.join(context, file);
+    // possible not correct resolved resource via require in pug
+    console.log(`${ansis.black.bgYellow(`[${plugin}] WARNING`)} Can't resolve the file ${ansis.cyan(file)}`);
 
-    return require(fullPath);
+    return fullPath;
   },
 };
 
@@ -64,6 +86,8 @@ const shallowEqual = function (obj1, obj2) {
 
 module.exports = {
   plugin,
+  isWin,
+  fixBackslashInUrl,
   resource,
   isFunction,
   shallowEqual,

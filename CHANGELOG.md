@@ -1,9 +1,13 @@
 # Change log
 
+## 1.2.2 (2022-01-20)
+- fix webpack bug in windows generating wrong backslash in url
+- update the `pug-loader` package
+
 ## 1.2.1 (2022-01-14)
-- fix: throw an exception if `output.publicPath` is `undefined` or `auto`
-- fix: real source path of required CSS file
-- fix: extract styles and images via require with method `html`
+- fix throw an exception if `output.publicPath` is `undefined` or `auto`
+- fix real source path of required CSS file
+- fix extract styles and images via require with method `html`
 
 ## 1.2.0 (2022-01-11)
 - added support `webpack serve`
