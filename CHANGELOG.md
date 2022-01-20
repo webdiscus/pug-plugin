@@ -1,5 +1,9 @@
 # Change log
 
+## 1.2.3 (2022-01-21)
+- fix issue with path in windows
+- update npm packages
+
 ## 1.2.2 (2022-01-20)
 - fix webpack bug in windows generating wrong backslash in url
 - update the `pug-loader` package
