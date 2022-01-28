@@ -10,22 +10,12 @@ module.exports = {
   },
 
   entry: {
-    index: {
-      import: './src/index.pug',
-      filename: '[name].html',
-    },
-    page01: {
-      import: './src/pages/page01.pug',
-      filename: '../build/[name].html', // output __dirname/build/page01.html
-    },
-    about: './src/about.pug',
+    // pass custom data as JSON string via query
+    //index: './src/index.pug?customData={"options":{"title":"My title"}}',
+    index: './src/index.pug?customData=' + JSON.stringify({ options: { title: 'My title' } }),
   },
 
-  plugins: [
-    new PugPlugin({
-      filename: '[name]-custom.html',
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [

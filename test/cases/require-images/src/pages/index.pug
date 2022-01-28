@@ -1,5 +1,7 @@
 html
   head
+    //- the customData passed from webpack entry
+    title= customData.options.title
     link(rel='icon' href=require('~Images/favicon.ico'))
   body
     //- require file as string

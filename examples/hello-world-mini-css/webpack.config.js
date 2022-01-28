@@ -25,27 +25,27 @@ module.exports = {
   },
 
   entry: {
-    styles: './src/assets/styles/common.scss',
-    'about-styles': './src/assets/styles/about.css',
-    main: './src/main.js',
-    // main: {
-    //   import: './src/main.js',
-    //   filename: '[name]-[contenthash:4].js',
-    // },
-    index: './src/templates/index.pug',
-    about: './src/templates/about.html',
+    app: './src/main.js',
+
+    styles: './src/assets/styles/styles.scss',
+    about: './src/assets/styles/about.css',
+    vendor: './src/assets/styles/vendor.css',
   },
 
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/templates/index.pug',
       filename: 'index.html',
+      inject: false,
     }),
     new HtmlWebpackPlugin({
       template: 'src/templates/about.html',
       filename: 'about.html',
+      inject: false,
     }),
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
+    }),
   ],
 
   module: {
@@ -55,7 +55,6 @@ module.exports = {
         loader: PugPlugin.loader, // the pug-loader is already included in the PugPlugin
         options: {
           method: 'render',
-          esModule: true,
         },
       },
       // image resources processing via require() in pug
@@ -63,7 +62,7 @@ module.exports = {
         test: /\.(png|jpg|jpeg|ico)/,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/img/[name].[hash][ext][query]',
+          filename: 'assets/img/[name].[hash][ext]',
         },
       },
 
@@ -88,6 +87,10 @@ module.exports = {
       {
         test: /\.html$/,
         loader: 'html-loader',
+        options: {
+          // disable processing of resources in static HTML, leave as is
+          sources: false,
+        },
       },
     ],
   },
@@ -111,22 +114,25 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'public'),
     },
-    compress: true,
     port: 9000,
     https: false,
-    // open in default browser
-    open: true,
-    // define a development browser
-    /*open: {
-      app: {
-        name: 'Firefox',
-      },
-    },*/
     liveReload: true,
     hot: true,
-
     client: {
       progress: true,
     },
+    compress: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+    // open in default browser
+    open: true,
+    // open in the browser
+    // open: {
+    //   app: {
+    //     name: 'Firefox',
+    //   },
+    // },
   },
 };

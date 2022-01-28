@@ -1,0 +1,121 @@
+const fs = require('fs');
+const path = require('path');
+const ansis = require('ansis');
+const { plugin } = require('./config');
+
+let lastError = null;
+
+/**
+ * @param {string} message
+ * @constructor
+ */
+const PugPluginException = function (message) {
+  this.name = 'PugPluginException';
+  this.message = message;
+  this.toString = () => this.message;
+};
+
+/**
+ * @param {string} message The error description.
+ * @param {PugPluginException|Error|string?} error The original error from catch()
+ * @constructor
+ */
+const PugPluginError = function (message, error = '') {
+  if (error && error instanceof PugPluginException) {
+    if (error.toString() === lastError) {
+      // prevent double output same error
+      throw new PugPluginException(lastError);
+    }
+    // throw original error to avoid output all nested exceptions
+    lastError = error.toString();
+    throw new Error(lastError);
+  }
+  lastError = message + `\n` + error;
+  throw new PugPluginException(lastError);
+};
+
+/**
+ * @param {ModuleOptions[]} modules
+ * @throws {Error}
+ */
+const optionModulesException = (modules) => {
+  const message =
+    `\n${ansis.black.bgRedBright(`[${plugin}]`)} The plugin option ${ansis.green(
+      'modules'
+    )} must be the array of ${ansis.green('ModuleOptions')} but given:\n` + ansis.cyanBright(JSON.stringify(modules));
+
+  PugPluginError(message);
+};
+
+/**
+ * @throws {Error}
+ */
+const publicPathException = () => {
+  const message =
+    `\n${ansis.black.bgRedBright(`[${plugin}]`)} This plugin yet not support 'auto' or undefined ${ansis.yellow(
+      'output.publicPath'
+    )}.\n` +
+    `Define a publicPath in the webpack configuration, for example: \n` +
+    `${ansis.magenta("output: { publicPath: '/' }")}\n` +
+    `  or as a function (will be called in compilation time)\n` +
+    `${ansis.magenta("output: { publicPath: (obj) => '/' }")}.`;
+
+  PugPluginError(message);
+};
+
+/**
+ * @param {string} file
+ * @throws {Error}
+ */
+const resolveException = (file) => {
+  let message = `\n${ansis.black.bgRedBright(`[${plugin}]`)} Can't resolve the file ${ansis.cyan(file)}`;
+
+  if (path.isAbsolute(file) && fs.existsSync(file)) {
+    if (/\.(css|sass|scss)$/.test(file)) {
+      message +=
+        `${ansis.yellow('\nPossible reason:')} to require a style in pug, ` +
+        `add to webpack module.rules for this style the ${ansis.magenta(
+          `type: 'asset/resource'`
+        )} and optional a generator.\n` +
+        `See manual: https://github.com/webdiscus/pug-plugin#extract-css-via-require-in-pug`;
+    }
+  }
+
+  PugPluginError(message);
+};
+
+/**
+ * @param {Error} error
+ * @param {string} sourceFile
+ * @param {string} source
+ * @throws {Error}
+ */
+const executeTemplateFunctionException = (error, sourceFile, source) => {
+  const message =
+    `\n${ansis.black.bgRedBright(`[${plugin}]`)} Failed to execute template function'.\n` +
+    `The source file: '${ansis.cyan(sourceFile)}'.`;
+
+  PugPluginError(message, error);
+};
+
+/**
+ * @param {Error} error
+ * @param {EntryAssetInfo} info
+ * @throws {Error}
+ */
+const postprocessException = (error, info) => {
+  const message =
+    `\n${ansis.black.bgRedBright(`[${plugin}]`)} Postprocess execution failed by the entry '${info.entryFile}'.\n` +
+    `The source file '${info.sourceFile}'.`;
+
+  PugPluginError(message, error);
+};
+
+module.exports = {
+  PugPluginError,
+  optionModulesException,
+  resolveException,
+  publicPathException,
+  executeTemplateFunctionException,
+  postprocessException,
+};

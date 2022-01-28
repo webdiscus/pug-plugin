@@ -8,16 +8,14 @@
     "build": "webpack --mode=production --progress",
     "watch": "webpack --mode=production --watch --progress"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "@webdiscus/pug-loader": "^1.6.2",
+    "@webdiscus/pug-loader": "^1.6.3",
     "css-loader": "^6.5.1",
     "html-webpack-plugin": "^5.5.0",
-    "mini-css-extract-plugin": "^2.5.2",
+    "mini-css-extract-plugin": "^2.5.3",
     "sass": "^1.49.0",
     "sass-loader": "^12.4.0",
-    "webpack": "^5.66.0",
+    "webpack": "^5.67.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.7.3"
   }

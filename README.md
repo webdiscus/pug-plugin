@@ -1,16 +1,30 @@
+<div align="center">
+    <h1>
+        <a href="https://pugjs.org">
+            <img height="140" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
+        </a>
+        <a href="https://github.com/webpack/webpack">
+            <img height="120" src="https://webpack.js.org/assets/icon-square-big.svg">
+        </a>
+        <a href="https://github.com/webdiscus/pug-plugin"><br>
+        Pug Plugin
+        </a>
+    </h1>
+  <div>Webpack plugin to extract HTML and CSS into separate file</div>
+</div>
+
+---
 [![npm](https://img.shields.io/npm/v/pug-plugin?logo=npm&color=brightgreen "npm package")](https://www.npmjs.com/package/pug-plugin "download npm package")
 [![node](https://img.shields.io/node/v/pug-plugin)](https://nodejs.org)
 [![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-plugin/peer/webpack)](https://webpack.js.org/)
 [![codecov](https://codecov.io/gh/webdiscus/pug-plugin/branch/master/graph/badge.svg?token=Q6YMEN536M)](https://codecov.io/gh/webdiscus/pug-plugin)
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
-# [pug-plugin](https://www.npmjs.com/package/pug-plugin)
 
-Webpack plugin for the [Pug](https://pugjs.org) templates.\
-This plugin extract HTML and CSS from `pug` `html` `scss` `css` files defined by `webpack entry` 
-and dynamically replace in a template the required source filename of CSS, image with a public hashed name. 
+This plugin extract HTML and CSS from `pug` `html` `scss` `css` files defined in `webpack entry` 
+and save into separate files. 
 
-Using the `pug-plugin` and `pug` `html` `scss` `css` assets in the `webpack entry` no longer requires additional plugins such as:
+Using the `pug-plugin` and `pug` `html` `scss` `css` resources in the `webpack entry` no longer requires additional plugins such as:
 - [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
 - [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)
 - [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts)
@@ -112,7 +126,7 @@ module.exports = {
   ```js
   module.exports = {
     entry: {
-      about: 'src/templates/about.pug', // extract HTML and save into output directory as `about.html`
+      about: 'src/templates/about.pug', // extract HTML and save to output directory as `about.html`
     },
   }
   ```
@@ -120,7 +134,7 @@ module.exports = {
   ```js
   module.exports = {
     entry: {
-      index: 'src/templates/index.html', // save the HTML into output directory as `index.html`
+      index: 'src/templates/index.html', // save the HTML to output directory as `index.html`
     },
   }
   ```
@@ -128,7 +142,7 @@ module.exports = {
   ```js
   module.exports = {
     entry: {
-      styles: 'src/assets/scss/main.scss', // extract CSS and save into output directory as `styles.css`
+      styles: 'src/assets/scss/main.scss', // extract CSS and save to output directory as `styles.css`
     },
   }
   ```
@@ -202,7 +216,7 @@ module.exports = {
   };
   ```
   > See the description of the [`pug-loader`](https://github.com/webdiscus/pug-loader) options [here](https://github.com/webdiscus/pug-loader#options-of-original-pug-loader).
-- extract CSS files from `webpack entry` without generating unnecessary empty js files,\
+- extract CSS files from `webpack entry` in separate file without generating unexpected empty js files,\
   not need more for additional fix plugins like [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts)
   or [webpack-fix-style-only-entries](https://github.com/fqborges/webpack-fix-style-only-entries)
   ```js
@@ -214,12 +228,22 @@ module.exports = {
     plugins: [
       new PugPlugin({
         modules: [
-          PugPlugin.extractCss({ ...extractCssOptions }),
+          PugPlugin.extractCss(),
         ],
       }),
-    ]
+    ],
+    module: {
+      rules: [
+        {
+        test: /\.(css|sass|scss)$/,
+        use: [ 'css-loader', 'sass-loader' ],
+      }
+      ],
+    },
   };
   ```
+  > Neither `MiniCssExtractPlugin` nor `MiniCssExtractPlugin.loader` is required when using `PugPlugin.extractCss`. \
+  > The `PugPlugin.extractCss(options)` has the same options as the plugin options.
 - extract CSS via `require()` directly in pug and replace the source filename with a public hashed name. In this case is no need to define the style in the webpack entry:
   ```pug
   link(rel='stylesheet' href=require('~Styles/main.scss'))
@@ -274,11 +298,23 @@ Type: `Function` Default: `null`<br>
 The post process for extracted content from compiled entry.
 The following parameters are available in the function:
   - `@param {string | []} content` The content of compiled entry. Can be a string (for html entry), an array (for css).
-  - `@param {AssetEntry} entry` The current entry object.
+  - `@param {EntryAssetInfo} info` The info of current asset.
   - `@param {webpack Compilation} compilation` The webpack [compilation object](https://webpack.js.org/api/compilation-object/).
-  - `@return {string | null}` Return a string content to save it into output directory.\
+  - `@return {string | null}` Return a string content to save it to output directory.\
     If return `null` then the compiled content of the entry will be ignored, and will be saved original content compiled as JS module.
     Returning `null` can be useful for debugging to see the source of the compilation of the webpack loader.
+
+```js
+/**
+ * @typedef {Object} EntryAssetInfo
+ * @property {boolean} [verbose = false] Whether information should be displayed.
+ * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
+ * @property {string} entryFile The entry file.
+ * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
+ * @property {string} sourceFile The source file.
+ * @property {string} assetFile The output asset file with relative path by webpack output path.
+ */
+```
 
 ### `modules`
 Type: `PluginOptions[]` Default: `[]`<br>
@@ -293,7 +329,7 @@ The description of `@property` of the type `PluginOptions` see above, by Plugin 
  * @property {string} sourcePath
  * @property {string} outputPath
  * @property {string | function(PathData, AssetInfo): string} filename
- * @property {function(string, AssetEntry, Compilation): string | null} postprocess
+ * @property {function(string, EntryAssetInfo, Compilation): string | null} postprocess
  */
 ```
 
@@ -303,7 +339,7 @@ Show the file information at processing of entry.
 
 ## Usage examples
 
-### Output HTML file from Pug template
+### Extract HTML into file from Pug template
 
 webpack.config.js
 ```js
@@ -335,7 +371,7 @@ module.exports = {
 };
 ```
 
-### Output HTML file from a source directory
+### Save HTML to output file from source
 
 Dependency: `html-loader`  This loader is need to handle the `.html` file type.\
 Install: `npm install html-loader --save-dev`
@@ -388,8 +424,8 @@ Dependencies:
 
 Install: `npm install css-loader sass sass-loader --save-dev`
 
-In this case no need to define the style in webpack entry. 
-The CSS will be extracted from a style source required directly in the pug template.
+In this case no need to define the style in webpack entry.
+The CSS is extracted from a style using the `require()` function directly in the pug template.
 
 The pug template `src/templates/index.pug`:
 ```pug
@@ -399,8 +435,24 @@ html
   body
     p Hello World!
 ```
+
+The generated HTML:
+```html
+<html>
+  <head>
+    <link rel="stylesheet" href="/assets/css/my-style.f57966f4.css">
+  </head>
+  <body>
+    <p>Hello World!</p>
+  </body>
+</html>
+```
+
+The extracted CSS is saved in the file `assets/css/my-style.f57966f4.css` in the output directory.
+
 Add to the `webpack.config.js` following:
 ```js
+const PugPlugin = require('pug-plugin');
 module.exports = {
   entry: {
     // ...
@@ -412,7 +464,7 @@ module.exports = {
     // handle pug and style files defined in webpack.entry
     new PugPlugin({
       modules: [
-        PugPlugin.extractCss(), // enable CSS extraction
+        PugPlugin.extractCss(), // the module to extract CSS
       ],
     }),
   ],
@@ -426,11 +478,11 @@ module.exports = {
       },
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // extract css in pug via require
+        type: 'asset/resource', // extracts css via require in pug
         generator: {
-          filename: 'assets/css/[name].[hash:8].css', // save extracted css in public path
+          filename: 'assets/css/[name].[hash:8].css', // save extracted css in output directory
         },
-        use: [ 'css-loader', 'sass-loader' ], // extract css from a style source
+        use: [ 'css-loader', 'sass-loader' ], // extract css from a style
       }
     ],
   },
@@ -438,23 +490,11 @@ module.exports = {
 
 ```
 
-The generated HTML:
-```html
-<html>
-  <head>
-    <link rel="stylesheet" href="/assets/css/main.f57966f4.css">
-  </head>
-  <body>
-    <p>Hello World!</p>
-  </body>
-</html>
-```
-
 > **Note**: don't needed any additional plugin, like `mini-css-extract-plugin`.
 
 ## ! ACHTUNG ! ATTENTION !
 ### STOP import styles in JavaScript! This is very BAD praxis.
-**DON'T DO IT :** `import ./src/styles.scss` This is popular but `dirty way`!
+> ⚠️ Don't do that in JavaScript: `import ./src/styles.scss`. This is popular but **_dirty way_**.
 
 ### Clarification
 The importing of styles in JavaScript triggers the events in Webpack which call the `mini-css-extract-plugin` loader 
@@ -523,17 +563,14 @@ module.exports = {
 };
 ```
 
-> If `sass` files are defined only in `webpack entry` and used `PugPlugin.extractCss()`, 
-> then don't use [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)
-> because this plugin generates unnecessary empty JavaScript files and as the fix should be used additional
-> [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts)
-> or [webpack-fix-style-only-entries](https://github.com/fqborges/webpack-fix-style-only-entries).
 > 
-> So, if using `PugPlugin.extractCss()`, then following plugins are not needed:
-> - `mini-css-extract-plugin` 
-> - `webpack-remove-empty-scripts`
+> When using `PugPlugin.extractCss()` to extract CSS from `webpack entry` the following plugins are not needed:
+> - [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)
+> - [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts) - fix plugin for mini-css-extract-plugin
 > 
 > The plugin module `PugPlugin.extractCss` extract and save pure CSS, without eny empty JS files.
+> 
+> ⚠️ When using `PugPlugin.extractCss()` don't use the `style-loader`. 
 
 ---
 
@@ -593,7 +630,7 @@ module.exports = {
           sourcePath: 'src/templates/html/',
           outputPath: 'static/',
         },
-        // add the module to extract CSS into output file
+        // add the module to extract CSS
         PugPlugin.extractCss({
           filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
           sourcePath: 'src/assets/sass/',
@@ -641,7 +678,8 @@ module.exports = {
 ```
 
 ## Special rare case
-###Usage `pug-plugin` and `pug-loader` with `html` render method.
+
+### Usage `pug-plugin` and `pug-loader` with `html` render method.
 
 > Don't use it if you don't know why you need it.\
 > It's only the example of the solution for possible trouble by usage the `html-loader`.\
@@ -705,13 +743,6 @@ module.exports = {
               esModule: false,
               sources: {
                 // MEGA IMPORTANT!
-                // Static resource URL from public web path should not be parsed.
-                // Leave as is:
-                //   img(src='/assets/image.jpg')
-                //   link(rel='stylesheet' href='assets/styles.css')
-                // Must be processed:
-                //   img(src=require('./image.jpg'))
-                //   link(rel='stylesheet' href=require('./styles.css'))
                 urlFilter: (attribute, value) => path.isAbsolute(value) && fs.existsSync(value),
               },
             },
@@ -746,6 +777,21 @@ module.exports = {
 };
 ```
 
+> ### ⚠️ When used `PugPlugin` and `html-loader` 
+>
+> A static resource URL from a public web path should not be parsed by the `html-loader`. Leave the URL as is:
+> ```html
+> img(src='/assets/image.jpg')
+> link(rel='stylesheet' href='assets/styles.css')
+> ```
+> Loading a resource with `require()` should be handled via webpack:
+> ```html
+> img(src=require('./image.jpg'))
+> link(rel='stylesheet' href=require('./styles.css'))
+> ```
+> For this case add to `html-loader` the option:\
+> `sources: { urlFilter: (attribute, value) => path.isAbsolute(value) && fs.existsSync(value) }`
+
 
 ## Testing
 
@@ -755,16 +801,16 @@ module.exports = {
 ## Also See
 
 - more examples of usages see in [test cases](https://github.com/webdiscus/pug-plugin/tree/master/test/cases)
+- [`ansis`][ansis] - colorize text in terminal
+- [`pug-loader`][pug-loader]
 - [`pug GitHub`][pug]
 - [`pug API Reference`][pug-api]
-- [`pug-loader`][pug-loader]
 
 ## License
 
 [ISC](https://github.com/webdiscus/pug-loader/blob/master/LICENSE)
 
-<!-- prettier-ignore-start -->
+[ansis]: https://github.com/webdiscus/ansis
 [pug]: https://github.com/pugjs/pug
 [pug-api]: https://pugjs.org/api/reference.html
 [pug-loader]: https://github.com/webdiscus/pug-loader
-<!-- prettier-ignore-end -->

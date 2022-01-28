@@ -1,5 +1,13 @@
 # Change log
 
+## 1.2.4 (2022-01-28)
+- fix issue by output info with enabled verbose and filename as a function
+- fix issue by usage a query string in entry filename
+- fix issue when same asset file is defined webpack entry-point and required in pug
+- refactoring exceptions
+- update npm packages
+- update readme
+
 ## 1.2.3 (2022-01-21)
 - fix issue with path in windows
 - update npm packages
@@ -14,11 +22,8 @@
 - fix extract styles and images via require with method `html`
 
 ## 1.2.0 (2022-01-11)
-- added support `webpack serve`
-- added support require of style source directly in pug, e.g.:
-  ```pug
-  link(rel='stylesheet' href=require('~Styles/main.scss'))
-  ```
+- added support for `webpack serve`
+- added support for require of style source directly in pug
 - added ansi styling by console output
 - improve performance
 - code optimisation
@@ -28,14 +33,14 @@
 
 ## 1.1.0 (2021-12-07)
 In this release was follow features tested, described and activated:
-- add option `enabled` for enable/disable the plugin
-- add option `verbose` for show the compilation information
-- add option `sourcePath` as absolute path to sources
-- add option `outputPath` as output directory for assets
-- add option `filename` as file name of output file, can be a template string or function 
-- add option `modules` for processing different types of entries separately
-- add module `extractCss` to fast extract CSS and source map from webpack entry without `mini-css-extract-plugin`
-- add tests for code coverage more than 90%
+- added option `enabled` for enable/disable the plugin
+- added option `verbose` for show the compilation information
+- added option `sourcePath` as absolute path to sources
+- added option `outputPath` as output directory for assets
+- added option `filename` as file name of output file, can be a template string or function 
+- added option `modules` for processing different types of entries separately
+- added module `extractCss` to fast extract CSS and source map from webpack entry without `mini-css-extract-plugin`
+- added tests for code coverage more than 90%
 - update readme
 
 ## 1.0.0 (2021-12-03)

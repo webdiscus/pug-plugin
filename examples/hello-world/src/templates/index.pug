@@ -5,15 +5,13 @@ html
     meta(charset='utf-8')
     link(rel='icon' href=require('~Images/favicon.ico'))
 
-    //- source styles required directly in template
-    link(rel='stylesheet' href=require('~Styles/main.scss'))
-    link(rel='stylesheet' href=require('~Styles/faq.css'))
+    //- require source styles directly in template for processing via webpack
+    link(rel='stylesheet' href=require('~Styles/styles.scss'))
 
     //- the compiled CSS from public path
-    link(rel='stylesheet' href='/styles.css')
-    link(rel='stylesheet' href='/about-styles.css')
+    link(rel='stylesheet' href='/assets/css/vendor.css')
 
-    script(src='/main.js')
+    script(src='/app.js')
 
   body
     #app-root
@@ -21,8 +19,9 @@ html
           This supports `live reload` after edit.
 
     #static-content
+      h2.vendor-color Static content
       div Here is the content from static generated HTML.
       div After edit you must reload the site manual.
       img(src=require('~Images/image.jpeg'))
       p
-       a(href='about.html') about
+        a(href='about.html') about

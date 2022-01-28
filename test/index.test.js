@@ -89,10 +89,6 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
   });
 
-  test('entry: style-loader (development)', (done) => {
-    compareFileListAndContent(PATHS, 'entry-style-loader', done);
-  });
-
   test('entry: js, pug', (done) => {
     compareFileListAndContent(PATHS, 'entry-js-pug', done);
   });
@@ -101,7 +97,10 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-styles-pass-over', done);
   });
 
-  // TODO: fix method compile
+  test('entry: pass data via query', (done) => {
+    compareFileListAndContent(PATHS, 'entry-pug-query', done);
+  });
+
   test('entry: pug require data, method compile', (done) => {
     compareFileListAndContent(PATHS, 'require-data-method-compile', done);
   });
@@ -150,19 +149,23 @@ describe('exception tests', () => {
     exceptionContain(PATHS, relTestCasePath, containString, done);
   });
 
-  // TODO: fix this test case
-  // test('exception: execute template function', (done) => {
-  //   const relTestCasePath = 'exception-execute-template';
-  //   const containString = 'Failed to execute template function';
-  //   exceptionContain(PATHS, relTestCasePath, containString, done);
-  // });
+  test('exception: resolve required style', (done) => {
+    const relTestCasePath = 'exception-require-css-in-pug';
+    const containString = `type: 'asset/resource'`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
 
-  // TODO: find a case to catch error
-  // test('exception: execute source code', (done) => {
-  //   const relTestCasePath = 'exception-execute-source';
-  //   const containString = 'Failed to execute source code';
-  //   exceptionContain(PATHS, relTestCasePath, containString, done);
-  // });
+  test('exception: execute template function', (done) => {
+    const relTestCasePath = 'exception-execute-template';
+    const containString = 'Failed to execute template function';
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
+
+  test('exception: resolve required file', (done) => {
+    const relTestCasePath = 'exception-resolve-file';
+    const containString = `Can't resolve the file`;
+    exceptionContain(PATHS, relTestCasePath, containString, done);
+  });
 
   test('exception: option modules', (done) => {
     const relTestCasePath = 'exception-option-modules';

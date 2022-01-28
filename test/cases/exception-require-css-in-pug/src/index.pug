@@ -1,0 +1,6 @@
+html
+  head
+    //- require source styles directly in template for processing via webpack
+    link(rel='stylesheet' href=require('./styles.css'))
+  body
+    p Hello World!

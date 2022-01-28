@@ -2,8 +2,16 @@ const vm = require('vm');
 const path = require('path');
 const ansis = require('ansis');
 const { merge } = require('webpack-merge');
-const { plugin, isWin, isFunction, resource, pathToPosix } = require('./utils');
+const { plugin, isWin } = require('./config');
+const { isFunction, resource, pathToPosix } = require('./utils');
 const { extractHtml, extractCss } = require('./modules');
+
+const {
+  optionModulesException,
+  publicPathException,
+  executeTemplateFunctionException,
+  postprocessException,
+} = require('./exceptions');
 
 /** @typedef {import('webpack').Compiler} Compiler */
 /** @typedef {import('webpack').Compilation} Compilation */
@@ -20,7 +28,7 @@ const { extractHtml, extractCss } = require('./modules');
  * @property {string | function(PathData, AssetInfo): string} [filename = '[name].html'] The file name of output file.
  *   See https://webpack.js.org/configuration/output/#outputfilename.
  *   Must be an absolute or a relative by the context path.
- * @property {function(string, AssetEntry, Compilation): string | null} [postprocess = null] The post process for extracted content from entry.
+ * @property {function(string, EntryAssetInfo, Compilation): string | null} [postprocess = null] The post process for extracted content from entry.
  * @property {boolean} [verbose = false] Show the information at processing entry files.
  */
 
@@ -52,7 +60,7 @@ const { extractHtml, extractCss } = require('./modules');
 
 /**
  * @typedef {Object} EntryAssetInfo
- * @property {boolean} [verbose = false]
+ * @property {boolean} [verbose = false] Whether information should be displayed.
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
  * @property {string} entryFile The entry file.
  * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
@@ -75,8 +83,6 @@ const defaultOptions = {
   // each entry has its own local options that override global options
   modules: [],
 };
-
-const MODULE_TYPE = `${plugin}/entry`;
 
 class PugPlugin {
   /** @type {AssetEntry[]} */
@@ -103,7 +109,7 @@ class PugPlugin {
     this.verbose = this.options.verbose;
 
     if (options.modules && !Array.isArray(options.modules)) {
-      this.optionModulesException(options.modules);
+      optionModulesException(options.modules);
     }
   }
 
@@ -115,21 +121,13 @@ class PugPlugin {
     const { RawSource } = compiler.webpack.sources;
 
     // TODO resolve 'auto' publicPath
-    if (webpackOutputPublicPath == null || webpackOutputPublicPath === 'auto') this.publicPathException();
+    if (webpackOutputPublicPath == null || webpackOutputPublicPath === 'auto') publicPathException();
     resource.publicPath = webpackOutputPublicPath;
 
     // enable library type `jsonp` for compilation JS from source into HTML string via Function()
     if (compiler.options.output.enabledLibraryTypes.indexOf('jsonp') < 0) {
       compiler.options.output.enabledLibraryTypes.push('jsonp');
     }
-
-    // TODO prevent warning split chunk 240 KB
-    // const { splitChunks } = compiler.options.optimization;
-    // if (splitChunks) {
-    //   if (splitChunks.defaultSizeTypes.includes('...')) {
-    //     splitChunks.defaultSizeTypes.push(MODULE_TYPE);
-    //   }
-    // }
 
     compiler.hooks.entryOption.tap(plugin, (context, entries) => {
       if (!this.options.sourcePath) this.options.sourcePath = compiler.options.context;
@@ -145,11 +143,11 @@ class PugPlugin {
           postprocess,
           verbose,
         } = this.options;
-        let sourceFile = entry.import[0];
+        const importFile = entry.import[0];
+        let sourceFile = this.getFileFromImport(importFile);
         const module = this.getModule(sourceFile);
 
         if (!extensionRegexp.test(sourceFile) && !module) continue;
-
         if (!entry.library) entry.library = this.entryLibrary;
 
         if (module) {
@@ -160,9 +158,9 @@ class PugPlugin {
           if (module.postprocess) postprocess = module.postprocess;
         }
 
-        if (!path.isAbsolute(sourceFile)) {  
+        if (!path.isAbsolute(sourceFile)) {
           sourceFile = path.join(sourcePath, sourceFile);
-          entry.import[0] = sourceFile;
+          entry.import[0] = path.join(sourcePath, importFile);
         }
 
         if (entry.filename) filenameTemplate = entry.filename;
@@ -207,19 +205,13 @@ class PugPlugin {
     compiler.hooks.thisCompilation.tap(plugin, (compilation) => {
       const verbose = this.verbose;
 
-      compilation.hooks.buildModule.tap(plugin, (module) => {
-        if (this.isChunkModuleInEntry(module)) {
-          module.type = MODULE_TYPE;
-        }
-      });
-
       // render source code
       compilation.hooks.renderManifest.tap(plugin, (result, { chunk }) => {
         const { chunkGraph } = compilation;
         const { HotUpdateChunk } = compiler.webpack;
         const filenameTemplate = chunk.filenameTemplate;
-        let source = '',
-          compiledResult = '';
+        let compiledResult = '',
+          source;
 
         // don't hot update chunks
         if (chunk instanceof HotUpdateChunk) return;
@@ -230,20 +222,24 @@ class PugPlugin {
 
         resource.files = {};
         for (const module of chunkGraph.getChunkModules(chunk)) {
-          if (module.type === 'asset/resource') {
+          if (this.isEntryModule(module) && chunkGraph.isEntryModuleInChunk(module, chunk)) {
+            source = module.originalSource().source().toString();
+          } else if (module.type === 'asset/resource') {
             const sourceFile = isWin ? pathToPosix(module.resource) : module.resource;
-            resource.files[sourceFile] = module.buildInfo.filename;
+            const assetFile = module.buildInfo.filename;
+            resource.files[sourceFile] = assetFile;
             this.entryAssets.push({
               entryFile: entry.importFile,
               sourceFile,
-              assetFile: module.buildInfo.filename,
+              assetFile,
             });
-          } else if (module.type === MODULE_TYPE) {
-            source = module.originalSource().source().toString();
           }
         }
 
-        compiledResult = this.extract(source, entry.importFile);
+        if (source) {
+          // note: by any error in webpack config the source is empty
+          compiledResult = this.extract(source, entry.importFile);
+        }
 
         result.push({
           render: () => new RawSource(compiledResult),
@@ -254,13 +250,12 @@ class PugPlugin {
         });
       });
 
-      //
-      compilation.hooks.chunkAsset.tap(plugin, (chunk, filename) => {
-        // TODO for @next release
-        //  - collect entry files for manifest to replace original name with hashed
-        //const asset = compilation.getAsset(filename);
-        //const assetInfo = compilation.assetsInfo.get(filename) || {};
-      });
+      // compilation.hooks.chunkAsset.tap(plugin, (chunk, filename) => {
+      //   // TODO for next release
+      //   //  - collect entry files for manifest to replace original name with hashed
+      //   const asset = compilation.getAsset(filename);
+      //   const assetInfo = compilation.assetsInfo.get(filename) || {};
+      // });
 
       // only here can be an asset deleted or emitted
       compilation.hooks.processAssets.tap(
@@ -320,7 +315,7 @@ class PugPlugin {
               try {
                 result = postprocess(result, info, compilation);
               } catch (error) {
-                this.postprocessException(error, info);
+                postprocessException(error, info);
               }
             }
 
@@ -354,18 +349,13 @@ class PugPlugin {
     });
 
     const script = new vm.Script(source, { filename: sourceFile });
-    try {
-      result = script.runInContext(contextObject);
-    } catch (error) {
-      this.compileCodeException(error, sourceFile, source);
-    }
+    result = script.runInContext(contextObject) || '';
 
     if (isFunction(result)) {
-      // execute a template function generated by `html-loader`
       try {
         return result();
       } catch (error) {
-        this.executeTemplateFunctionException(error, sourceFile, source);
+        executeTemplateFunctionException(error, sourceFile, source);
       }
     }
 
@@ -405,11 +395,14 @@ class PugPlugin {
   }
 
   /**
-   * @param {string} filename The filename is a key of the compilation assets object.
-   * @return {AssetEntry}
+   * Return the file part from import file.
+   * For example: from `index.pug?data={"key":"value"}` return `index.pug`
+   *
+   * @param {string} str
+   * @returns {string}
    */
-  getEntryByFilename(filename) {
-    return this.entries.find((entry) => entry.filename === filename);
+  getFileFromImport(str) {
+    return str.split('?', 1)[0];
   }
 
   /**
@@ -421,20 +414,33 @@ class PugPlugin {
   }
 
   /**
-   * @param {string} filename
-   * @returns {ModuleOptions}
+   * @param {string} filename The filename is a key of the compilation assets object.
+   * @return {AssetEntry}
    */
-  getModule(filename) {
-    return this.options.modules.find((module) => module.enabled !== false && module.test.test(filename));
+  getEntryByFilename(filename) {
+    return this.entries.find((entry) => entry.filename === this.getFileFromImport(filename));
   }
 
   /**
-   * @param {Object} module The webpack chunk module.
+   * @param {string} filename The filename of a source file, can contain a query string.
+   * @returns {ModuleOptions}
+   */
+  getModule(filename) {
+    return this.options.modules.find(
+      (module) => module.enabled !== false && module.test.test(this.getFileFromImport(filename))
+    );
+  }
+
+  /**
+   * @param {Module} module The chunk module.
    * @returns {boolean}
    */
-  isChunkModuleInEntry(module) {
+  isEntryModule(module) {
     const importFile = module.resource;
-    return importFile ? this.entries.find((entry) => entry.importFile === importFile) !== undefined : false;
+
+    return importFile
+      ? this.entries.find((entry) => entry.importFile === this.getFileFromImport(importFile)) !== undefined
+      : false;
   }
 
   /**
@@ -447,7 +453,9 @@ class PugPlugin {
     console.log(
       `${ansis.black.bgYellow(`[${plugin}]`)} Compile the entry ${ansis.green(entry.name)}\n` +
         ` - filename: ${
-          typeof entry.filename === 'function' ? ansis.cyan('[Function]') : ansis.magenta(entry.filenameTemplate)
+          isFunction(entry.filenameTemplate)
+            ? ansis.greenBright('[Function: filename]')
+            : ansis.magenta(entry.filenameTemplate.toString())
         }\n` +
         ` - source: ${ansis.cyan(entry.importFile)}\n` +
         ` - output: ${ansis.cyanBright(entry.file)}\n`
@@ -466,91 +474,6 @@ class PugPlugin {
       `${ansis.black.bgYellow(`[${plugin}]`)} Extract the asset from ${ansis.green(entryFile)}\n` +
         ` - source: ${ansis.cyan(sourceFile)}\n` +
         ` - output: ${ansis.cyanBright(assetFile)}\n`
-    );
-  }
-
-  /**
-   * @param {ModuleOptions[]} modules
-   * @throws {Error}
-   */
-  optionModulesException(modules) {
-    throw new Error(
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} The plugin option ${ansis.green(
-        'modules'
-      )} must be the array of ${ansis.green('ModuleOptions')} but given:\n` +
-        ansis.cyanBright(JSON.stringify(modules)) +
-        `\n`
-    );
-  }
-
-  /**
-   * @throws {Error}
-   */
-  publicPathException() {
-    throw new Error(
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} This plugin yet not support 'auto' or undefined ${ansis.yellow(
-        'output.publicPath'
-      )}.\n` +
-        `Define a publicPath in the webpack configuration, for example: \n` +
-        `${ansis.magenta("output: { publicPath: '/' }")}\n` +
-        `  or as a function (will be called in compilation time)\n` +
-        `${ansis.magenta("output: { publicPath: (obj) => '/' }")}.\n`
-    );
-  }
-
-  /**
-   * @param {Error} error
-   * @param {string} sourceFile
-   * @param {string} source
-   * @throws {Error}
-   */
-  compileCodeException(error, sourceFile, source) {
-    throw new Error(
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} Failed to execute source code'.\n` +
-        `The source file: '${ansis.cyan(sourceFile)}'.\n` +
-        error
-    );
-  }
-
-  /**
-   * @param {Error} error
-   * @param {string} sourceFile
-   * @param {string} source
-   * @throws {Error}
-   */
-  executeTemplateFunctionException(error, sourceFile, source) {
-    let reasons = '';
-
-    if (source.indexOf('require(') >= 0) {
-      reasons +=
-        `- missed webpack configuration in 'module.rule' for required resource type, e.g.:\n` +
-        `  for link(href=require('./style.css'))\n` +
-        `  in webpack 'module.rule' must be defined the option 'type'\n` +
-        `  {\n` +
-        `    test: /\.(css|sass|scss)$/,\n` +
-        `    ${ansis.red.bgWhite("type: 'asset/resource', // <== possible this is missed")}\n` +
-        `    use: [ 'css-loader', 'sass-loader' ],\n` +
-        `  }\n`;
-    }
-
-    throw new Error(
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} Failed to execute template function'.\n` +
-        `The source file: '${ansis.cyan(sourceFile)}'.\n` +
-        (reasons ? `Possible reason:\n` + reasons : '') +
-        error
-    );
-  }
-
-  /**
-   * @param {Error} error
-   * @param {EntryAssetInfo} info
-   * @throws {Error}
-   */
-  postprocessException(error, info) {
-    throw new Error(
-      `\n${ansis.black.bgRedBright(`[${plugin}]`)} Postprocess execution failed by the entry '${info.entryFile}'.\n` +
-        `The source file '${info.sourceFile}'.\n` +
-        error
     );
   }
 }

@@ -23,15 +23,16 @@ module.exports = {
   },
 
   entry: {
-    styles: './src/assets/styles/common.scss',
-    'assets/css/about': './src/assets/styles/about.css',
-    main: './src/main.js',
-    // main: {
-    //   import: './src/main.js',
-    //   filename: '[name]-[contenthash:4].js',
-    // },
-    index: 'src/templates/index.pug',
-    about: './src/templates/about.html',
+    app: './src/main.js',
+
+    styles: './src/assets/styles/styles.scss',
+    about: './src/assets/styles/about.css',
+
+    index: './src/templates/index.pug',
+    aboutHtml: {
+      import: './src/templates/about.html',
+      filename: 'about.html',
+    },
   },
 
   plugins: [
@@ -41,7 +42,7 @@ module.exports = {
       modules: [
         PugPlugin.extractHtml(),
         PugPlugin.extractCss({
-          //filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
+          filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
         }),
       ],
     }),
