@@ -1,7 +1,7 @@
 <div align="center">
     <h1>
         <a href="https://pugjs.org">
-            <img height="140" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
+            <img height="135" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
         </a>
         <a href="https://github.com/webpack/webpack">
             <img height="120" src="https://webpack.js.org/assets/icon-square-big.svg">
@@ -33,6 +33,14 @@ Using the `pug-plugin` and `pug` `html` `scss` `css` resources in the `webpack e
 - [pug-loader](https://github.com/webdiscus/pug-loader) (this loader is already included in the `pug-plugin`)
 
 > The plugin can be used not only for `pug` but also for simply extracting `HTML` or `CSS` from  `webpack entry`, independent of pug usage.
+
+## Requirements
+- **Webpack 5** \
+  ⚠️ Working with Webpack 4 is not guaranteed.
+- **Asset Modules** for Webpack 5: `asset/resource` `asset/inline` `asset/source` `asset` \
+  ⚠️ Does not support deprecated modules such as `file-loader` `url-loader` `raw-loader`.
+- **Pug 3** \
+  ⚠️ By usage Pug v2.x is required extra install the `pug-walk` package. Working with Pug < v3.0.2 is not guaranteed.
 
 <a id="install" name="install" href="#install"></a>
 ## Install
@@ -121,7 +129,6 @@ module.exports = {
 ```
 
 ## Features
-- supports **Webpack 5** and **Pug 3**
 - supports handle `pug` files from `webpack entry` and save extracted HTML into separate file
   ```js
   module.exports = {
@@ -193,7 +200,7 @@ module.exports = {
     modules: [
       {
         test: /\.pug$/,
-        postprocess: (content, entry, compilation) => {
+        postprocess: (content, info, compilation) => {
           // TODO: your can here handle extracted HTML
           return content;
         },
@@ -801,10 +808,10 @@ module.exports = {
 ## Also See
 
 - more examples of usages see in [test cases](https://github.com/webdiscus/pug-plugin/tree/master/test/cases)
-- [`ansis`][ansis] - colorize text in terminal
-- [`pug-loader`][pug-loader]
-- [`pug GitHub`][pug]
-- [`pug API Reference`][pug-api]
+- [ansis][ansis] - ANSI color styling of text in terminal
+- [pug-loader][pug-loader]
+- [pug GitHub][pug]
+- [pug API Reference][pug-api]
 
 ## License
 

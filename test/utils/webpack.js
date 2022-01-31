@@ -5,7 +5,8 @@ const { merge } = require('webpack-merge');
 
 const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
   const testPath = path.join(PATHS.testOutput, relTestCasePath),
-    outputPath = path.join(testPath, 'public/'),
+    webRootPath = path.join(testPath, PATHS.webRoot),
+    outputPath = path.join(webRootPath, PATHS.output),
     configFile = path.join(testPath, 'webpack.config.js'),
     commonConfigFile = path.join(PATHS.base, 'webpack.common.js');
 
@@ -34,6 +35,7 @@ const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
 export const compile = (PATHS, testCasePath, webpackOpts) =>
   new Promise((resolve, reject) => {
     let config;
+
     try {
       config = prepareWebpackConfig(PATHS, testCasePath, webpackOpts);
     } catch (error) {

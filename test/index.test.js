@@ -115,6 +115,10 @@ describe('integration tests', () => {
 });
 
 describe('require assets tests', () => {
+  test('require fonts in pug', (done) => {
+    compareFileListAndContent(PATHS, 'require-fonts', done);
+  });
+
   test('require images in pug', (done) => {
     compareFileListAndContent(PATHS, 'require-images', done);
   });

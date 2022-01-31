@@ -1,5 +1,11 @@
 # Change log
 
+## 1.2.5 (2022-01-31)
+- update the pug-loader to the latest version supported the `htmlWebpackPlugin.options` in pug template
+- added test case for require fonts in pug template
+- refactoring of tests
+- update readme
+
 ## 1.2.4 (2022-01-28)
 - fix issue by output info with enabled verbose and filename as a function
 - fix issue by usage a query string in entry filename

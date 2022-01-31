@@ -51,5 +51,9 @@ export const copyRecursiveSync = function (src, dest) {
  * @return {any}
  */
 export const readTextFileSync = (file) => {
+  if (!fs.existsSync(file)) {
+    console.log(`\nWARN: the file "${file}" not found.`);
+    return '';
+  }
   return fs.readFileSync(file, 'utf-8');
 };
