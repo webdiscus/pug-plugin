@@ -89,6 +89,10 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
   });
 
+  test('entry: sass css with sourceMap', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-source-map', done);
+  });
+
   test('entry: js, pug', (done) => {
     compareFileListAndContent(PATHS, 'entry-js-pug', done);
   });

@@ -1,6 +1,9 @@
 const path = require('path');
 const PugPlugin = require('../../');
 
+const autoprefixer = require('autoprefixer');
+const cssnano = require('cssnano');
+
 const isProduction = false; //process.env.NODE_ENV === 'production';
 module.exports = {
   mode: 'production',
@@ -27,6 +30,7 @@ module.exports = {
 
     styles: './src/assets/styles/styles.scss',
     about: './src/assets/styles/about.css',
+    'post-css-demo.min': './src/assets/styles/post-css-demo.scss',
 
     index: './src/templates/index.pug',
     aboutHtml: {
@@ -78,6 +82,16 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {},
+          },
+          // Add browser prefixes and minify CSS.
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [autoprefixer(), cssnano()],
+              },
+              sourceMap: true,
+            },
           },
           {
             loader: 'sass-loader',
