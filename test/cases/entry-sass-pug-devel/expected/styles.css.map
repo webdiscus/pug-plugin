@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://./src/assets/main.scss"],"names":[],"mappings":"AACA;EACE,cAFM;AAER","sourcesContent":["$color: darkred;\nh1 {\n  color: $color;\n}"],"sourceRoot":""}

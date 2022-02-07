@@ -12,4 +12,6 @@ html
   body
     +menuItem('about')
     h1 ABOUT ME
-    img(src=require(DATA.body.image))
+    //- The `compile` method not support require from parent directory
+      TODO: fix issue
+      img(src=require(DATA.body.image))

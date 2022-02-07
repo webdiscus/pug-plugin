@@ -12,4 +12,6 @@ html
   body
     +menuItem('index')
     h1 INDEX
-    img(src=require(DATA.body.image))
+    //- The `compile` method not support require from parent directory
+      TODO: fix issue
+      img(src=require(DATA.body.image))

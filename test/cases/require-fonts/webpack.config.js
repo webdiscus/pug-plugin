@@ -13,6 +13,12 @@ module.exports = {
     publicPath: '/',
   },
 
+  resolve: {
+    alias: {
+      assets: path.join(__dirname, 'src/assets')
+    },
+  },
+
   entry: {
     index: 'src/index.pug',
   },
@@ -25,7 +31,7 @@ module.exports = {
         test: /\.pug$/,
         loader: PugPlugin.loader,
         options: {
-          method: 'render',
+          //method: 'render',
         },
       },
 

@@ -26,7 +26,6 @@ module.exports = {
 
   entry: {
     app: './src/main.js',
-
     styles: './src/assets/styles/styles.scss',
     about: './src/assets/styles/about.css',
     vendor: './src/assets/styles/vendor.css',

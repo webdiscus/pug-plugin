@@ -5,7 +5,7 @@ const isProduction = true;
 
 module.exports = {
   mode: isProduction ? 'production' : 'development',
-  devtool: isProduction ? false : 'source-map',
+  devtool: 'source-map',
 
   resolve: {
     // aliases used in the pug template
@@ -32,7 +32,7 @@ module.exports = {
       // test verbose of extracted assets from entry
       verbose: true,
       // add the `PugPlugin.extractCss()` to extract CSS with pug-plugin anywhere, e.g. via require in pug
-      modules: [PugPlugin.extractCss()],
+      modules: [PugPlugin.extractCss({ verbose: true })],
     }),
   ],
 
@@ -42,7 +42,7 @@ module.exports = {
         test: /\.pug$/,
         loader: PugPlugin.loader,
         options: {
-          method: 'render',
+          //method: 'render',
         },
       },
 

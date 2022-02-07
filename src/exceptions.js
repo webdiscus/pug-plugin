@@ -73,12 +73,14 @@ const resolveException = (file) => {
   if (path.isAbsolute(file) && fs.existsSync(file)) {
     if (/\.(css|sass|scss)$/.test(file)) {
       message +=
-        `${ansis.yellow('\nPossible reason:')} to require a style in pug, ` +
+        `\n${ansis.yellow('Possible reason:')} to require a style in pug, ` +
         `add to webpack module.rules for this style the ${ansis.magenta(
           `type: 'asset/resource'`
         )} and optional a generator.\n` +
         `See manual: https://github.com/webdiscus/pug-plugin#extract-css-via-require-in-pug`;
     }
+  } else if (/\.css$/.test(file) && file.indexOf('??ruleSet')) {
+    message += `\nThe ${ansis.yellow('@import CSS rule')} is not supported. Avoid CSS imports!`;
   }
 
   PugPluginError(message);

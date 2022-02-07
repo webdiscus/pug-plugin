@@ -93,6 +93,11 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-sass-source-map', done);
   });
 
+  // TODO: bugfix the error `Multiple chunks emit assets to the same filename`
+  test('entry: load styles from entry with same base names using generator', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-with-same-names', done);
+  });
+
   test('entry: js, pug', (done) => {
     compareFileListAndContent(PATHS, 'entry-js-pug', done);
   });
@@ -116,6 +121,10 @@ describe('integration tests', () => {
   test('entry: pug require data, method html', (done) => {
     compareFileListAndContent(PATHS, 'require-data-method-html', done);
   });
+
+  test('entry: alias resolve.plugins, method compile', (done) => {
+    compareFileListAndContent(PATHS, 'entry-alias-resolve.plugins-compile', done);
+  });
 });
 
 describe('require assets tests', () => {
@@ -123,8 +132,12 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-fonts', done);
   });
 
-  test('require images in pug', (done) => {
-    compareFileListAndContent(PATHS, 'require-images', done);
+  test('require images in pug, method compile', (done) => {
+    compareFileListAndContent(PATHS, 'require-images-compile', done);
+  });
+
+  test('require images in pug, method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-images-render', done);
   });
 
   test('require assets in pug, method render', (done) => {
@@ -146,44 +159,42 @@ describe('require assets tests', () => {
 
 describe('exception tests', () => {
   test('exception: publicPath undefined', (done) => {
-    const relTestCasePath = 'exception-public-path-undefined';
     const containString = `This plugin yet not support 'auto' or undefined`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    exceptionContain(PATHS, 'exception-public-path-undefined', containString, done);
   });
 
   test('exception: publicPath auto', (done) => {
-    const relTestCasePath = 'exception-public-path-auto';
     const containString = `This plugin yet not support 'auto' or undefined`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    exceptionContain(PATHS, 'exception-public-path-auto', containString, done);
   });
 
   test('exception: resolve required style', (done) => {
-    const relTestCasePath = 'exception-require-css-in-pug';
     const containString = `type: 'asset/resource'`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    exceptionContain(PATHS, 'exception-require-css-in-pug', containString, done);
   });
 
   test('exception: execute template function', (done) => {
-    const relTestCasePath = 'exception-execute-template';
     const containString = 'Failed to execute template function';
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    exceptionContain(PATHS, 'exception-execute-template', containString, done);
   });
 
   test('exception: resolve required file', (done) => {
-    const relTestCasePath = 'exception-resolve-file';
     const containString = `Can't resolve the file`;
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    exceptionContain(PATHS, 'exception-resolve-file', containString, done);
+  });
+
+  test('exception: @import CSS is not supported', (done) => {
+    const containString = `Avoid CSS imports`;
+    exceptionContain(PATHS, 'exception-import-css-rule', containString, done);
   });
 
   test('exception: option modules', (done) => {
-    const relTestCasePath = 'exception-option-modules';
     const containString = 'must be the array of';
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    exceptionContain(PATHS, 'exception-option-modules', containString, done);
   });
 
   test('exception: execute postprocess', (done) => {
-    const relTestCasePath = 'exception-execute-postprocess';
     const containString = 'Postprocess execution failed';
-    exceptionContain(PATHS, relTestCasePath, containString, done);
+    exceptionContain(PATHS, 'exception-execute-postprocess', containString, done);
   });
 });

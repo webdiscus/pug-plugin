@@ -1,11 +1,11 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = false;
+const isProduction = true;
 
 module.exports = {
   mode: isProduction ? 'production' : 'development',
-  devtool: isProduction ? false : 'source-map',
+  devtool: 'source-map',
 
   resolve: {
     // aliases used in the pug template
@@ -33,6 +33,7 @@ module.exports = {
       modules: [
         // add the extractor to handle styles from the entry
         PugPlugin.extractCss({
+          verbose: true,
           // the output filename for all styles from the entry
           filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
         }),

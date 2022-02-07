@@ -1,5 +1,35 @@
+// the 'enhanced-resolve' package already used in webpack, don't need to define it in package.json
+const ResolverFactory = require('enhanced-resolve');
 const path = require('path');
 const { resolveException } = require('./exceptions');
+
+/**
+ * @param {string} path The start path to resolve.
+ * @param {{}} options The enhanced-resolve options.
+ * @returns {function(context:string, request:string): string | false}
+ */
+const getFileResolverSync = (path, options) => {
+  const resolve = ResolverFactory.create.sync({
+    ...options,
+    aliasFields: [],
+    conditionNames: [],
+    descriptionFiles: [],
+    exportsFields: [],
+    mainFields: [],
+    modules: [],
+    mainFiles: [],
+    extensions: [],
+    preferRelative: true,
+  });
+
+  return (context, request) => {
+    if (!request) request = context;
+    else path = context;
+    return resolve(path, request);
+  };
+};
+
+let resolveFile = null;
 
 const isFunction = (value) => typeof value === 'function';
 
@@ -17,6 +47,8 @@ const isFunction = (value) => typeof value === 'function';
 const pathToPosix = (value) => value.replace(/\\/g, '/');
 
 const resource = {
+  webpackOptionsResolve: {},
+
   /**
    * @type {string} The context directory to require the file.
    */
@@ -32,6 +64,22 @@ const resource = {
    */
   files: {},
 
+  init: (rootContext, resolveOptions) => {
+    resolveFile = getFileResolverSync(rootContext, resolveOptions);
+  },
+
+  /**
+   * Get the key of asset for get/set it into/from cache.
+   *
+   * @note Very important to normalize the file.
+   *   The file can contain `path/to/../to/file` that is not equal to `path/to/file` for same file.
+   *
+   * @param {string} context
+   * @param {string} file
+   * @returns {symbol}
+   */
+  getKey: (context, file) => Symbol.for(context + '__' + path.join(file)),
+
   /**
    * Require the resource file from source in pug template.
    *
@@ -41,19 +89,31 @@ const resource = {
    */
   require: (file) => {
     const self = resource;
-    const assetFile = self.files[file];
+    const context = self.context;
+    const assetId = self.getKey(context, file);
+    const assetFile = self.files[assetId];
 
     if (assetFile) {
       // resolve web path of processed asset filename
       return path.posix.join(self.publicPath, assetFile);
     } else if (/\.js[a-z0-9]*$/i.test(file)) {
       // require only js code or json data
-      const context = self.context || __dirname;
       const fullPath = require.resolve(file, { paths: [context] });
-      // TODO remove in next version
-      //const fullPath = path.isAbsolute(file) ? file : path.join(context, file);
-
       return require(fullPath);
+    }
+
+    // fallback for `compile` method to try to resolve alias from resolve.plugins
+    try {
+      const resolvedFile = resolveFile(context, file);
+      const assetId = self.getKey(context, resolvedFile);
+      const assetFile = self.files[assetId];
+
+      if (assetFile) {
+        // resolve web path of processed asset filename
+        return path.posix.join(self.publicPath, assetFile);
+      }
+    } catch (error) {
+      resolveException(file);
     }
 
     resolveException(file);
@@ -80,9 +140,12 @@ const shallowEqual = function (obj1, obj2) {
   return true;
 };
 
+const outToConsole = (...args) => process.stdout.write(args.join(' ') + '\n');
+
 module.exports = {
   pathToPosix,
   resource,
   isFunction,
   shallowEqual,
+  outToConsole,
 };

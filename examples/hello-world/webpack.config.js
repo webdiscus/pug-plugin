@@ -30,6 +30,7 @@ module.exports = {
 
     styles: './src/assets/styles/styles.scss',
     about: './src/assets/styles/about.css',
+    vendor: './src/assets/styles/vendor.css',
     'post-css-demo.min': './src/assets/styles/post-css-demo.scss',
 
     index: './src/templates/index.pug',
@@ -46,6 +47,7 @@ module.exports = {
       modules: [
         PugPlugin.extractHtml(),
         PugPlugin.extractCss({
+          verbose: true,
           filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
         }),
       ],

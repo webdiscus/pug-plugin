@@ -285,14 +285,10 @@ The output directory for processed entries.
 
 ### `filename`
 Type: `string | Function` Default: `webpack.output.filename || '[name].html'`<br>
-The file name of output file.
-- If type is `string` then following substitutions are available in template strings
-  - `[name]` Only filename without extension or path.
-  - `[base]` Filename with extension.
-  - `[path]` Only path, without filename.
-  - `[path][name]` The path and filename without extension.
-  - `[ext]` Extension with leading `.`.
+The name of output file.
+- If type is `string` then following substitutions (see [output.filename](https://webpack.js.org/configuration/output/#outputfilename) for chunk-level) are available in template string:
   - `[id]` The ID of the chunk.
+  - `[name]` Only filename without extension or path.
   - `[contenthash]` The hash of the content.
   - `[contenthash:nn]` The `nn` is the length of hashes (defaults to 20).
 - If type is `Function` then following parameters are available in the function:
@@ -422,7 +418,7 @@ module.exports = {
 ```
 
 <a id="require-style" name="require-style" href="#require-style"></a>
-### Extract CSS via `require` in pug
+### Extract CSS from SASS via `require` in pug
 
 Dependencies:
 - `css-loader` handles `.css` files and prepare CSS for any CSS extractor
@@ -500,8 +496,8 @@ module.exports = {
 > **Note**: don't needed any additional plugin, like `mini-css-extract-plugin`.
 
 ## ! ACHTUNG ! ATTENTION !
-### STOP import styles in JavaScript! This is very BAD praxis.
-> ⚠️ Don't do that in JavaScript: `import ./src/styles.scss`. This is popular but **_dirty way_**.
+### Don't import styles in JavaScript!
+> ❌ BAD practice: `import ./src/styles.scss` is a popular but **_dirty way_**.
 
 ### Clarification
 The importing of styles in JavaScript triggers the events in Webpack which call the `mini-css-extract-plugin` loader 
@@ -510,8 +506,8 @@ Your can't define in which HTML file will be added style and in which order. You
 This process requires two different plugins and has poor performance.\
 The single `pug-plugin` does it with right way, in one step and much faster.
 
-> ### Correct ways
-> - add a source style file directly in pug via `require`, like `link(href=require('~Styles/styles.scss'))`
+> ### ✅ Correct ways
+> - add a source style file directly in pug via `require`, e.g. `link(href=require('~Styles/styles.scss'))`
 > - add a compiled css file directly in pug, like `link(href='/assets/styles.css')` and add the source of the style in webpack entry.\
 >   Yes, in this case may be needed additional assets manifest plugin to replace original filename with hashed name. But this is the right way.\
 >   In the future, will be added support to automatically replace the asset file name with a hashed one.
@@ -579,6 +575,10 @@ module.exports = {
 > 
 > ⚠️ When using `PugPlugin.extractCss()` don't use the `style-loader`. 
 
+> ⚠️ **Limitation for CSS**\
+> The `@import` CSS rule is not supported. 
+> This is a [BAD practice](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/page-speed-rules-and-recommendations?hl=en#avoid_css_imports), avoid CSS imports.
+> Use any CSS preprocessor like the Sass to create a style bundle using the preprocessor import.
 ---
 
 ## Usage of Pug, HTML, SASS and JS together in `webpack entry`

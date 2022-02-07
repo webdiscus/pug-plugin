@@ -1,5 +1,12 @@
 # Change log
 
+## 1.3.0 (2022-02-07)
+- added extraction of source map for CSS in separate file
+- fix not extracted source map for CSS in node <=14
+- replace console.log with process.stdout by output in terminal
+- update the pug-loader to new version
+- update readme: remove unsupported substitutions `[base]` `[path]` `[ext]` by the option filename 
+
 ## 1.2.5 (2022-01-31)
 - update the pug-loader to the latest version supported the `htmlWebpackPlugin.options` in pug template
 - added test case for require fonts in pug template

@@ -4,7 +4,7 @@ const cssnano = require('cssnano');
 
 module.exports = {
   entry: {
-    app: './src/assets/app.scss',
+    main: './src/assets/main.scss',
   },
 
   mode: 'development',
