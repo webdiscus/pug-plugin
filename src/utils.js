@@ -93,6 +93,9 @@ const resource = {
     const assetId = self.getKey(context, file);
     const assetFile = self.files[assetId];
 
+    // bypass the inline data-url, e.g.: data:image/png;base64
+    if (file.startsWith('data:')) return file;
+
     if (assetFile) {
       // resolve web path of processed asset filename
       return path.posix.join(self.publicPath, assetFile);

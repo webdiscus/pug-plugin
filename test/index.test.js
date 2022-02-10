@@ -80,6 +80,14 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-html-pug', done);
   });
 
+  test('entry: css data-url', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-data-url', done);
+  });
+
+  test('entry: css font-face src', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-font-face-src', done);
+  });
+
   // TODO: research why test in GitHub generate other filename - `styles.9790d61e.css`, but local is 'styles.ccc97e51.css'
   // test('entry: sass, pug (production)', (done) => {
   //   compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);

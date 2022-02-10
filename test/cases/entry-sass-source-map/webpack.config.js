@@ -3,15 +3,15 @@ const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 
 module.exports = {
-  entry: {
-    main: './src/assets/main.scss',
-  },
-
   mode: 'development',
   devtool: 'source-map',
 
   output: {
     publicPath: '/',
+  },
+
+  entry: {
+    main: './src/assets/main.scss',
   },
 
   module: {

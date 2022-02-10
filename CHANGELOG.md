@@ -1,5 +1,12 @@
 # Change log
 
+## 1.3.2 (2022-02-10)
+- fix issue in module extractCss by usage the data-url in css property, #3
+- update pug-loader to the latest version with fixed issues
+
+## 1.3.1 (2022-02-10)
+- added test case for @font-face src
+
 ## 1.3.0 (2022-02-07)
 - added extraction of source map for CSS in separate file
 - fix not extracted source map for CSS in node <=14
