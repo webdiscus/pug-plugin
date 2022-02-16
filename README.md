@@ -22,14 +22,16 @@
 
 
 This plugin extract HTML and CSS from `pug` `html` `scss` `css` files defined in `webpack entry` 
-and save into separate files. 
+and save into separate files. The plugin can extract CSS from the styles required in pug template.
+The plugin resolves the `url` in CSS so no additional url resolver is required.
 
-Using the `pug-plugin` and `pug` `html` `scss` `css` resources in the `webpack entry` no longer requires additional plugins such as:
+Using the `pug-plugin` no longer requires additional plugins and loaders such as:
 - [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
 - [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)
 - [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts)
   or [webpack-fix-style-only-entries](https://github.com/fqborges/webpack-fix-style-only-entries) \
   (bug fix plugins for `mini-css-extract-plugin`)
+- [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
 - [pug-loader](https://github.com/webdiscus/pug-loader) (this loader is already included in the `pug-plugin`)
 
 > The plugin can be used not only for `pug` but also for simply extracting `HTML` or `CSS` from  `webpack entry`, independent of pug usage.
@@ -260,6 +262,22 @@ module.exports = {
   <link rel="stylesheet" href="/assets/css/main.6f4d012e.css">
   ```
   [see complete example of usage](#require-style)
+- resolve url in CSS both in relative path and node_modules, extract resolved resource to output path
+  ```css
+  @use 'material-icons'; /* <= resolve urls in the imported node module */
+  @font-face {
+    font-family: 'Montserrat';
+    src:
+      url('../fonts/Montserrat-Regular.woff') format('woff'), /* <= resolve url relative by source */
+      url('../fonts/Montserrat-Regular.ttf') format('truetype');
+  }
+  ```
+  > ⚠️ Avoid using [resolve-url-loader](https://github.com/bholloway/resolve-url-loader) together with `PugPlugin.extractCss` because the `resolve-url-loader` is buggy, in some cases fails to resolve an url. 
+  > The pug plugin resolves all urls well and much faster than `resolve-url-loader`.
+  > Unlike `resolve-url-loader`, this plugin resolves an url without requiring source-maps.
+ 
+  [see test case to resolve url](https://github.com/webdiscus/pug-plugin/tree/master/test/cases/entry-sass-resolve-url)
+  
 
 <a id="options" name="options" href="#options"></a>
 ## Plugin options
@@ -300,22 +318,22 @@ The name of output file.
 Type: `Function` Default: `null`<br>
 The post process for extracted content from compiled entry.
 The following parameters are available in the function:
-  - `@param {string | []} content` The content of compiled entry. Can be a string (for html entry), an array (for css).
-  - `@param {EntryAssetInfo} info` The info of current asset.
+  - `@param {string} content` The content of compiled entry.
+  - `@param {ResourceInfo} info` The info of current asset.
   - `@param {webpack Compilation} compilation` The webpack [compilation object](https://webpack.js.org/api/compilation-object/).
-  - `@return {string | null}` Return a string content to save it to output directory.\
+  - `@return {string | null}` Return string content to save to output directory.\
     If return `null` then the compiled content of the entry will be ignored, and will be saved original content compiled as JS module.
     Returning `null` can be useful for debugging to see the source of the compilation of the webpack loader.
 
 ```js
 /**
- * @typedef {Object} EntryAssetInfo
+ * @typedef {Object} ResourceInfo
  * @property {boolean} [verbose = false] Whether information should be displayed.
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
- * @property {string} entryFile The entry file.
+ * @property {string} entryFile The absolute path to entry file (issuer of asset).
  * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
- * @property {string} sourceFile The source file.
- * @property {string} assetFile The output asset file with relative path by webpack output path.
+ * @property {string} sourceFile The absolute path to source file.
+ * @property {string} assetFile The output asset file relative by `output.publicPath`.
  */
 ```
 
@@ -332,7 +350,7 @@ The description of `@property` of the type `PluginOptions` see above, by Plugin 
  * @property {string} sourcePath
  * @property {string} outputPath
  * @property {string | function(PathData, AssetInfo): string} filename
- * @property {function(string, EntryAssetInfo, Compilation): string | null} postprocess
+ * @property {function(string, ResourceInfo, Compilation): string | null} postprocess
  */
 ```
 
@@ -406,10 +424,8 @@ module.exports = {
         test: /\.html$/,
         loader: 'html-loader',
         options: {
-          // disable processing of resources in static HTML, leave as is
-          sources: false,
-          // webpack use CommonJS module
-          esModule: false,
+          sources: false, // disable processing of resources in static HTML, leave as is
+          esModule: false, // webpack use CommonJS module
         },
       },
     ],
@@ -458,33 +474,29 @@ Add to the `webpack.config.js` following:
 const PugPlugin = require('pug-plugin');
 module.exports = {
   entry: {
-    // ...
     index: 'src/templates/index.pug', // the pug file with required style
   },
   
   plugins: [
-    // ...
-    // handle pug and style files defined in webpack.entry
+    // the plugin to handle pug and styles defined in webpack.entry
     new PugPlugin({
       modules: [
-        PugPlugin.extractCss(), // the module to extract CSS
+        // the module to extract CSS
+        PugPlugin.extractCss({
+          filename: 'assets/css/[name].[contenthash:8].css'
+        }),
       ],
     }),
   ],
 
   module: {
     rules: [
-      // ...
       {
         test: /\.pug$/,
         loader: PugPlugin.loader, // the pug-loader is already included in the PugPlugin
       },
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // extracts css via require in pug
-        generator: {
-          filename: 'assets/css/[name].[hash:8].css', // save extracted css in output directory
-        },
         use: [ 'css-loader', 'sass-loader' ], // extract css from a style
       }
     ],
@@ -661,23 +673,14 @@ module.exports = {
         test: /\.html$/,
         loader: 'html-loader',
         options: {
-          // disable processing of resources in static HTML, leave as is
-          sources: false,
-          // webpack use CommonJS module
-          esModule: false,
+          sources: false, // disable processing of resources in static HTML, leave as is
+          esModule: false, // webpack use CommonJS module
         },
       },
       // styles
       {
         test: /\.(css|sass|scss)$/,
-        use: [
-          {
-            loader: 'css-loader',
-          },
-          {
-            loader: 'sass-loader',
-          },
-        ],
+        use: [ 'css-loader', 'sass-loader' ],
       },
     ],
   },
@@ -734,7 +737,11 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [PugPlugin.extractCss()],
+      modules: [
+        PugPlugin.extractCss({
+          filename: 'assets/css/[name].[contenthash:8].css',
+        })
+      ],
     }),
   ],
 
@@ -765,10 +772,6 @@ module.exports = {
 
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // process required scss/css in pug
-        generator: {
-          filename: 'assets/css/[name].[contenthash:8].css',
-        },
         use: ['css-loader', 'sass-loader'],
       },
 

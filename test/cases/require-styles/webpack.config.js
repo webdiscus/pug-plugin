@@ -32,7 +32,12 @@ module.exports = {
       // test verbose of extracted assets from entry
       verbose: true,
       // add the `PugPlugin.extractCss()` to extract CSS with pug-plugin anywhere, e.g. via require in pug
-      modules: [PugPlugin.extractCss({ verbose: true })],
+      modules: [
+        PugPlugin.extractCss({
+          verbose: true,
+          filename: 'assets/css/[name].[contenthash:8].css',
+        }),
+      ],
     }),
   ],
 
@@ -49,11 +54,6 @@ module.exports = {
       // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // add this for usage in pug, like `link(href=require('~Styles/my-style.scss'))`
-        generator: {
-          // save required styles
-          filename: 'assets/css/[name].[hash:8].css',
-        },
         use: [
           {
             loader: 'css-loader',

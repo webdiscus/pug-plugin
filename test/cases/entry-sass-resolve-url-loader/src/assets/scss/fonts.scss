@@ -1,0 +1,12 @@
+// font from npm package
+@import 'material-icons';
+
+// font from directory
+@font-face {
+  font-family: 'Montserrat';
+  src:
+    url('../fonts/Montserrat-Regular.woff') format('woff'),
+    url('../fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}

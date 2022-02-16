@@ -1,0 +1,16 @@
+//@import 'abstract/variables';
+
+@font-face {
+  font-family: 'ibm-plex-sans-regular';
+  src: local('☺'),
+    url('../fonts/ibm-plex-sans-v7-latin-regular.woff2') format('woff'),
+    url('../fonts/ibm-plex-sans-v7-latin-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+$color: darkred;
+h1.main {
+  color: $color;
+  font-family: 'ibm-plex-sans-regular', serif;
+}

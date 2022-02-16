@@ -3,8 +3,11 @@ const path = require('path');
 const ansis = require('ansis');
 const { merge } = require('webpack-merge');
 const { plugin, isWin } = require('./config');
-const { isFunction, resource, pathToPosix, outToConsole } = require('./utils');
 const { extractHtml, extractCss } = require('./modules');
+const { urlDependencyResolver, resourceResolver } = require('./resolver');
+const { isFunction, pathToPosix, outToConsole } = require('./utils');
+const JavascriptParser = require('webpack/lib/javascript/JavascriptParser');
+const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator');
 
 const {
   optionModulesException,
@@ -28,7 +31,7 @@ const {
  * @property {string | function(PathData, AssetInfo): string} [filename = '[name].html'] The file name of output file.
  *   See https://webpack.js.org/configuration/output/#outputfilename.
  *   Must be an absolute or a relative by the context path.
- * @property {function(string, EntryAssetInfo, Compilation): string | null =} postprocess The post process for extracted content from entry.
+ * @property {function(string, ResourceInfo, Compilation): string | null =} postprocess The post process for extracted content from entry.
  * @property {function(): string | null =} extract
  * @property {boolean} [verbose = false] Show the information at processing entry files.
  */
@@ -61,13 +64,13 @@ const {
  */
 
 /**
- * @typedef {Object} EntryAssetInfo
+ * @typedef {Object} ResourceInfo
  * @property {boolean} [verbose = false] Whether information should be displayed.
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
- * @property {string} entryFile The entry file.
+ * @property {string} entryFile The absolute path to entry file (issuer of asset).
  * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
- * @property {string} sourceFile The source file.
- * @property {string} assetFile The output asset file with relative path by webpack output path.
+ * @property {string} sourceFile The absolute path to source file.
+ * @property {string} assetFile The output asset file relative by `output.publicPath`.
  */
 
 /**
@@ -90,19 +93,13 @@ class PugPlugin {
   /** @type {AssetEntry[]} */
   entries = [];
 
-  /**
-   * Resources required in the template.
-   * @type {[]}
-   */
-  entryAssets = [];
-
   entryLibrary = {
     name: 'return',
     type: 'jsonp',
   };
 
   /**
-   * @param {PugPluginOptions} options
+   * @param {PugPluginOptions|{}} options
    */
   constructor(options = {}) {
     this.apply = this.apply.bind(this);
@@ -113,6 +110,7 @@ class PugPlugin {
     if (options.modules && !Array.isArray(options.modules)) {
       optionModulesException(options.modules);
     }
+    resourceResolver.clearCache();
   }
 
   apply(compiler) {
@@ -122,18 +120,61 @@ class PugPlugin {
     const webpackOutputPublicPath = compiler.options.output.publicPath;
     const { RawSource } = compiler.webpack.sources;
 
-    // TODO resolve 'auto' publicPath
+    // TODO: resolveInPaths 'auto' publicPath
     if (webpackOutputPublicPath == null || webpackOutputPublicPath === 'auto') publicPathException();
 
-    // initialize the resource module
-    resource.init(__dirname, compiler.options.resolve || {});
-    resource.publicPath = webpackOutputPublicPath;
+    resourceResolver.init({
+      publicPath: webpackOutputPublicPath,
+    });
 
     // enable library type `jsonp` for compilation JS from source into HTML string via Function()
     if (compiler.options.output.enabledLibraryTypes.indexOf('jsonp') < 0) {
       compiler.options.output.enabledLibraryTypes.push('jsonp');
     }
 
+    // Normal Module Factory
+    compiler.hooks.normalModuleFactory.tap(plugin, (normalModuleFactory) => {
+      urlDependencyResolver.init(normalModuleFactory.fs.fileSystem);
+
+      // TODO: resolveInPaths directory for case like: require('@images/' + file)
+      normalModuleFactory.hooks.beforeResolve.tap(plugin, (resolveData) => {
+        if (resolveData.dependencyType === 'url') {
+          //console.log(' ---> ', resolveData.request);
+          urlDependencyResolver.resolve(resolveData);
+        }
+      });
+
+      normalModuleFactory.hooks.createModule.tap(plugin, (createData, resolveData) => {
+        const { context, rawRequest, resource } = createData;
+        if (rawRequest !== resource) {
+          resourceResolver.addResolvedFile(context, rawRequest, resource);
+        }
+      });
+
+      // TODO: The snipped is reserved for future features.
+      // Context Module Factory
+      // compiler.hooks.contextModuleFactory.tap(plugin, (contextModuleFactory) => {
+      //   contextModuleFactory.hooks.beforeResolve.tap(plugin, (data) => {
+      //     const context = data.context;
+      //     //console.log('\n/// Context afterResolve: ', data);
+      //     for (let item of data.dependencies) {
+      //       if (item.userRequest === '@images2') {
+      //       }
+      //     }
+      //     //return false;
+      //   });
+      // });
+      // Parse source of template function for require() to resolveInPaths unresolved aliases
+      // normalModuleFactory.hooks.parser.for('javascript/auto').tap(plugin, (parser, options) => {
+      //   parser.hooks.call.for('require').tap(plugin, (expression) => {
+      //     // here is unresolved alias, we can manually resolveInPaths it, but we can't change it
+      //     console.log('\n... Module parser: ', expression.arguments[0].left.value);
+      //     return expression;
+      //   });
+      // });
+    });
+
+    // Entry options
     compiler.hooks.entryOption.tap(plugin, (context, entries) => {
       if (!this.options.sourcePath) this.options.sourcePath = compiler.options.context;
       if (!this.options.outputPath) this.options.outputPath = webpackOutputPath;
@@ -178,7 +219,6 @@ class PugPlugin {
           filenameTemplate: filenameTemplate,
           filename: undefined,
           file: undefined,
-          assetFile: undefined,
           importFile: sourceFile,
           sourcePath: sourcePath,
           outputPath: outputPath,
@@ -188,181 +228,219 @@ class PugPlugin {
           verbose,
         };
 
+        const relativeOutputPath = path.relative(webpackOutputPath, outputPath);
+
         entry.filename = (pathData, assetInfo) => {
           if (!assetEntry.filename) {
             Object.defineProperty(assetEntry, 'filename', {
               set(filename) {
                 // replace the setter with value of resolved filename
                 delete this.filename;
-                this.file = path.join(this.outputPath, filename);
-                this.assetFile = path.relative(webpackOutputPath, this.file);
                 this.filename = filename;
+                this.file = path.join(webpackOutputPath, filename);
               },
             });
           }
 
-          return isFunction(filenameTemplate) ? filenameTemplate(pathData, assetInfo) : filenameTemplate;
+          let filename = isFunction(filenameTemplate) ? filenameTemplate(pathData, assetInfo) : filenameTemplate;
+          filename = path.posix.join(relativeOutputPath, filename);
+
+          return filename;
         };
 
         this.entries.push(assetEntry);
       }
     });
 
+    // This compilation
     compiler.hooks.thisCompilation.tap(plugin, (compilation) => {
       const verbose = this.verbose;
       this.compilation = compilation;
 
-      // render source code
-      compilation.hooks.renderManifest.tap(plugin, (result, { chunk }) => {
-        if (chunk instanceof compiler.webpack.HotUpdateChunk) return;
-
-        const { chunkGraph } = compilation;
-        const filenameTemplate = chunk.filenameTemplate;
-        const entry = this.getEntryByName(chunk.name);
-        let contentHashType = 'javascript',
-          compiledResult = '',
-          source;
-
-        // process only entries supported by this plugin
-        if (!entry) return;
-
-        entry.filename = compilation.getPath(filenameTemplate, { contentHashType, chunk });
-
-        resource.files = {};
-        for (const module of chunkGraph.getChunkModules(chunk)) {
-          if (!module.resource) continue;
-
-          if (this.isEntryModule(module) && chunkGraph.isEntryModuleInChunk(module, chunk)) {
-            source = module.originalSource().source().toString();
-          } else if (module.type === 'asset/resource') {
-            //const readableIdentifier = module.readableIdentifier(compilation.runtimeTemplate.requestShortener);
-            const context = path.dirname(entry.importFile);
-            const sourceFile = isWin ? pathToPosix(module.resource) : module.resource;
-            const assetFile = module.buildInfo.filename;
-            const assetId = resource.getKey(context, module.rawRequest);
-            const assetId2 = resource.getKey(context, sourceFile);
-
-            // for resolve the asset file by full path or rawRequest, both variants are possible in source code
-            resource.files[assetId] = assetFile;
-            resource.files[assetId2] = assetFile;
-
-            this.entryAssets.push({
-              entryFile: entry.importFile,
-              sourceFile,
-              assetFile,
-            });
+      compilation.hooks.buildModule.tap(plugin, (module) => {
+        if (module.type === 'asset/resource') {
+          // fix css module, if `html` method is used, to be able to extract css from source code
+          const isCss = module.loaders.find((item) => item.loader.indexOf('css-loader') > 0);
+          if (isCss) {
+            module.type = 'javascript/auto';
+            module.binary = false;
+            module.parser = new JavascriptParser('auto');
+            module.generator = new JavascriptGenerator();
           }
         }
-
-        if (source) {
-          // note: by any error in webpack config the source is empty
-          compiledResult = this.compileSource(source, entry.importFile, entry.assetFile, entry.extract);
-          //console.log(' ---> compiledResult', compiledResult);
-        }
-
-        result.push({
-          render: () => new RawSource(compiledResult),
-          filenameTemplate,
-          pathOptions: {
-            chunk,
-            contentHashType,
-          },
-          identifier: `${plugin}.${chunk.id}`,
-          hash: chunk.contentHash[contentHashType],
-        });
       });
 
-      //compilation.hooks.chunkAsset.tap(plugin, (chunk, filename) => {
-      // TODO for next release
-      //  - collect entry files for manifest to replace original name with hashed
-      //const asset = compilation.getAsset(filename);
-      //const assetInfo = compilation.assetsInfo.get(filename) || {};
-      //compilation.assetsInfo.delete(file);
-      //const file = chunk.files.values().next().value;
-      //const auxiliaryFile = chunk.auxiliaryFiles.values().next().value;
+      // render source code
+      compilation.hooks.renderManifest.tap(
+        plugin,
+        (result, { chunk, chunkGraph, moduleGraph, codeGenerationResults }) => {
+          if (chunk instanceof compiler.webpack.HotUpdateChunk) return;
 
-      //if (auxiliaryFile && auxiliaryFile.endsWith('.css') && file.endsWith('.css')) {
-      //compilation.deleteAsset(filename);
-      // TODO: this module is not in entry and was required
-      //}
-      //});
+          const entry = this.getEntryByName(chunk.name);
 
-      //compilation.hooks.buildModule.tap(plugin, (module) => {
-      //   if (/.(pug|jade)$/i.test(module.resourceResolveData.context.issuer)) {
-      //     // TODO: this module is not in entry and was required
-      //   }
-      //});
+          // process only entries supported by this plugin
+          if (!entry) return;
 
-      // only here can be an asset deleted or emitted
-      compilation.hooks.processAssets.tap(
-        {
-          name: plugin,
-          stage: compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
-        },
-        (assets) => {
-          /** @type {null|string|object|function} result */
-          let filename;
+          const sources = new Set();
+          const contentHashType = 'javascript';
+          let assetFile = compilation.getPath(chunk.filenameTemplate, { contentHashType, chunk });
 
-          for (filename in assets) {
-            const entry = this.getEntryByFilename(filename);
-            let entryAsset, module, assetFile, source, result, postprocess;
+          entry.filename = assetFile;
+          resourceResolver.clearChunkCache();
 
-            if (entry) {
-              // the asset defined in webpack entry
-              assetFile = entry.assetFile;
-              postprocess = entry.postprocess;
-              // the result of rendering in the `renderManifest` hook
-              result = assets[filename].source();
-              if (verbose) this.verboseEntry(entry);
-            } else {
-              // the asset required in pug
-              module = this.getModule(filename);
-              if (!module) continue;
+          if (verbose) this.verboseEntry(entry);
 
-              // extract required resource which is not presents in webpack entry
-              entryAsset = this.entryAssets.find((item) => item.assetFile === filename);
-              if (!entryAsset) {
-                // remove double assets from webpack entry and processed via module `asset/resource` e.g. using require
-                compilation.deleteAsset(filename);
-                continue;
-              }
+          for (const module of chunkGraph.getChunkModules(chunk)) {
+            if (!module.resource) continue;
 
-              assetFile = filename;
-              source = assets[filename].source().toString();
-              postprocess = module.postprocess;
-              result = this.compileSource(source, entryAsset.sourceFile, assetFile, module.extract);
+            const { buildInfo } = module;
+            const resourceResolveDataContext = module.resourceResolveData.context || {};
+            const issuerFile = resourceResolveDataContext.issuer || module.resource;
 
-              if (verbose) {
-                entryAsset.assetFile = path.join(webpackOutputPath, assetFile);
-                this.verboseExtractAsset(entryAsset);
-              }
+            if (this.isEntryModule(module) && chunkGraph.isEntryModuleInChunk(module, chunk)) {
+              // entry-point
+              const source = module.originalSource();
+              // module builder error
+              if (source == null) return;
+
+              const pluginModule = this.getModule(module.resource);
+              const extract = pluginModule && pluginModule.extract ? pluginModule.extract : entry.extract;
+              const postprocess =
+                pluginModule && pluginModule.postprocess ? pluginModule.postprocess : entry.postprocess;
+
+              const postprocessInfo = {
+                isEntry: true,
+                verbose: entry.verbose,
+                entryFile: entry.file,
+                filename: chunk.filenameTemplate,
+                sourceFile: entry.importFile,
+                assetFile,
+              };
+
+              sources.add({
+                isEntry: true,
+                // compiler arguments
+                source: source.source().toString(),
+                sourceFile: entry.importFile,
+                assetFile,
+                extract,
+                // result options
+                postprocess,
+                postprocessInfo,
+                identifier: `${plugin}.${chunk.id}`,
+                pathOptions: { chunk, contentHashType },
+                hash: chunk.contentHash[contentHashType],
+                filenameTemplate: chunk.filenameTemplate,
+              });
+            } else if (module.type === 'javascript/auto') {
+              // require a resource supported via the plugin module, e.g. style
+              const source = module.originalSource();
+              // module builder error
+              if (source == null) return;
+
+              const pluginModule = this.getModule(module.resource);
+              if (!pluginModule) continue;
+
+              const filenameTemplate = pluginModule.filename;
+
+              // TODO: generate content hash for assets required in pug for true [contenthash] in filename
+              //   origin: buildInfo.assetInfo.contenthash or buildInfo.fullContentHash
+              const hash = buildInfo.assetInfo ? buildInfo.assetInfo.contenthash : buildInfo.hash;
+              const { name } = path.parse(module.resource);
+              // TODO: research why sometimes the id is relative path instead of a number, it's ok?
+              const id = chunkGraph.getModuleId(module);
+
+              /** @type {PathData} minimum data to generate an asset path by filenameTemplate */
+              const contextData = {
+                contentHash: hash,
+                chunk: {
+                  chunkId: chunk.id,
+                  id,
+                  name,
+                  hash,
+                },
+              };
+              const assetFile = compilation.getAssetPath(filenameTemplate, contextData);
+              resourceResolver.addToChunkCache(module, assetFile);
+
+              const postprocessInfo = {
+                isEntry: false,
+                verbose: pluginModule.verbose,
+                entryFile: entry.file,
+                filename: filenameTemplate,
+                sourceFile: module.resource,
+                assetFile,
+              };
+
+              if (verbose)
+                this.verboseExtractModule({
+                  issuerFile,
+                  sourceFile: module.resource,
+                  assetFile: path.join(webpackOutputPath, assetFile),
+                });
+
+              sources.add({
+                isEntry: false,
+                // compiler arguments
+                source: source.source().toString(),
+                sourceFile: module.resource,
+                assetFile,
+                extract: pluginModule.extract,
+                // result options
+                postprocess: pluginModule.postprocess,
+                postprocessInfo,
+                identifier: `${plugin}.${chunk.id}.${id}`,
+                pathOptions: contextData,
+                hash,
+                filenameTemplate,
+              });
+            } else if (module.type === 'asset/resource') {
+              // require a resource
+              const assetFile = buildInfo.filename;
+              resourceResolver.addToChunkCache(module, assetFile);
+
+              if (verbose)
+                this.verboseExtractResource({
+                  issuerFile,
+                  sourceFile: module.resource,
+                  assetFile: path.join(webpackOutputPath, assetFile),
+                });
             }
+          }
 
-            const info = {
-              isEntry: !!entry,
-              verbose: entry ? entry.verbose : module.verbose,
-              entryFile: entry ? entry.file : entryAsset.entryFile,
-              filename: entry ? entry.filenameTemplate : module.filename,
-              sourceFile: entry ? entry.importFile : entryAsset.sourceFile,
-              assetFile,
-            };
+          for (let item of sources) {
+            if (!item.source) continue;
+            // note: by any error in webpack config the source is empty
+            let compiledResult = this.compileSource(item.source, item.sourceFile, item.assetFile, item.extract);
 
-            if (postprocess) {
+            if (item.postprocess) {
               try {
-                result = postprocess(result, info, compilation);
+                compiledResult = item.postprocess(compiledResult, item.postprocessInfo, compilation);
               } catch (error) {
-                postprocessException(error, info);
+                postprocessException(error, item.postprocessInfo);
               }
             }
 
-            if (result != null) {
-              // remove source asset to avoid creating needles js file
-              compilation.deleteAsset(filename);
-              compilation.emitAsset(assetFile, new RawSource(result, false));
+            if (compiledResult != null) {
+              result.push({
+                render: () => new RawSource(compiledResult),
+                filename: item.assetFile,
+                pathOptions: item.pathOptions,
+                identifier: item.identifier,
+                hash: item.hash,
+              });
             }
           }
         }
       );
+
+      // only here can be an asset deleted or emitted
+      // compilation.hooks.processAssets.tap(
+      //   { name: plugin, stage: compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE },
+      //   (assets) => {
+      //     // do nothing
+      //   }
+      // );
     });
   }
 
@@ -376,18 +454,16 @@ class PugPlugin {
    * @return {Buffer}
    */
   compileSource(source, sourceFile, assetFile, extract) {
-    resource.context = path.dirname(sourceFile);
-    source = this.toCommonJS(source);
-
-    let result;
-    const contextObject = vm.createContext({
-      require: resource.require,
+    resourceResolver.setCurrentContext(path.dirname(sourceFile));
+    const contextOptions = {
+      require: resourceResolver.require,
       // the `module.id` is required for `css-loader`, in module extractCss expected as source path
       module: { id: sourceFile },
-    });
-
-    const script = new vm.Script(source, { filename: sourceFile });
-    result = script.runInContext(contextObject) || '';
+    };
+    const contextObject = vm.createContext(contextOptions);
+    const sourceCjs = this.toCommonJS(source);
+    const script = new vm.Script(sourceCjs, { filename: sourceFile });
+    let result = script.runInContext(contextObject) || '';
 
     if (isFunction(result)) {
       try {
@@ -454,14 +530,6 @@ class PugPlugin {
   }
 
   /**
-   * @param {string} filename The filename is a key of the compilation assets object.
-   * @return {AssetEntry}
-   */
-  getEntryByFilename(filename) {
-    return this.entries.find((entry) => entry.filename === this.getFileFromImport(filename));
-  }
-
-  /**
    * @param {string} filename The filename of a source file, can contain a query string.
    * @returns {ModuleOptions}
    */
@@ -501,13 +569,28 @@ class PugPlugin {
   }
 
   /**
-   * @param {string} entryFile
+   * @param {string} issuerFile
    * @param {string} sourceFile
    * @param {string} assetFile
    */
-  verboseExtractAsset({ entryFile, sourceFile, assetFile }) {
+  verboseExtractModule({ issuerFile, sourceFile, assetFile }) {
     outToConsole(
-      `${ansis.black.bgYellow(`[${plugin}]`)} Extract the asset from ${ansis.green(entryFile)}\n` +
+      `${ansis.black.bgYellow(`[${plugin}]`) + ansis.black.bgGreen(` Extract Module `)} in ` +
+        `${ansis.green(issuerFile)}\n` +
+        ` - source: ${ansis.cyan(sourceFile)}\n` +
+        ` - output: ${ansis.cyanBright(assetFile)}\n`
+    );
+  }
+
+  /**
+   * @param {string} issuerFile
+   * @param {string} sourceFile
+   * @param {string} assetFile
+   */
+  verboseExtractResource({ issuerFile, sourceFile, assetFile }) {
+    outToConsole(
+      `${ansis.black.bgYellow(`[${plugin}]`) + ansis.black.bgGreen(` Extract Resource `)} in ` +
+        `${ansis.green(issuerFile)}\n` +
         ` - source: ${ansis.cyan(sourceFile)}\n` +
         ` - output: ${ansis.cyanBright(assetFile)}\n`
     );
@@ -518,4 +601,4 @@ module.exports = PugPlugin;
 module.exports.extractCss = extractCss;
 module.exports.extractHtml = extractHtml;
 module.exports.loader = require.resolve('@webdiscus/pug-loader');
-//module.exports.loader = require.resolve('../../pug-loader'); // local dev only
+//module.exports.loader = require.resolveInPaths('../../pug-loader'); // local dev only

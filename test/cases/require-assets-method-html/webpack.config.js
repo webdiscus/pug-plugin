@@ -4,6 +4,7 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
+  devtool: 'source-map',
 
   output: {
     path: path.join(__dirname, 'public/'),
@@ -16,7 +17,11 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [PugPlugin.extractCss()],
+      modules: [
+        PugPlugin.extractCss({
+          filename: 'assets/css/[name].[contenthash:8].css',
+        }),
+      ],
     }),
   ],
 
@@ -29,7 +34,7 @@ module.exports = {
             loader: 'html-loader',
             options: {
               // Test: transformation of ESM to CommonJS source in PugPlugin.extractHtml
-              esModule: true,
+              //esModule: true,
               sources: {
                 // Static resource URL from public web path should not be parsed.
                 // Leave as is:
@@ -46,6 +51,7 @@ module.exports = {
             loader: PugPlugin.loader,
             options: {
               method: 'html',
+              //method: 'render',
             },
           },
         ],
@@ -53,13 +59,12 @@ module.exports = {
 
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // process required scss/css in pug
-        generator: {
-          filename: 'assets/css/[name].[contenthash:8].css',
-        },
         use: [
           {
             loader: 'css-loader',
+          },
+          {
+            loader: 'sass-loader',
           },
         ],
       },

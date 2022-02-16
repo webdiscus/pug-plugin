@@ -69,6 +69,10 @@ describe('options', () => {
   test('options.modules (extractCss)', (done) => {
     compareFileListAndContent(PATHS, 'options-modules-css', done);
   });
+
+  test('options.modules.postprocess', (done) => {
+    compareFileListAndContent(PATHS, 'options-modules-postprocess', done);
+  });
 });
 
 describe('integration tests', () => {
@@ -88,10 +92,23 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-sass-font-face-src', done);
   });
 
-  // TODO: research why test in GitHub generate other filename - `styles.9790d61e.css`, but local is 'styles.ccc97e51.css'
-  // test('entry: sass, pug (production)', (done) => {
-  //   compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);
-  // });
+  test('entry: sass resolve url', (done) => {
+    // tested for: compile, render
+    compareFileListAndContent(PATHS, 'entry-sass-resolve-url', done);
+  });
+
+  test('entry: sass resolve url with `resolve-url-loader`', (done) => {
+    // tested for: compile, render
+    compareFileListAndContent(PATHS, 'entry-sass-resolve-url-loader', done);
+  });
+
+  test('entry: pug require style used url', (done) => {
+    compareFileListAndContent(PATHS, 'entry-pug-sass-import-url', done);
+  });
+
+  test('entry: sass, pug (production)', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);
+  });
 
   test('entry: sass, pug (development)', (done) => {
     compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
@@ -101,7 +118,6 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-sass-source-map', done);
   });
 
-  // TODO: bugfix the error `Multiple chunks emit assets to the same filename`
   test('entry: load styles from entry with same base names using generator', (done) => {
     compareFileListAndContent(PATHS, 'entry-sass-with-same-names', done);
   });
@@ -110,8 +126,8 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-js-pug', done);
   });
 
-  test('entry styles pass over to other plugin', (done) => {
-    compareFileListAndContent(PATHS, 'entry-styles-pass-over', done);
+  test('entry styles bypass to other plugin', (done) => {
+    compareFileListAndContent(PATHS, 'entry-styles-bypass', done);
   });
 
   test('entry: pass data via query', (done) => {
@@ -174,11 +190,6 @@ describe('exception tests', () => {
   test('exception: publicPath auto', (done) => {
     const containString = `This plugin yet not support 'auto' or undefined`;
     exceptionContain(PATHS, 'exception-public-path-auto', containString, done);
-  });
-
-  test('exception: resolve required style', (done) => {
-    const containString = `type: 'asset/resource'`;
-    exceptionContain(PATHS, 'exception-require-css-in-pug', containString, done);
   });
 
   test('exception: execute template function', (done) => {

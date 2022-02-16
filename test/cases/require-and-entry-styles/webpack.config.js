@@ -54,11 +54,6 @@ module.exports = {
       // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // add this for usage in pug, like `link(href=require('~Styles/my-style.scss'))`
-        generator: {
-          // save required styles
-          filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
-        },
         use: [
           {
             loader: 'css-loader',

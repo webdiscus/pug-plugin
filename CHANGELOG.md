@@ -1,5 +1,41 @@
 # Change log
 
+## 1.4.0 (2022-02-18)
+
+### BREAKING CHANGE (low probability).
+When using required style in pug, like `link(rel='stylesheet' href=require('./styles.css'))` then no need anymore the `type: 'asset/resource'` in the rule for styles.\
+**UPDATE** your `webpack.config.js`: remove in the rule for styles (css, scss, sass, etc.) the `type` and the `generator` fields.\
+Following is enough to extract CSS everywhere:
+```js
+{
+  test: /\.(css|sass|scss)$/,
+  // type: 'asset/resource', <-- remove the type property
+  // generator: { 'assets/css/[name].[contenthash:8].css' } <-- remove the generator property
+  use: [ 'css-loader', 'sass-loader' ],
+},
+```
+
+To define a filename for extracted CSS use the option `filename` in the `extractCss` module:
+```js
+new PugPlugin({
+  modules: [
+    PugPlugin.extractCss({
+      filename: 'assets/css/[name].[contenthash:8].css'
+    }),
+  ],
+}),
+```
+For mode details see [plugin options](https://github.com/webdiscus/pug-plugin#plugin-options).
+
+### CHANGES
+- added resolving url in CSS and export resolved resource to output path 
+- added caching of already resolved resources by enhanced resolver
+- improved html and css extraction
+- complete refactoring of all code
+- fixed issue for the option `outputPath`
+- fixed resolving issue by import styles directly from node_modules, e.g.: @import 'material-icons';
+- fixed some invisible issues
+
 ## 1.3.2 (2022-02-10)
 - fix issue in module extractCss by usage the data-url in css property, #3
 - update pug-loader to the latest version with fixed issues

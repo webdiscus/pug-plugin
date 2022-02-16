@@ -41,8 +41,8 @@ module.exports = {
         use: [
           {
             loader: 'css-loader',
-            // test CommonJS
-            options: { esModule: false },
+            // test ESM
+            options: { esModule: true },
           },
           {
             loader: 'sass-loader',

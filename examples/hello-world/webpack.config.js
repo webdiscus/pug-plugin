@@ -28,7 +28,6 @@ module.exports = {
   entry: {
     app: './src/main.js',
 
-    styles: './src/assets/styles/styles.scss',
     about: './src/assets/styles/about.css',
     vendor: './src/assets/styles/vendor.css',
     'post-css-demo.min': './src/assets/styles/post-css-demo.scss',
@@ -75,11 +74,6 @@ module.exports = {
       // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
-        type: 'asset/resource', // add this for usage in pug, like `link(href=require('~Styles/my-style.scss'))`
-        generator: {
-          // save required styles
-          filename: 'assets/css/[name].[hash].css',
-        },
         use: [
           {
             loader: 'css-loader',
@@ -146,11 +140,5 @@ module.exports = {
     },
     // open in default browser
     open: true,
-    // open in the browser
-    // open: {
-    //   app: {
-    //     name: 'Firefox',
-    //   },
-    // },
   },
 };
