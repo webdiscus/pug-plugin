@@ -1,5 +1,8 @@
 # Change log
 
+## 1.4.1 (2022-02-19)
+- update pug-loader to fix path error in Windows when watching dependencies 
+
 ## 1.4.0 (2022-02-18)
 
 ### BREAKING CHANGE (low probability).
