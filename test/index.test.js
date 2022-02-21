@@ -75,6 +75,20 @@ describe('options', () => {
   });
 });
 
+describe('source map', () => {
+  test('css with source-map', (done) => {
+    compareFileListAndContent(PATHS, 'devtool-source-map', done);
+  });
+
+  test('css with inline-source-map', (done) => {
+    compareFileListAndContent(PATHS, 'devtool-inline-source-map', done);
+  });
+
+  test('css without source-map', (done) => {
+    compareFileListAndContent(PATHS, 'devtool-no-source-map', done);
+  });
+});
+
 describe('integration tests', () => {
   test('Hello World! Zero config.', (done) => {
     compareFileListAndContent(PATHS, 'hello-world', done);
@@ -112,10 +126,6 @@ describe('integration tests', () => {
 
   test('entry: sass, pug (development)', (done) => {
     compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
-  });
-
-  test('entry: sass css with sourceMap', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-source-map', done);
   });
 
   test('entry: load styles from entry with same base names using generator', (done) => {

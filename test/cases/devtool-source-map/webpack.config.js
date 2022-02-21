@@ -1,3 +1,4 @@
+const path = require('path');
 const PugPlugin = require('../../../');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
@@ -7,12 +8,23 @@ module.exports = {
   devtool: 'source-map',
 
   output: {
+    path: path.join(__dirname, 'public/'),
     publicPath: '/',
   },
 
   entry: {
-    main: './src/assets/main.scss',
+    styles: './src/assets/main.scss',
   },
+
+  plugins: [
+    new PugPlugin({
+      modules: [
+        PugPlugin.extractCss({
+          filename: 'assets/[name].min.css',
+        }),
+      ],
+    }),
+  ],
 
   module: {
     rules: [
@@ -20,7 +32,6 @@ module.exports = {
         test: /\.scss$/,
         exclude: /node_modules/,
         use: [
-          // Extract and save the final CSS.
           // Load the CSS, set url = false to prevent following urls to fonts and images.
           { loader: 'css-loader', options: { url: false, importLoaders: 1, sourceMap: true } },
           // Add browser prefixes and minify CSS.
@@ -33,21 +44,9 @@ module.exports = {
               sourceMap: true,
             },
           },
-          // Load the SCSS/SASS
-          { loader: 'sass-loader', options: { sourceMap: true } },
+          'sass-loader',
         ],
       },
     ],
   },
-
-  plugins: [
-    // Extract css to .css file
-    new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: '[name].bundle.min.css',
-        }),
-      ],
-    }),
-  ],
 };

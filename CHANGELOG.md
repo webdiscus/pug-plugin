@@ -1,5 +1,9 @@
 # Change log
 
+## 1.4.3 (2022-02-21)
+- fix for the webpack option inline-source-map to save css and source map in single file
+- update pug-loader to the latest version
+
 ## 1.4.2 (2022-02-19)
 - update pug-loader to fix collision with local variables passed in template function for compile method
 

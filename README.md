@@ -330,7 +330,7 @@ The following parameters are available in the function:
  * @typedef {Object} ResourceInfo
  * @property {boolean} [verbose = false] Whether information should be displayed.
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
- * @property {string} entryFile The absolute path to entry file (issuer of asset).
+ * @property {string} outputFile The absolute path to generated output file (issuer of asset).
  * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
  * @property {string} sourceFile The absolute path to source file.
  * @property {string} assetFile The output asset file relative by `output.publicPath`.
@@ -450,7 +450,7 @@ The pug template `src/templates/index.pug`:
 ```pug
 html
   head
-    link(href=require('~Styles/my-style.scss'))
+    link(rel='stylesheet' href=require('~Styles/my-style.scss'))
   body
     p Hello World!
 ```
@@ -513,16 +513,26 @@ module.exports = {
 
 ### Clarification
 The importing of styles in JavaScript triggers the events in Webpack which call the `mini-css-extract-plugin` loader 
-to extract CSS from imported style source. Then the `html-webpack-plugin` using a magic add the `<link href="styles.css">` with filename of extracted CSS to any HTML file in head at last position.
+to extract CSS from imported style source. Then the `html-webpack-plugin` using a magic add the `<link rel="stylesheet" href="styles.css">` with filename of extracted CSS to any HTML file in head at last position.
 Your can't define in which HTML file will be added style and in which order. You are not in control of this process!
 This process requires two different plugins and has poor performance.\
 The single `pug-plugin` does it with right way, in one step and much faster.
 
 > ### ✅ Correct ways
-> - add a source style file directly in pug via `require`, e.g. `link(href=require('~Styles/styles.scss'))`
-> - add a compiled css file directly in pug, like `link(href='/assets/styles.css')` and add the source of the style in webpack entry.\
->   Yes, in this case may be needed additional assets manifest plugin to replace original filename with hashed name. But this is the right way.\
->   In the future, will be added support to automatically replace the asset file name with a hashed one.
+> 1. Add a source style file directly in pug via `require`:
+> ```pug
+> html
+>   head
+>     link(rel='stylesheet' href=require('~Styles/main.scss'))
+> ```
+> 2. Add a compiled css file directly in pug and add the source file in webpack entry.
+> ```pug
+> html
+>   head
+>     link(rel='stylesheet' href='/assets/css/styles.css')
+> ```
+> In this case may be needed additional assets manifest plugin to replace original filename with hashed name. But this is the right way.\
+> In the future, will be added support to automatically replace the source filename with processed name.
 
 
 ### Extract CSS from SASS defined in webpack entry

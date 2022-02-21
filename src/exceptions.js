@@ -100,8 +100,9 @@ const executeTemplateFunctionException = (error, sourceFile, source) => {
  */
 const postprocessException = (error, info) => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${plugin}]`)} Postprocess execution failed by the entry '${info.entryFile}'.\n` +
-    `The source file '${info.sourceFile}'.`;
+    `\n${ansis.black.bgRedBright(`[${plugin}]`)} Postprocess execution failed by the output file '${
+      info.outputFile
+    }'.\n` + `The source file '${info.sourceFile}'.`;
 
   PugPluginError(message, error);
 };

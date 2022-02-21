@@ -1,0 +1,19 @@
+$color: crimson;
+
+body {
+  color: $color;
+}
+
+// Unicode test
+
+.test {
+  content: 'Schöne Grüße';
+}
+
+.test-2 {
+  content: '✓';
+}
+
+.test-3 {
+  content: '\e901';
+}

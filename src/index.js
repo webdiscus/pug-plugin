@@ -67,7 +67,7 @@ const {
  * @typedef {Object} ResourceInfo
  * @property {boolean} [verbose = false] Whether information should be displayed.
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
- * @property {string} entryFile The absolute path to entry file (issuer of asset).
+ * @property {string} outputFile The absolute path to generated output file (issuer of asset).
  * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
  * @property {string} sourceFile The absolute path to source file.
  * @property {string} assetFile The output asset file relative by `output.publicPath`.
@@ -116,9 +116,10 @@ class PugPlugin {
   apply(compiler) {
     if (!this.enabled) return;
 
-    const webpackOutputPath = compiler.options.output.path;
-    const webpackOutputPublicPath = compiler.options.output.publicPath;
+    const webpackOptions = compiler.options;
+    const { path: webpackOutputPath, publicPath: webpackOutputPublicPath } = webpackOptions.output;
     const { RawSource } = compiler.webpack.sources;
+    const { HotUpdateChunk } = compiler.webpack;
 
     // TODO: resolveInPaths 'auto' publicPath
     if (webpackOutputPublicPath == null || webpackOutputPublicPath === 'auto') publicPathException();
@@ -128,8 +129,8 @@ class PugPlugin {
     });
 
     // enable library type `jsonp` for compilation JS from source into HTML string via Function()
-    if (compiler.options.output.enabledLibraryTypes.indexOf('jsonp') < 0) {
-      compiler.options.output.enabledLibraryTypes.push('jsonp');
+    if (webpackOptions.output.enabledLibraryTypes.indexOf('jsonp') < 0) {
+      webpackOptions.output.enabledLibraryTypes.push('jsonp');
     }
 
     // Normal Module Factory
@@ -176,7 +177,7 @@ class PugPlugin {
 
     // Entry options
     compiler.hooks.entryOption.tap(plugin, (context, entries) => {
-      if (!this.options.sourcePath) this.options.sourcePath = compiler.options.context;
+      if (!this.options.sourcePath) this.options.sourcePath = webpackOptions.context;
       if (!this.options.outputPath) this.options.outputPath = webpackOutputPath;
 
       for (let name in entries) {
@@ -274,7 +275,7 @@ class PugPlugin {
       compilation.hooks.renderManifest.tap(
         plugin,
         (result, { chunk, chunkGraph, moduleGraph, codeGenerationResults }) => {
-          if (chunk instanceof compiler.webpack.HotUpdateChunk) return;
+          if (chunk instanceof HotUpdateChunk) return;
 
           const entry = this.getEntryByName(chunk.name);
 
@@ -303,17 +304,14 @@ class PugPlugin {
               // module builder error
               if (source == null) return;
 
-              const pluginModule = this.getModule(module.resource);
-              const extract = pluginModule && pluginModule.extract ? pluginModule.extract : entry.extract;
-              const postprocess =
-                pluginModule && pluginModule.postprocess ? pluginModule.postprocess : entry.postprocess;
+              const pluginModule = this.getModule(module.resource) || entry;
 
               const postprocessInfo = {
                 isEntry: true,
                 verbose: entry.verbose,
-                entryFile: entry.file,
                 filename: chunk.filenameTemplate,
                 sourceFile: entry.importFile,
+                outputFile: entry.file,
                 assetFile,
               };
 
@@ -323,9 +321,8 @@ class PugPlugin {
                 source: source.source().toString(),
                 sourceFile: entry.importFile,
                 assetFile,
-                extract,
+                pluginModule,
                 // result options
-                postprocess,
                 postprocessInfo,
                 identifier: `${plugin}.${chunk.id}`,
                 pathOptions: { chunk, contentHashType },
@@ -366,9 +363,9 @@ class PugPlugin {
               const postprocessInfo = {
                 isEntry: false,
                 verbose: pluginModule.verbose,
-                entryFile: entry.file,
                 filename: filenameTemplate,
                 sourceFile: module.resource,
+                outputFile: entry.file,
                 assetFile,
               };
 
@@ -385,9 +382,8 @@ class PugPlugin {
                 source: source.source().toString(),
                 sourceFile: module.resource,
                 assetFile,
-                extract: pluginModule.extract,
+                pluginModule,
                 // result options
-                postprocess: pluginModule.postprocess,
                 postprocessInfo,
                 identifier: `${plugin}.${chunk.id}.${id}`,
                 pathOptions: contextData,
@@ -411,11 +407,11 @@ class PugPlugin {
           for (let item of sources) {
             if (!item.source) continue;
             // note: by any error in webpack config the source is empty
-            let compiledResult = this.compileSource(item.source, item.sourceFile, item.assetFile, item.extract);
+            let compiledResult = this.compileSource(item.source, item.sourceFile, item.assetFile, item.pluginModule);
 
-            if (item.postprocess) {
+            if (item.pluginModule.postprocess) {
               try {
-                compiledResult = item.postprocess(compiledResult, item.postprocessInfo, compilation);
+                compiledResult = item.pluginModule.postprocess(compiledResult, item.postprocessInfo, compilation);
               } catch (error) {
                 postprocessException(error, item.postprocessInfo);
               }
@@ -445,15 +441,15 @@ class PugPlugin {
   }
 
   /**
-   * Compile the source generated by loaders such as `css-loader`, `html-loader`.
+   * Compile the source generated by loaders such as `css-loader`, `html-loader`, `pug-loader`.
    *
    * @param {string} source The source generated by `css-loader`.
    * @param {string} sourceFile The full path of source file.
    * @param {string} assetFile
-   * @param {function} extract
+   * @param {ModuleOptions} pluginModule
    * @return {Buffer}
    */
-  compileSource(source, sourceFile, assetFile, extract) {
+  compileSource(source, sourceFile, assetFile, pluginModule) {
     resourceResolver.setCurrentContext(path.dirname(sourceFile));
     const contextOptions = {
       require: resourceResolver.require,
@@ -473,8 +469,8 @@ class PugPlugin {
       }
     }
 
-    if (extract) {
-      return extract(result, assetFile, this.compilation);
+    if (pluginModule && pluginModule.extract) {
+      return pluginModule.extract(result, assetFile, this.compilation);
     }
 
     return result;
@@ -601,4 +597,4 @@ module.exports = PugPlugin;
 module.exports.extractCss = extractCss;
 module.exports.extractHtml = extractHtml;
 module.exports.loader = require.resolve('@webdiscus/pug-loader');
-//module.exports.loader = require.resolveInPaths('../../pug-loader'); // local dev only
+//module.exports.loader = require.resolve('../../pug-loader'); // local dev only

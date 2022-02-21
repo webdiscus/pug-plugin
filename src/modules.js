@@ -1,7 +1,6 @@
-const { merge } = require('webpack-merge');
-const { plugin } = require('./config');
-const ansis = require('ansis');
 const path = require('path');
+const ansis = require('ansis');
+const { plugin } = require('./config');
 const { outToConsole } = require('./utils');
 
 /**
@@ -13,7 +12,7 @@ const { outToConsole } = require('./utils');
  * @return {ModuleOptions} Default options merged with custom options.
  */
 const extractHtml = function (options = {}) {
-  const defaultOptions = {
+  this.options = {
     test: /\.(html)$/,
     enabled: true,
     verbose: false,
@@ -21,10 +20,10 @@ const extractHtml = function (options = {}) {
     outputPath: undefined,
     filename: '[name].html',
     // example of filename as the function
-    //filename: (pathData, assetInfo) => {
-    //  const name = pathData.chunk.name;
-    //  return name === 'main' ? 'index.html' : '[name].html';
-    //},
+    // filename(pathData, assetInfo) {
+    //   const name = pathData.chunk.name;
+    //   return name === 'main' ? 'index.html' : '[name].html';
+    // },
 
     /**
      * @param {string} content The extracted html.
@@ -32,14 +31,16 @@ const extractHtml = function (options = {}) {
      * @param {Compilation} compilation
      * @return {string | null}
      */
-    //postprocess: (content, info, compilation) => {
+    //postprocess(content, info, compilation) {
     //  // todo For example, pretty format the content of html.
-    //  if (info.verbose) console.log(`Extract HTML: ${info.entryFile}\n`);
+    //  if (this.verbose) console.log(`Extract HTML: ${info.outputFile}\n`);
     //  return content;
     //},
   };
 
-  return merge(defaultOptions, options);
+  this.options = { ...this.options, ...options };
+
+  return this.options;
 };
 
 /**
@@ -65,31 +66,44 @@ const extractCss = function (options = {}) {
     filename: '[name].css',
 
     /**
+     * Extract CSS and source map.
+     *
+     * @note: The @import in CSS is not supported,
+     *  therefore css will be extracted from one module in the chunk of css asset.
+     *
      * @param {array} sourceMaps
      * @param {string} assetFile
      * @param {Compilation} compilation
      * @returns {string}
      * @private
      */
-    extract: (sourceMaps, assetFile, compilation) => {
-      // only one css module per css asset file, because the @import in CSS is not supported
-      const RawSource = compilation.compiler.webpack.sources.RawSource;
+    extract(sourceMaps, assetFile, compilation) {
+      const { compiler } = compilation;
+      const webpackOptions = compiler.options;
+      const isInlineSourceMap = webpackOptions.devtool && webpackOptions.devtool.startsWith('inline-');
+      const RawSource = compiler.webpack.sources.RawSource;
       const [item] = sourceMaps;
       const [sourceFile, cssCode, media, cssMapping, supports, layer] = item;
       let content = cssCode,
-        sourceMappingURL = '',
         mapFile;
 
       if (cssMapping) {
-        const sourceMapping = new RawSource(JSON.stringify(cssMapping));
-        mapFile = assetFile + '.map';
-
-        sourceMappingURL = `\n/*# sourceMappingURL=${path.basename(mapFile)} */`;
-        compilation.emitAsset(mapFile, sourceMapping);
+        if (isInlineSourceMap) {
+          const sourceURLs = cssMapping.sources
+            .map((source) => '/*# sourceURL=' + (cssMapping.sourceRoot || '') + source + ' */')
+            .join('\n');
+          const base64 = Buffer.from(JSON.stringify(cssMapping)).toString('base64');
+          const sourceMapping = '\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64 + ' */';
+          content += '\n' + sourceURLs + sourceMapping;
+        } else {
+          mapFile = assetFile + '.map';
+          const sourceMapping = new RawSource(JSON.stringify(cssMapping));
+          content += `\n/*# sourceMappingURL=${path.basename(mapFile)} */`;
+          compilation.emitAsset(mapFile, sourceMapping);
+        }
       }
-      content += sourceMappingURL;
 
-      if (this.options.verbose) {
+      if (this.verbose) {
         let verbose =
           ansis.black.bgYellow(`[${plugin}]`) +
           ansis.black.bgGreen(` Extract CSS `) +
@@ -116,13 +130,16 @@ const extractCss = function (options = {}) {
      * @param {Compilation} compilation
      * @return {string | null}
      */
-    // postprocess: (content, info, compilation) => {
+    // postprocess(content, info, compilation) {
     //   // the content here should be readonly
+    //   if (this.verbose) {
+    //     console.log(info);
+    //   }
     //   return content;
     // },
   };
 
-  this.options = merge(this.options, options);
+  this.options = { ...this.options, ...options };
 
   return this.options;
 };
