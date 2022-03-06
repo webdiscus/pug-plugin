@@ -1,5 +1,9 @@
 # Change log
 
+## 1.5.0 (2022-03-06)
+- update pug-loader to v1.8.0 containing the resolving and watching improvements
+- update npm packages
+
 ## 1.4.3 (2022-02-21)
 - fix for the webpack option inline-source-map to save css and source map in single file
 - update pug-loader to the latest version
