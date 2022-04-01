@@ -64,4 +64,13 @@ module.exports = {
       },
     ],
   },
+
+  optimization: {
+    // test injection of chunks in html
+    splitChunks: {
+      chunks: 'all',
+      minChunks: 1,
+      minSize: 10,
+    },
+  },
 };

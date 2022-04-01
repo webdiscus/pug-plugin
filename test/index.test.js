@@ -189,6 +189,29 @@ describe('require assets tests', () => {
   test('require styles in pug and use compiled styles from webpack entry', (done) => {
     compareFileListAndContent(PATHS, 'require-and-entry-styles', done);
   });
+
+  test('require css in pug and resolve in css the url(image), method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-css-image-render', done);
+  });
+
+  // TODO: fix the issue
+  // test('require css in pug and resolve in css the url(image), method html', (done) => {
+  //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
+  // });
+});
+
+describe('require in script tag', () => {
+  test('method compile', (done) => {
+    compareFileListAndContent(PATHS, 'require-scripts-compile', done);
+  });
+
+  test('method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-scripts-render', done);
+  });
+
+  test('method html', (done) => {
+    compareFileListAndContent(PATHS, 'require-scripts-html', done);
+  });
 });
 
 describe('exception tests', () => {

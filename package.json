@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "The pug plugin to handle the pug, html, css, scss files in webpack entry and extract css from pug.",
   "keywords": [
     "webpack",
@@ -60,29 +60,29 @@
     "webpack": ">=5.32.0"
   },
   "dependencies": {
-    "@webdiscus/pug-loader": "^1.8.0",
+    "@webdiscus/pug-loader": "^2.0.0",
     "ansis": "1.3.4",
     "webpack-merge": "^5.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.5",
+    "@babel/core": "^7.17.8",
     "@babel/preset-env": "^7.16.11",
     "@types/jest": "^27.4.1",
-    "autoprefixer": "^10.4.2",
-    "css-loader": "^6.7.0",
-    "cssnano": "^5.1.0",
+    "autoprefixer": "^10.4.4",
+    "css-loader": "^6.7.1",
+    "cssnano": "^5.1.5",
     "html-loader": "^3.1.0",
     "jest": "^27.5.1",
     "material-icons": "^1.10.7",
     "mini-css-extract-plugin": "^2.6.0",
     "postcss-loader": "^6.2.1",
-    "prettier": "^2.5.1",
+    "prettier": "^2.6.1",
     "rimraf": "^3.0.2",
     "sass": "^1.49.9",
     "sass-loader": "^12.6.0",
     "style-loader": "^3.3.1",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "resolve-url-loader": "^5.0.0",
-    "webpack": "^5.70.0"
+    "webpack": "^5.71.0"
   }
 }

@@ -307,15 +307,25 @@ const resourceResolver = {
     // @import CSS rule is not supported.
     if (file.indexOf('??ruleSet') > 0) resolveException(file);
 
+    const assetFile = self.resolveAsset(file);
+
+    if (assetFile) {
+      //console.log('\n *** REQUIRE assetFile: ', file, assetFile);
+      return path.posix.join(self.publicPath, assetFile);
+    }
+
+    // require script in tag <script src=require('./main.js')>
+    const scriptResource = self.scripts.getResource(file);
+    if (scriptResource != null) {
+      //console.log('\n *** REQUIRE script: ', file, '\n', scriptResource, self.scripts);
+      return scriptResource;
+    }
+
     // require only js code or json data
     if (/\.js[a-z0-9]*$/i.test(file)) {
       const fullPath = path.resolve(self.context, file);
+      //console.log('\n *** REQUIRE JS: ', file, fullPath);
       return require(fullPath);
-    }
-
-    const assetFile = self.resolveAsset(file);
-    if (assetFile) {
-      return path.posix.join(self.publicPath, assetFile);
     }
 
     resolveException(file);

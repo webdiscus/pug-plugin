@@ -1,7 +1,6 @@
 module.exports = {
   output: {
     filename: '[name].js',
-    assetModuleFilename: 'assets/images/[hash][ext][query]',
   },
 
   plugins: [],
