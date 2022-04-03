@@ -1,0 +1,14 @@
+mixin WSlideNavigation(data_name)
+    // nav.w-sn 
+    nav.w-sn(x-data=data_name, x-cloak)&attributes(attributes)
+        .w-sn__wrapper
+            block
+    // ## nav.w-sn 
+
+mixin WSlideNavigationItem(scene_name)
+    // .w-sn__item 
+    div(x-data="", data-scene=scene_name)
+        template(x-if="exists()")
+            .w-sn__item(:class="sceneClasses")&attributes(attributes)
+                block
+    // ## .w-sn__item 

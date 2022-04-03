@@ -22,7 +22,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public'),
     publicPath: '/',
-    filename: '[name].js',
+    filename: 'assets/js/[name].js',
   },
 
   entry: {
@@ -42,11 +42,11 @@ module.exports = {
   plugins: [
     // extract HTML from pug files defined by webpack entry
     new PugPlugin({
-      verbose: true,
+      //verbose: true,
       modules: [
         PugPlugin.extractHtml(),
         PugPlugin.extractCss({
-          verbose: true,
+          //verbose: true,
           filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
         }),
       ],
@@ -128,17 +128,17 @@ module.exports = {
     },
     port: 9000,
     https: false,
-    liveReload: true,
-    hot: true,
-    client: {
-      progress: true,
-    },
-    compress: true,
+    // liveReload: true,
+    // hot: true,
+    // client: {
+    //   progress: true,
+    // },
+    // compress: true,
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
     // open in default browser
-    open: true,
+    // open: true,
   },
 };

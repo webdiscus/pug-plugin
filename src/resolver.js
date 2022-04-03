@@ -10,8 +10,9 @@ const urlDependencyResolver = {
 
   /**
    * @param {FileSystem} fs
+   * @param {Object} options The webpack options.
    */
-  init(fs) {
+  init(fs, options) {
     this.fs = fs;
   },
 
@@ -81,11 +82,12 @@ const urlDependencyResolver = {
 
     if (!fs.existsSync(path.resolve(resolveData.context, request))) {
       const dependency = resolveData.dependencies[0];
+
       // TODO: use ModuleGraph.getParentModule(dependency);
       const parentModule = dependency._parentModule || {};
       const buildInfo = parentModule.buildInfo || {};
       const snapshot = buildInfo.snapshot || {};
-      const issuers = snapshot.fileTimestamps;
+      const issuers = snapshot.fileTimestamps || snapshot.fileTshs;
       /** @type {string} closest issuer that can import the resource */
       const closestIssuer = issuers != null && issuers.size > 0 ? Array.from(issuers.keys()).pop() : null;
       let context = closestIssuer ? path.dirname(closestIssuer) : resolveData.context;
@@ -105,15 +107,6 @@ const urlDependencyResolver = {
       }
 
       if (resolvedFile != null) {
-        // TODO: delete commented code in next version
-        // let relativeFile = path.relative(resolveData.context, resolvedFile);
-        // if (relativeFile[0] !== '.') {
-        //   relativeFile = './' + relativeFile;
-        // }
-        // resolveData.request = relativeFile;
-        // dependency.request = relativeFile;
-        // dependency.userRequest = relativeFile;
-
         resolveData.request = resolvedFile;
         dependency.request = resolvedFile;
         dependency.userRequest = resolvedFile;
@@ -125,8 +118,6 @@ const urlDependencyResolver = {
 
 /**
  * Resolve required resources.
- *
- * @type {{addResolvedPath(string): void, init({publicPath: string}): void, resolveAsset(string): (string|null), webpackOptionsResolve: {}, addToChunkCache({}, string): void, chunkCache: {paths: Set<any>, files: Map<any, any>}, getId(string, string): symbol, require(string): string, clearCache(): void, publicPath: string, addResolvedFile(string, string, string): void, clearChunkCache(): void, context: string, setCurrentContext(string): void, globalCache: {paths: Set<any>, files: Map<any, any>}}}
  */
 const resourceResolver = {
   webpackOptionsResolve: {},
@@ -166,10 +157,19 @@ const resourceResolver = {
   },
 
   /**
+   * @type {Map}
+   *  key is rawRequest
+   *  value is list of contexts
+   */
+  moduleCache: new Map(),
+
+  /**
    * @param {string} publicPath
    */
   init({ publicPath }) {
     this.publicPath = publicPath;
+    // clean cache for multiple calling of webpack.run(), e.g. by tests, webpack watch or webpack serve
+    this.clearChunkCache();
   },
 
   /**
@@ -202,29 +202,75 @@ const resourceResolver = {
   clearChunkCache() {
     this.chunkCache.files.clear();
     this.chunkCache.paths.clear();
+    this.moduleCache.clear();
   },
 
   /**
-   * @param {string} context
+   * Set the current source file, which is the issuer for assets when compiling the source code.
+   *
+   * @param {string} issuer
    */
-  setCurrentContext(context) {
-    this.context = context;
+  setIssuer(issuer) {
+    this.issuer = issuer;
+    this.context = path.dirname(issuer);
   },
 
   /**
    * Add the context and resolved path of the resource to resolve it in require() at render time.
    *
-   * @param {{}} module The chunk module.
+   * @param {Module} module The webpack chunk module.
    * @param {string} assetFile The web path of the asset.
    */
   addToChunkCache(module, assetFile) {
+    const request = module.rawRequest;
     const resourceContext = module.resourceResolveData.context;
     const context = resourceContext.issuer ? path.dirname(resourceContext.issuer) : module.context;
-    const request = module.rawRequest;
 
     const assetId = this.getId(context, request);
     this.chunkCache.files.set(assetId, assetFile);
     this.chunkCache.paths.add(context);
+  },
+
+  /**
+   * @param {string} resource The full path of source resource.
+   * @param {string} rawRequest The raw request of resource is argument of URL() in css.
+   * @param {string} issuer The parent file of the resource.
+   */
+  addToModuleCache(resource, rawRequest, issuer) {
+    if (!this.moduleCache.has(resource)) {
+      this.moduleCache.set(resource, {
+        issuers: [],
+        rawRequest,
+        assetFile: undefined,
+      });
+    }
+
+    this.moduleCache.get(resource).issuers.push(issuer);
+  },
+
+  /**
+   * @param {string} resource The full path of source resource.
+   * @param {string} assetFile The output asset filename.
+   */
+  setAssetFileInModuleCache(resource, assetFile) {
+    if (!this.moduleCache.has(resource)) return;
+
+    this.moduleCache.get(resource).assetFile = assetFile;
+  },
+
+  /**
+   * @param {string} rawRequest The raw request of resource is argument of URL() in css.
+   * @param {string} issuer The parent file of the resource.
+   * @return {null|string|*}
+   */
+  findAssetFileInModuleCache(rawRequest, issuer) {
+    for (const item of this.moduleCache.values()) {
+      if (item.rawRequest === rawRequest && item.issuers.indexOf(issuer) >= 0) {
+        return item.assetFile;
+      }
+    }
+
+    return null;
   },
 
   /**
@@ -258,29 +304,38 @@ const resourceResolver = {
    * @returns {null|string}
    */
   resolveAsset(file) {
+    const { issuer, context } = this;
     let dir, assetId, assetFile;
 
-    // firstly try to find an asset in resolved directories of the chunk
-    // this is mostly used case by resolve a required resource in pug
+    // try to resolve a resource required in pug by absolute path of source file
+    if (path.isAbsolute(file)) {
+      assetId = this.getId('', file);
+      assetFile = this.chunkCache.files.get(assetId);
+      if (assetFile != null) return assetFile;
+    }
+
+    // try to resolve a resource required in pug relative by context directory
     for (dir of this.chunkCache.paths) {
+      if (dir.indexOf(context) < 0) continue;
       assetId = this.getId(dir, file);
       assetFile = this.chunkCache.files.get(assetId);
-      if (assetFile != null) {
-        return assetFile;
-      }
+      if (assetFile != null) return assetFile;
     }
 
-    // secondly try to find an asset in resolved directories of global cache
-    // this case can be by resolve a resource from url used in css
+    // try to resolve ta resource required via url in css
+    assetFile = this.findAssetFileInModuleCache(file, issuer);
+    if (assetFile != null) return assetFile;
+
+    // try to resolve a resource imported from `node_modules` via url in css
     for (dir of this.globalCache.paths) {
-      assetId = this.getId(dir, file);
-      assetFile = this.chunkCache.files.get(assetId);
+      const fullPath = path.resolve(dir, file);
+      assetFile = this.findAssetFileInModuleCache(fullPath, issuer);
       if (assetFile != null) {
         return assetFile;
       }
     }
 
-    // at the end try to resolve the full path of file and then try to resolve an asset by this full path
+    // try to resolve the full path of the file and then try to resolve an asset by resolved file
     // this case can be by usage an alias retrieved using webpack resolve.plugins
     const resolvedFile = this.globalCache.files.get(file);
     if (resolvedFile != null) {
@@ -292,43 +347,39 @@ const resourceResolver = {
   },
 
   /**
-   * Require the resource file in the compiled pug or css.
+   * Require the resource request in the compiled pug or css.
    *
-   * @param {string} file The required file from source directory.
+   * @param {string} request The request of source resource.
    * @returns {string} The output asset filename generated by filename template.
    * @throws {Error}
    */
-  require(file) {
+  require(request) {
     const self = resourceResolver;
 
     // bypass the inline data-url, e.g.: data:image/png;base64
-    if (file.startsWith('data:')) return file;
+    if (request.startsWith('data:')) return request;
 
     // @import CSS rule is not supported.
-    if (file.indexOf('??ruleSet') > 0) resolveException(file);
+    if (request.indexOf('??ruleSet') > 0) resolveException(request);
 
-    const assetFile = self.resolveAsset(file);
-
+    // require resources
+    const assetFile = self.resolveAsset(request);
     if (assetFile) {
-      //console.log('\n *** REQUIRE assetFile: ', file, assetFile);
-      return path.posix.join(self.publicPath, assetFile);
+      return assetFile;
     }
 
     // require script in tag <script src=require('./main.js')>
-    const scriptResource = self.scripts.getResource(file);
-    if (scriptResource != null) {
-      //console.log('\n *** REQUIRE script: ', file, '\n', scriptResource, self.scripts);
-      return scriptResource;
-    }
+    const file = self.scripts.getResource(request);
+    if (file != null) return file;
 
     // require only js code or json data
-    if (/\.js[a-z0-9]*$/i.test(file)) {
-      const fullPath = path.resolve(self.context, file);
-      //console.log('\n *** REQUIRE JS: ', file, fullPath);
+    if (/\.js[a-z0-9]*$/i.test(request)) {
+      const fullPath = path.resolve(self.context, request);
       return require(fullPath);
     }
 
-    resolveException(file);
+    //return request;
+    resolveException(request, self.issuer);
   },
 };
 

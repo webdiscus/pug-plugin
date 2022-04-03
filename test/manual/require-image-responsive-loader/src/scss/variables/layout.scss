@@ -1,0 +1,18 @@
+// Breakpoint sizes
+$breakpoint-tablet-size: 768px !default;
+$breakpoint-desktop-size: 1024px !default;
+$breakpoint-widescreen-size: 1366px !default;
+
+// Breakpoint modifier names
+$breakpoint-initial-modifier: 'in';
+$breakpoint-tablet-modifier: 'sm';
+$breakpoint-desktop-modifier: 'md';
+$breakpoint-widescreen-modifier: 'lg';
+
+$gap: 0.5rem !default;
+
+// Container sizes
+$container-padding: $gap;
+$container-tablet: 750px;
+$container-desktop: 1000px;
+$container-widescreen: 1200px;

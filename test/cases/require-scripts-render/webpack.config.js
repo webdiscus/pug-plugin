@@ -1,17 +1,14 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = true;
-//const isProduction = false;
-
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
+  mode: 'production',
   devtool: false,
 
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'assets/[name].[contenthash:4].js',
+    filename: 'assets/js/[name].[contenthash:4].js',
   },
 
   entry: {

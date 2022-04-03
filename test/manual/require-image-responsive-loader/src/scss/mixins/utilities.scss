@@ -1,0 +1,177 @@
+// size mixin
+@mixin size($args) {
+  $length: length($args);
+
+  @if $length == 2 {
+    width: #{_get($args, 1)};
+    height: #{_get($args, 2)};
+  } @else if $length == 1 {
+    width: #{$args};
+    height: #{$args};
+  }
+}
+
+// margin mixin
+@mixin margin($args) {
+  $length: length($args);
+
+  @if $length == 4 {
+    margin-top: #{_get($args, 1)};
+    margin-right: #{_get($args, 2)};
+    margin-bottom: #{_get($args, 3)};
+    margin-left: #{_get($args, 4)};
+  } @else if $length == 3 {
+    margin-top: #{_get($args, 1)};
+    margin-right: #{_get($args, 2)};
+    margin-bottom: #{_get($args, 3)};
+    margin-left: #{_get($args, 2)};
+  } @else if $length == 2 {
+    margin-top: #{_get($args, 1)};
+    margin-right: #{_get($args, 2)};
+    margin-bottom: #{_get($args, 1)};
+    margin-left: #{_get($args, 2)};
+  } @else if $length == 1 {
+    margin-top: #{$args};
+    margin-right: #{$args};
+    margin-bottom: #{$args};
+    margin-left: #{$args};
+  }
+}
+
+// padding mixin
+@mixin padding($args) {
+  $length: length($args);
+
+  @if $length == 4 {
+    padding-top: #{_get($args, 1)};
+    padding-right: #{_get($args, 2)};
+    padding-bottom: #{_get($args, 3)};
+    padding-left: #{_get($args, 4)};
+  } @else if $length == 3 {
+    padding-top: #{_get($args, 1)};
+    padding-right: #{_get($args, 2)};
+    padding-bottom: #{_get($args, 3)};
+    padding-left: #{_get($args, 2)};
+  } @else if $length == 2 {
+    padding-top: #{_get($args, 1)};
+    padding-right: #{_get($args, 2)};
+    padding-bottom: #{_get($args, 1)};
+    padding-left: #{_get($args, 2)};
+  } @else if $length == 1 {
+    padding-top: #{$args};
+    padding-right: #{$args};
+    padding-bottom: #{$args};
+    padding-left: #{$args};
+  }
+}
+
+// center mixin
+@mixin center($type: 'position', $plane: null) {
+  @if $type == 'position' {
+    @if $plane == 'x' {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    } @else if $plane == 'y' {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    } @else {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  } @else if $type == 'flex' {
+    @if $plane == 'x' {
+      display: flex;
+      justify-content: center;
+    } @else if $plane == 'y' {
+      display: flex;
+      align-items: center;
+    } @else {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  } @else if $type == 'inline-flex' {
+    @if $plane == 'x' {
+      display: inline-flex;
+      justify-content: center;
+    } @else if $plane == 'y' {
+      display: inline-flex;
+      align-items: center;
+    } @else {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  } @else if $type == 'block' {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+// circle mixin
+@mixin circle($size, $color) {
+  size: $size;
+  border-radius: 50%;
+  background-color: $color;
+}
+
+@mixin visible($visibility) {
+  opacity: if($visibility, 1, 0);
+  visibility: if($visibility, unquote('visible'), unquote('hidden'));
+}
+
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+@mixin reset-list {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+
+  li {
+    list-style-type: none;
+    list-style-position: inside;
+    list-style-image: none;
+  }
+}
+
+@mixin text-stroke($size, $color, $smooth: 0) {
+  text-shadow: -#{$size} -#{$size} $smooth $color, -#{$size} 0 $smooth $color,
+    -#{$size} $size $smooth $color, 0 -#{$size} $smooth $color,
+    0 0 $smooth $color, 0 $size $smooth $color, $size -#{$size} $smooth $color,
+    $size 0 $smooth $color, $size $size $smooth $color;
+}
+
+@mixin sticky-footer($height, $wrapper: body) {
+  @at-root #{$wrapper} {
+    margin-bottom: $height;
+  }
+
+  & {
+    position: absolute null null 0 0;
+    size: 100% $height;
+  }
+}
+
+@mixin reflect($axis) {
+  @if $axis == 'vertical' {
+    transform: rotateY(180deg);
+  } @else if $axis == 'horizontal' {
+    transform: rotateY(180deg);
+  }
+}
+
+@mixin defineColorHex($color, $hex) {
+  #{$color}: unquote('#{$hex}');
+  #{$color}-hsl: hue($hex), saturation($hex), lightness($hex);
+}

@@ -1,0 +1,32 @@
+@mixin second-icon {
+  &:nth-child(1) {
+    @include visible(false);
+  }
+  &:nth-child(2) {
+    @include visible(true);
+  }
+}
+
+.w-icon {
+  display: inline-block;
+  position: relative;
+  @include size(48px);
+
+  svg {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    @include size(100%);
+
+    &:nth-child(2) {
+      @include visible(false);
+    }
+  }
+}

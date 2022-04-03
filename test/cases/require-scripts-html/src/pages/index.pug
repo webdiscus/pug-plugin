@@ -1,10 +1,9 @@
 html
   head
-    //- stay as is
-    script(src='/static/vendor/main.js')
-
     link(rel='stylesheet' href=require('./styles.css'))
 
+    //- stay as is
+    script(src='/static/vendor/main.js')
     //- extract common code in separate chunk file and inject one before original script
     script(src=require('./module/script-a.js'))
     script(src=require('./module/script-b.js'))

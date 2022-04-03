@@ -21,27 +21,48 @@
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
 
-This plugin extract HTML and CSS from `pug` `html` `scss` `css` files defined in `webpack entry` and save into separate files.
-The plugin can extract CSS and JavaScript from source files required in pug, without necessary to define them in the webpack entry.
+The pug plugin extract HTML, JavaScript and CSS from pug template defined in `webpack entry`.
 
-Using the `pug-plugin` no longer requires additional plugins and loaders such as:
-- [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)
-- [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)
-- [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts)
-  or [webpack-fix-style-only-entries](https://github.com/fqborges/webpack-fix-style-only-entries) \
-  (bug fix plugins for `mini-css-extract-plugin`)
-- [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
-- [pug-loader](https://github.com/webdiscus/pug-loader) (this loader is already included in the `pug-plugin`)
+Now is possible to define pug templates in webpack entry. All styles and scripts will be automatically extracted from pug.
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  entry: {
+    'index': './src/index.pug', // extract html, css and js from pug
+  },
+  plugins: [
+    new PugPlugin(),
+  ],
+  // ...
+};
+```
 
-> The plugin can be used not only for `pug` but also for simply extracting `HTML` or `CSS` from  `webpack entry`, independent of pug usage.
+Now is possible to use the source files of styles and scripts directly in pug.
+```pug
+link(href=require('./styles.scss') rel='stylesheet')
+script(src=require('./main.js'))
+```
+The generated HTML contains hashed css and js filenames, depending on how webpack is configured.
+```html
+<link rel="stylesheet" href="/assets/css/styles.05e4dd86.css">
+<script src="/assets/js/main.f4b855d8.js"></script>
+```
 
-## Requirements
-- **Webpack 5** \
-  ⚠️ Working with Webpack 4 is not guaranteed.
-- **Asset Modules** for Webpack 5: `asset/resource` `asset/inline` `asset/source` `asset` \
-  ⚠️ Does not support deprecated modules such as `file-loader` `url-loader` `raw-loader`.
-- **Pug 3** \
-  ⚠️ By usage Pug v2.x is required extra install the `pug-walk` package. Working with Pug < v3.0.2 is not guaranteed.
+> 💡 The required styles and scripts in pug do not need to define in the webpack entry.
+> All required resources will be automatically handled by webpack. 
+
+
+The single pug plugin perform the most commonly used functions of the following packages:
+
+| Packages                                                                                  | Features                                                      | 
+|-------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)                    | extract HTML from pug                                         |
+| [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)     | extract CSS from styles                                       |
+| [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts) | prevent generating empty files by the `mini-css-extract-plugin` |
+| [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)                     | resolve the url in CSS                                        |
+| [pug-loader](https://github.com/webdiscus/pug-loader)                                     | the pug loader is already included in the pug plugin          |
+
+You can replace all of the above packages with just one pug plugin.
 
 <a id="install" name="install" href="#install"></a>
 ## Install
@@ -52,7 +73,7 @@ npm install pug-plugin --save-dev
 
 ## Quick Start
 
-The minimal configuration in `webpack.config.js`:
+The minimal webpack config to extract HTML from pug:
 ```js
 const path = require('path');
 const PugPlugin = require('pug-plugin');
@@ -380,7 +401,7 @@ The absolute path to sources.
 
 ### `outputPath`
 Type: `string` Default: `webpack.options.output.path`<br>
-The output directory for processed entries.
+The output directory for processed entries. This directory can be relative by `webpack.options.output.path` or absolute.
 
 ### `filename`
 Type: `string | Function` Default: `webpack.output.filename || '[name].html'`<br>
@@ -568,20 +589,12 @@ Your can't define concrete position in HTML where should be added the style.
 This process requires two different plugins and has poor performance.\
 The single `pug-plugin` does it with right way, in one step and much faster.
 
-> ### ✅ Correct ways
-> 1. Add a source style file directly in pug via `require`>
+> ### ✅ Correct way
+> Add a source style file directly in pug via `require`:
 > ```pug
 > html
 >   head
 >     link(rel='stylesheet' href=require('./styles.scss'))
-> ```
-> **This is the correct standard way, strongly recommended.**
-> 
-> 2. Add a compiled css file directly in pug and add the source file in webpack entry:
-> ```pug
-> html
->   head
->     link(rel='stylesheet' href='/assets/css/styles.css')
 > ```
 
 ### Extract HTML from file defined in webpack entry

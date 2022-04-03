@@ -3,6 +3,7 @@ html
   head
     title= title
     meta(charset='utf-8')
+
     link(rel='icon' href=require('~Images/favicon.ico'))
 
     //- require source styles directly in template for processing via webpack
@@ -12,11 +13,12 @@ html
     link(rel='stylesheet' href='/assets/css/vendor.css')
     link(rel='stylesheet' href='/assets/css/post-css-demo.min.css')
 
-    script(src='/app.js')
+    script(src='/assets/js/app.js')
+    script(src=require('../assets/js/lib.js'))
 
   body
     #app-root
-      //- The application content from PUG templates will be added via JavaScript.
+      //- 1 The application content from PUG templates will be added via JavaScript.
           This supports `live reload` after edit.
 
     #static-content

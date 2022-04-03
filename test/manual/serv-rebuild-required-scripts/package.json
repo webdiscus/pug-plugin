@@ -1,0 +1,20 @@
+{
+  "name": "serv-rebuild-required-scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack serve",
+    "build": "webpack --mode=production",
+    "watch": "webpack --mode=production --watch"
+  },
+  "devDependencies": {
+    "@webdiscus/pug-loader": "^2.0.0",
+    "css-loader": "^6.7.1",
+    "sass": "^1.50.0",
+    "sass-loader": "^12.6.0",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.8.1"
+  }
+}

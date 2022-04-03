@@ -1,0 +1,4 @@
+mixin WImage(file, size=960)
+    .w-img
+        picture
+            source(srcset=file.srcSet, type="image/webp")

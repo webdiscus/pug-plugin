@@ -1,0 +1,11 @@
+$font-path: '../fonts/MaterialIcons';
+$font-family: 'Material Icons';
+
+@font-face {
+  font-family: '#{$font-family}';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'),
+  local('MaterialIcons-Regular'),
+  url('#{$font-path}/MaterialIcons-Regular.woff2') format('woff2');
+}

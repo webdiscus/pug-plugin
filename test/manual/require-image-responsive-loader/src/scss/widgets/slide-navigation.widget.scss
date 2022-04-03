@@ -1,0 +1,32 @@
+.w-sn {
+  padding: 80px;
+  max-width: 600px;
+  width: 100%;
+  user-select: none;
+  transition: all 500ms;
+
+  &__wrapper {
+    position: relative;
+    overflow: hidden;
+    transition: all 500ms;
+  }
+
+  &__item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateX(100%);
+    width: 100%;
+    transition: all 500ms;
+    @include visible(false);
+
+    &--active {
+      transform: none;
+      @include visible(true);
+    }
+
+    &--parent {
+      transform: translateX(-100%);
+    }
+  }
+}

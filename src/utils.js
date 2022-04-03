@@ -11,6 +11,15 @@
  */
 const pathToPosix = (value) => value.replace(/\\/g, '/');
 
+/**
+ * @param {string} request
+ * @return {{resource: string, query: string|null}}
+ */
+const parseRequest = (request) => {
+  const [resource, query] = request.split('?');
+  return { resource, query };
+};
+
 const isFunction = (value) => typeof value === 'function';
 
 const outToConsole = (...args) => process.stdout.write(args.join(' ') + '\n');
@@ -37,6 +46,7 @@ const shallowEqual = function (obj1, obj2) {
 
 module.exports = {
   pathToPosix,
+  parseRequest,
   isFunction,
   shallowEqual,
   outToConsole,

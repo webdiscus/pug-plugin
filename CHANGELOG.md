@@ -1,5 +1,18 @@
 # Change log
 
+## 2.1.0 (2022-04-18)
+- feat: added supports the `responsive-loader`
+- feat: caching of an already processed asset when the same asset is required in different issuer files
+- fix: conflict of multiple styles with the same filename
+- fix: resolving url() in styles required in pug
+- fix: missing js file after rebuild by webpack serv
+- fix: potential collision when resolving resources for `compile` method
+- test: caching for styles required with same name
+
+## 2.0.1 (2022-04-03)
+- fixed incorrect output directory for a module if the option `outputPath` was relative
+- update readme
+
 ## 2.0.0 (2022-04-01)
 ### NEW feature
 Added supports the require() of the javascript source files directly in pug. \

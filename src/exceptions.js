@@ -67,8 +67,10 @@ const publicPathException = () => {
  * @param {string} file
  * @throws {Error}
  */
-const resolveException = (file) => {
-  let message = `\n${ansis.black.bgRedBright(`[${plugin}]`)} Can't resolve the file ${ansis.cyan(file)}`;
+const resolveException = (file, issuer) => {
+  let message = `\n${ansis.black.bgRedBright(`[${plugin}]`)} Can't resolve the file ${ansis.cyan(
+    file
+  )} in ${ansis.blueBright(issuer)}`;
 
   if (path.isAbsolute(file) && !fs.existsSync(file)) {
     message += `\n${ansis.yellow('The reason:')} this file not found!`;

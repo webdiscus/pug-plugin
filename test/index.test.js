@@ -34,9 +34,21 @@ beforeEach(() => {
 });
 
 describe('utils tests', () => {
-  test('shallowEqual', (done) => {
+  test('shallowEqual same', (done) => {
     const received = shallowEqual({ a: 123, b: 'abc' }, { b: 'abc', a: 123 });
     expect(received).toBeTruthy();
+    done();
+  });
+
+  test('shallowEqual different size', (done) => {
+    const received = shallowEqual({ a: 123 }, { b: 'abc', a: 123 });
+    expect(received).toBeFalsy();
+    done();
+  });
+
+  test('shallowEqual different value', (done) => {
+    const received = shallowEqual({ a: 123, b: 'abc' }, { b: 'cba', a: 123 });
+    expect(received).toBeFalsy();
     done();
   });
 });
@@ -72,6 +84,10 @@ describe('options', () => {
 
   test('options.modules.postprocess', (done) => {
     compareFileListAndContent(PATHS, 'options-modules-postprocess', done);
+  });
+
+  test('options-outputpath', (done) => {
+    compareFileListAndContent(PATHS, 'options-outputpath', done);
   });
 });
 
@@ -186,6 +202,22 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-styles', done);
   });
 
+  test('require styles with same name', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-with-same-name', done);
+  });
+
+  test('require styles with same name, hash', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-with-same-name-hash', done);
+  });
+
+  test('require styles with relative path in url', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-url-relative', done);
+  });
+
+  test('require styles with alias in url', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-url-alias', done);
+  });
+
   test('require styles in pug and use compiled styles from webpack entry', (done) => {
     compareFileListAndContent(PATHS, 'require-and-entry-styles', done);
   });
@@ -211,6 +243,10 @@ describe('require in script tag', () => {
 
   test('method html', (done) => {
     compareFileListAndContent(PATHS, 'require-scripts-html', done);
+  });
+
+  test('require scripts with same name', (done) => {
+    compareFileListAndContent(PATHS, 'require-scripts-same-src', done);
   });
 });
 
