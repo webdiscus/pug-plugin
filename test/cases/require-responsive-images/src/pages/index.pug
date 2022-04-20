@@ -1,0 +1,14 @@
+html
+  head
+    link(rel='icon' href=require('~Images/favicon.png?size=92'))
+  body
+    -
+      const img = {
+        src: require('~Images/delfin.jpg?size=320'),
+        srcSet: require('~Images/delfin.jpg?prop=srcSet'),
+      }
+
+      const defaultSrcSet = require('~Images/delfin.jpg')
+
+    img(srcset=img.srcSet src=img.src alt="responsive image")
+    p= defaultSrcSet

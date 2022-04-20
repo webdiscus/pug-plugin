@@ -1,1 +1,1 @@
-console.log('Home! 123');
+console.log('Home!');

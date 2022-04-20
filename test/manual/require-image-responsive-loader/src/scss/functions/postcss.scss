@@ -1,3 +1,0 @@
-@function lookup($property) {
-  @return unquote('@#{$property}');
-}

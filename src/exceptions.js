@@ -65,6 +65,7 @@ const publicPathException = () => {
 
 /**
  * @param {string} file
+ * @param {string} issuer
  * @throws {Error}
  */
 const resolveException = (file, issuer) => {
@@ -109,23 +110,12 @@ const postprocessException = (error, info) => {
   PugPluginError(message, error);
 };
 
-/**
- * @param {Error} error
- * @param {string} entryName
- * @throws {Error}
- */
-const addEntryException = (error, entryName) => {
-  const message = `\n${ansis.black.bgRedBright(`[${plugin}]`)} Conflict by add entry-point with name '${entryName}'`;
-
-  PugPluginError(message, error);
-};
-
 module.exports = {
   PugPluginError,
+  PugPluginException,
   optionModulesException,
   resolveException,
   publicPathException,
   executeTemplateFunctionException,
   postprocessException,
-  addEntryException,
 };

@@ -4,6 +4,9 @@ const rimraf = require('rimraf');
 import { shallowEqual } from '../src/utils';
 import { copyRecursiveSync } from './utils/file';
 import { compareFileListAndContent, exceptionContain } from './utils/helpers';
+import { PugPluginError, PugPluginException } from '../src/exceptions';
+
+const AssetEntry = require('../src/AssetEntry');
 
 // The base path of test directory.
 const basePath = path.resolve(__dirname, './');
@@ -30,7 +33,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  jest.setTimeout(2000);
+  jest.setTimeout(10000);
 });
 
 describe('utils tests', () => {
@@ -53,6 +56,22 @@ describe('utils tests', () => {
   });
 });
 
+describe('AssetEntry tests', () => {
+  test('isEntryModule', (done) => {
+    const received = AssetEntry.isEntryModule({});
+    expect(received).toBeFalsy();
+    done();
+  });
+
+  test('resetAdditionalEntries', (done) => {
+    AssetEntry.addedToCompilationEntryNames = ['home', 'about'];
+    AssetEntry.resetAdditionalEntries();
+    const received = AssetEntry.addedToCompilationEntryNames;
+    expect(received).toEqual([]);
+    done();
+  });
+});
+
 describe('options', () => {
   test('options.enabled = false', (done) => {
     compareFileListAndContent(PATHS, 'options-enabled', done);
@@ -68,6 +87,10 @@ describe('options', () => {
 
   test('options.filename as function', (done) => {
     compareFileListAndContent(PATHS, 'options-filename-function', done);
+  });
+
+  test('options.filename as function for separate assets', (done) => {
+    compareFileListAndContent(PATHS, 'options-filename-separate-assets', done);
   });
 
   test('options.sourcePath and options.outputPath (default)', (done) => {
@@ -190,6 +213,10 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-images-render', done);
   });
 
+  test('require images via responsive-loader', (done) => {
+    compareFileListAndContent(PATHS, 'require-responsive-images', done);
+  });
+
   test('require assets in pug, method render', (done) => {
     compareFileListAndContent(PATHS, 'require-assets-method-render', done);
   });
@@ -251,6 +278,37 @@ describe('require in script tag', () => {
 });
 
 describe('exception tests', () => {
+  test('exception test: previous error', (done) => {
+    const containString = 'previous error';
+
+    try {
+      PugPluginError('previous error');
+    } catch (error) {
+      try {
+        PugPluginError('last error', error);
+      } catch (error) {
+        expect(error.toString()).toContain(containString);
+        done();
+      }
+    }
+  });
+
+  test('exception test: nested exceptions', (done) => {
+    const containString = 'last error';
+
+    const originalError = new PugPluginException('original error');
+    try {
+      PugPluginError('previous error', originalError);
+    } catch (error) {
+      try {
+        PugPluginError('last error', error);
+      } catch (error) {
+        expect(error.toString()).toContain(containString);
+        done();
+      }
+    }
+  });
+
   test('exception: publicPath undefined', (done) => {
     const containString = `This plugin yet not support 'auto' or undefined`;
     exceptionContain(PATHS, 'exception-public-path-undefined', containString, done);

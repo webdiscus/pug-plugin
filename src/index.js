@@ -7,17 +7,20 @@ const { merge } = require('webpack-merge');
 const JavascriptParser = require('webpack/lib/javascript/JavascriptParser');
 const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator');
 
-const { plugin, isWin } = require('./config');
+const { plugin } = require('./config');
+const { isFunction, parseRequest, outToConsole } = require('./utils');
+const { UrlDependencyResolver, ResourceResolver } = require('./resolvers');
 const { extractHtml, extractCss } = require('./modules');
-const { isFunction, pathToPosix, parseRequest, outToConsole } = require('./utils');
-const { urlDependencyResolver, resourceResolver } = require('./resolver');
+
+const AssetEntry = require('./AssetEntry');
+const AssetModule = require('./AssetModule');
+const AssetScript = require('./AssetScript');
 
 const {
   optionModulesException,
   publicPathException,
   executeTemplateFunctionException,
   postprocessException,
-  addEntryException,
 } = require('./exceptions');
 
 /** @typedef {import('webpack').Compiler} Compiler */
@@ -131,354 +134,6 @@ const AssetTrash = {
 };
 
 /**
- * AssetEntry singleton.
- */
-const AssetEntry = {
-  /** @type {AssetEntryOptions[]} */
-  entries: [],
-
-  /** @type {string[]} */
-  addedToCompilationEntryNames: [],
-
-  compilation: null,
-  EntryPlugin: null,
-
-  /**
-   * @param {Compilation} compilation The instance of the webpack compilation.
-   */
-  init(compilation) {
-    this.compilation = compilation;
-    this.EntryPlugin = compilation.compiler.webpack.EntryPlugin;
-    this.resetAdditionalEntries();
-  },
-
-  /**
-   * @param {{}} entry The webpack entry object.
-   * @param {AssetEntryOptions} assetEntryOptions
-   * @param {string} webpackOutputPath
-   */
-  add(entry, assetEntryOptions, webpackOutputPath) {
-    const { outputPath, filenameTemplate } = assetEntryOptions;
-    const relativeOutputPath = path.isAbsolute(outputPath) ? path.relative(webpackOutputPath, outputPath) : outputPath;
-
-    entry.filename = (pathData, assetInfo) => {
-      if (!assetEntryOptions.filename) {
-        Object.defineProperty(assetEntryOptions, 'filename', {
-          set(filename) {
-            // replace the setter with value of resolved filename
-            delete this.filename;
-            this.filename = filename;
-            this.file = path.join(outputPath, filename);
-          },
-        });
-      }
-
-      let filename = isFunction(filenameTemplate) ? filenameTemplate(pathData, assetInfo) : filenameTemplate;
-      if (relativeOutputPath) {
-        filename = path.posix.join(relativeOutputPath, filename);
-      }
-
-      return filename;
-    };
-
-    this.entries.push(assetEntryOptions);
-  },
-
-  /**
-   * Add a resource from pug, e.g. script, to webpack compilation.
-   *
-   * @param {string} name
-   * @param {string} importFile
-   * @param {string} filenameTemplate
-   * @param {string} outputPath
-   * @param {string} context
-   * @param {string} issuer
-   * @return {boolean}
-   */
-  addToCompilation({ name, importFile, filenameTemplate, outputPath, context, issuer }) {
-    // ignore duplicate entries with same name
-    if (name === false) return false;
-
-    const entry = {
-      name,
-      runtime: undefined,
-      layer: undefined,
-      dependOn: undefined,
-      baseUri: undefined,
-      publicPath: undefined,
-      chunkLoading: undefined,
-      asyncChunks: undefined,
-      wasmLoading: undefined,
-      library: undefined,
-    };
-
-    /** @type {AssetEntryOptions} */
-    const assetEntryOptions = {
-      name,
-      filenameTemplate,
-      filename: undefined,
-      file: undefined,
-      importFile,
-      sourcePath: context,
-      outputPath,
-      postprocess: undefined,
-      extract: undefined,
-      verbose: false,
-    };
-
-    this.add(entry, assetEntryOptions, outputPath);
-
-    // adds the entry of the script from pug to the compilation
-    // see reference: node_modules/webpack/lib/EntryPlugin.js
-    const entryDependency = this.EntryPlugin.createDependency(importFile, { name });
-    this.compilation.addEntry(context, entryDependency, entry, (err) => {
-      if (err) addEntryException(err, name);
-    });
-
-    this.addedToCompilationEntryNames.push(name);
-
-    return true;
-  },
-
-  /**
-   * @param {string} name The entry name.
-   * @returns {AssetEntryOptions}
-   */
-  findByName(name) {
-    return this.entries.find((entry) => entry.name === name);
-  },
-
-  /**
-   * @param {Module} module The chunk module.
-   * @returns {boolean}
-   */
-  isEntryModule(module) {
-    if (!module.resource) return false;
-
-    const { resource } = parseRequest(module.resource);
-
-    return this.entries.find((entry) => entry.importFile === resource) !== undefined;
-  },
-
-  /**
-   * Reset entries added not via webpack entry.
-   * This is important for webpack watch and serve.
-   */
-  resetAdditionalEntries() {
-    for (const entryName of this.addedToCompilationEntryNames) {
-      const index = this.entries.findIndex((entry) => entry.name === entryName);
-      this.entries.splice(index, 1);
-    }
-    this.addedToCompilationEntryNames = [];
-  },
-
-  clear() {
-    this.entries = [];
-    this.addedToCompilationEntryNames = [];
-  },
-};
-
-/**
- * AssetScript singleton.
- */
-const AssetScript = {
-  files: [],
-  index: 1,
-
-  /**
-   * Replace all required source filenames with generating asset filenames.
-   * Note: this method must be called in the afterProcessAssets compilation hook.
-   *
-   * @param {Compilation} compilation The instance of the webpack compilation.
-   * @param {string} outputPublicPath The output public path.
-   */
-  replaceSourceFilesInCompilation(compilation, outputPublicPath) {
-    const RawSource = compilation.compiler.webpack.sources.RawSource;
-
-    // in the content, replace the source script file with the output filename
-    for (let asset of this.files) {
-      const issuerFile = asset.issuer.filename;
-      let { request: sourceFile, chunkFiles } = asset;
-
-      if (!compilation.assets.hasOwnProperty(issuerFile)) {
-        // let's show an original error
-        continue;
-      }
-
-      let chunkScripts = '';
-      let newContent;
-      const content = compilation.assets[issuerFile].source();
-      const chunk = compilation.namedChunks.get(asset.name);
-
-      chunkFiles = chunk.files;
-      asset.chunkFiles = chunkFiles;
-
-      // replace source filename with asset filename
-      if (chunkFiles.size === 1) {
-        const assetFile = path.posix.join(outputPublicPath, chunkFiles.values().next().value);
-        newContent = content.replace(sourceFile, assetFile);
-      } else {
-        // generate additional scripts of chunks
-        for (let file of chunkFiles) {
-          const assetsInfo = compilation.assetsInfo.get(file);
-          if (assetsInfo.hotModuleReplacement === true) continue;
-
-          const scriptFile = path.posix.join(outputPublicPath, file);
-          chunkScripts += `<script src="${scriptFile}"></script>`;
-        }
-
-        // inject generated chunks <script> and replace source file with output filename
-        if (chunkScripts) {
-          const srcPos = content.indexOf(sourceFile);
-          let tagStartPos = srcPos;
-          let tagEndPos = srcPos + sourceFile.length;
-          while (tagStartPos >= 0 && content.charAt(--tagStartPos) !== '<') {}
-          tagEndPos = content.indexOf('</script>', tagEndPos) + 9;
-          newContent = content.slice(0, tagStartPos) + chunkScripts + content.slice(tagEndPos);
-        }
-      }
-
-      compilation.assets[issuerFile] = new RawSource(newContent);
-    }
-  },
-
-  /**
-   * @param {string} request The source file of asset.
-   * @param  {string} issuer The issuer of the asset.
-   * @return {string | false} return false if the file was already processed else return unique assetFile
-   */
-  getUniqueName(request, issuer) {
-    let { name } = path.parse(request);
-
-    const entry = AssetEntry.findByName(name);
-    let uniqueName = name;
-    let result = name;
-
-    // the entrypoint name must be unique, if already exists then add index: `main` => `main.1`, etc
-    if (entry) {
-      if (entry.importFile === request) {
-        result = false;
-      } else {
-        uniqueName = name + '.' + this.index++;
-        result = uniqueName;
-      }
-    }
-    this.add(uniqueName, request, issuer);
-
-    return result;
-  },
-
-  /**
-   * @param {string} name The unique name of entry point.
-   * @param {string} request The required resource file.
-   * @param {string} issuer The source file of issuer of the required file.
-   */
-  add(name, request, issuer) {
-    let cachedFile = this.files.find((item) => item.request === request && item.issuer.request === issuer);
-    if (cachedFile) {
-      // update the name for the script
-      // after rebuild by hmr the same request can be generated with other asset name
-      cachedFile.name = name;
-      cachedFile.chunkFiles = new Set();
-      return;
-    }
-
-    this.files.push({
-      name,
-      request,
-      chunkFiles: new Set(),
-      issuer: {
-        filename: undefined,
-        request: issuer,
-      },
-    });
-  },
-
-  /**
-   *
-   * @param {string} issuer The source file of issuer of the required file.
-   * @param {string} filename The asset filename of issuer.
-   */
-  setIssuerFilename(issuer, filename) {
-    for (let item of this.files) {
-      if (item.issuer.request === issuer) {
-        item.issuer.filename = filename;
-      }
-    }
-  },
-
-  has(request) {
-    return this.files.find((item) => item.request === request);
-  },
-
-  getResource(request) {
-    const { resource, query } = parseRequest(request);
-
-    return query === 'isScript' ? resource : null;
-  },
-
-  /**
-   * Reset cache before new compilation by webpack watch or serve.
-   */
-  reset() {
-    // don't reset files because this cache is used by webpack watch or serve
-    //this.files = [];
-    this.index = 1;
-  },
-
-  /**
-   * Clear caches before start of this plugin.
-   */
-  clear() {
-    this.files = [];
-    this.index = 1;
-  },
-};
-
-/**
- * AssetModule singleton.
- */
-const AssetModule = {
-  files: [],
-  index: {},
-
-  /**
-   * @param {string} sourceFile
-   * @param {string} assetFile
-   * @return {string|boolean} return false if the file was already processed else return unique assetFile
-   */
-  getUniqueFilename(sourceFile, assetFile) {
-    const sameAssets = this.files.filter((item) => item.filename === assetFile) || [];
-    let uniqueFilename = assetFile;
-
-    if (sameAssets.length > 0) {
-      if (sameAssets.find((item) => item.request === sourceFile)) return false;
-
-      let index = '.' + this.index[assetFile]++;
-      let pos = assetFile.lastIndexOf('.');
-
-      // paranoid filename extension check, should normally never occur
-      if (pos < 0) pos = assetFile.length;
-      uniqueFilename = assetFile.slice(0, pos) + index + assetFile.slice(pos);
-    } else {
-      // start index of same asset filename, eg: styles.1.css
-      this.index[assetFile] = 1;
-    }
-
-    this.files.push({
-      request: sourceFile,
-      filename: assetFile,
-    });
-
-    return uniqueFilename;
-  },
-
-  reset() {
-    this.files = [];
-  },
-};
-
-/**
  * Class PugPlugin.
  */
 class PugPlugin {
@@ -499,7 +154,7 @@ class PugPlugin {
     if (options.modules && !Array.isArray(options.modules)) {
       optionModulesException(options.modules);
     }
-    resourceResolver.clearCache();
+    ResourceResolver.clearCache();
   }
 
   apply(compiler) {
@@ -517,7 +172,7 @@ class PugPlugin {
     // TODO: resolveInPaths 'auto' publicPath
     if (webpackPublicPath == null || webpackPublicPath === 'auto') publicPathException();
 
-    resourceResolver.init({
+    ResourceResolver.init({
       publicPath: webpackPublicPath,
     });
 
@@ -594,7 +249,7 @@ class PugPlugin {
       const verbose = this.verbose;
       this.compilation = compilation;
 
-      urlDependencyResolver.init(normalModuleFactory.fs.fileSystem, compiler.options);
+      UrlDependencyResolver.init(normalModuleFactory.fs.fileSystem, compiler.options);
       AssetEntry.init(compilation);
       AssetTrash.reset();
       AssetScript.reset();
@@ -620,7 +275,7 @@ class PugPlugin {
 
           resolveData.request = importFile;
         } else if (resolveData.dependencyType === 'url') {
-          urlDependencyResolver.resolve(resolveData);
+          UrlDependencyResolver.resolve(resolveData);
         }
       });
 
@@ -629,7 +284,7 @@ class PugPlugin {
         const { context, rawRequest, resource } = createData;
 
         if (rawRequest !== resource) {
-          resourceResolver.addResolvedFile(context, rawRequest, resource);
+          ResourceResolver.addResolvedFile(context, rawRequest, resource);
         }
 
         if (resolveData.dependencyType === 'url') {
@@ -639,7 +294,7 @@ class PugPlugin {
           module.isDependencyTypeUrl = true;
 
           if (resolveData?.contextInfo.issuer) {
-            resourceResolver.addToModuleCache(resource, rawRequest, issuer);
+            ResourceResolver.addToModuleCache(resource, rawRequest, issuer);
           }
         }
       });
@@ -647,7 +302,9 @@ class PugPlugin {
       // build module
       compilation.hooks.buildModule.tap(plugin, (module) => {
         if (module.type === 'asset/resource') {
-          // fix css module, if used the `html` method, to be able to extract css from source code
+          // TODO: get/set filenameTemplate and outputPath for plugin module.
+
+          // fix css module, if used the `html` method to extract css from source code
           const isCss = module.loaders.find((item) => item.loader.indexOf('css-loader') > 0);
           if (isCss) {
             module.type = 'javascript/auto';
@@ -677,7 +334,7 @@ class PugPlugin {
 
         entry.filename = assetFile;
         AssetScript.setIssuerFilename(entry.importFile, assetFile);
-        resourceResolver.scripts = AssetScript;
+        ResourceResolver.scripts = AssetScript;
 
         if (verbose) this.verboseEntry(entry);
 
@@ -685,7 +342,6 @@ class PugPlugin {
           if (!module.resource) continue;
 
           const sourceFile = module.resource;
-          const context = path.dirname(sourceFile);
 
           // add needless chunks to trash
           if (AssetScript.has(sourceFile)) {
@@ -800,7 +456,7 @@ class PugPlugin {
               filenameTemplate,
             });
 
-            resourceResolver.addToChunkCache(module, path.posix.join(webpackPublicPath, assetFile));
+            ResourceResolver.addToChunkCache(module, path.posix.join(webpackPublicPath, assetFile));
             resourceIssuer = sourceFile;
           } else if (module.type === 'asset/resource') {
             // require a resource in pug or in css via url()
@@ -824,7 +480,7 @@ class PugPlugin {
                 if (result && result.hasOwnProperty(prop)) {
                   AssetTrash.toTrash(assetFile);
                   assetFile = result[prop];
-                  resourceResolver.addToChunkCache(module, assetFile);
+                  ResourceResolver.addToChunkCache(module, assetFile);
 
                   if (verbose) {
                     this.verboseExtractResource({
@@ -852,7 +508,7 @@ class PugPlugin {
                 if (realAssetFile) {
                   AssetTrash.toTrash(assetFile);
                   assetFile = realAssetFile;
-                  resourceResolver.addToChunkCache(module, assetFile);
+                  ResourceResolver.addToChunkCache(module, assetFile);
 
                   if (verbose) {
                     this.verboseExtractResource({
@@ -880,9 +536,9 @@ class PugPlugin {
             }
 
             if (module.isDependencyTypeUrl) {
-              resourceResolver.setAssetFileInModuleCache(module.resource, assetFile);
+              ResourceResolver.setAssetFileInModuleCache(module.resource, assetFile);
             } else {
-              resourceResolver.addToChunkCache(module, assetFile);
+              ResourceResolver.addToChunkCache(module, assetFile);
             }
           }
         }
@@ -958,11 +614,11 @@ class PugPlugin {
    */
   compileSource(source, sourceFile, assetFile, postprocessInfo, pluginModule) {
     let result, compiledCode;
-    resourceResolver.setIssuer(sourceFile);
+    ResourceResolver.setIssuer(sourceFile);
 
     const sourceCjs = this.toCommonJS(source);
     const contextOptions = {
-      require: resourceResolver.require,
+      require: ResourceResolver.require,
       // the `module.id` is required for `css-loader`, in module extractCss expected as source path
       module: { id: sourceFile },
     };

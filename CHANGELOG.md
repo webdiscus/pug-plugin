@@ -1,5 +1,11 @@
 # Change log
 
+## 2.1.1 (2022-04-20)
+- fix: issue of resolving the js split chunks in generated html
+- test: added new test for usage the pug plugin with the `responsive-loader`
+- refactor: code refactoring
+- docs: update readme
+
 ## 2.1.0 (2022-04-18)
 - feat: added supports the `responsive-loader`
 - feat: caching of an already processed asset when the same asset is required in different issuer files
