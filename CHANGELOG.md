@@ -1,5 +1,8 @@
 # Change log
 
+## 2.2.0 (2022-04-21)
+- feat: added the `pretty` option to format the resulting HTML
+
 ## 2.1.1 (2022-04-20)
 - fix: issue of resolving the js split chunks in generated html
 - test: added new test for usage the pug plugin with the `responsive-loader`

@@ -13,7 +13,7 @@
     {
       "files": ["*.html", "*.pug"],
       "options": {
-        "tabWidth": 4
+        "tabWidth": 2
       }
     }
   ]

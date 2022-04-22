@@ -45,7 +45,7 @@ script(src=require('./main.js'))
 ```
 The generated HTML contains hashed CSS and JS output filenames, depending on how webpack is configured.
 ```html
-<link rel="stylesheet" href="/assets/css/styles.05e4dd86.css">
+<link href="/assets/css/styles.05e4dd86.css" rel="stylesheet">
 <script src="/assets/js/main.f4b855d8.js"></script>
 ```
 
@@ -75,7 +75,7 @@ You can replace all of the above packages with just one pug plugin.
 1. [Recipes](#Recipes)
 
 ## Install and Quick start
-<a id="Install"></a>
+<a id="Install" name="Install"></a>
 
 Install the `pug-plugin`.
 ```bash
@@ -148,14 +148,14 @@ The generated HTML:
     <link rel="stylesheet" href="/assets/css/styles.f57966f4.css">
   </head>
   <body>
-    <p>Hello Pug!</p>
+    <h1>Hello Pug!</h1>
     <script src="/assets/js/main.b855d8f4.js"></script>
   </body>
 </html>
 ```
 
 ## Features
-<a id="Features"></a>
+<a id="Features" name="Features"></a>
 
 - extract HTML from `pug` files defined in `webpack entry` into separate file
 - extract CSS and JS from source files in pug using `require()` and replace the source filename with a output filename.
@@ -247,6 +247,7 @@ The generated HTML:
     ],
   };
   ```
+- supports `pretty` formatting the resulting HTML
 - the [pug-loader](https://github.com/webdiscus/pug-loader) is the part of this plugin, no need additional loaders to render `pug` files
   ```js
   const PugPlugin = require('pug-plugin');
@@ -265,14 +266,14 @@ The generated HTML:
 - supports the result object of the [responsive-loader](https://github.com/dazuaz/responsive-loader), see [usage example](https://github.com/webdiscus/pug-plugin/tree/master/test/manual/require-responsive-image)\
   to extract a single property from result use the resource query parameter `?prop=PROPERTY_NAME`
   ```pug
-  //- srcset from property `srcSet` of result of responsive-loader
+  //- srcset from property `srcSet`
   img(srcset=require('./image.jpg?prop=srcSet') alt="responsive image")
   //- image with fixed size
-  img(src=require('../img/image.jpg?size=320') alt="image 320px")
+  img(src=require('./image.jpg?size=320') alt="image 320px")
   ```
 
 ## Plugin options
-<a id="PluginOptions"></a>
+<a id="PluginOptions" name="PluginOptions"></a>
 
 The plugin options are default options for self plugin and all plugin `modules`. 
 In a defined `module` any option can be overridden.
@@ -281,9 +282,56 @@ In a defined `module` any option can be overridden.
 Type: `boolean` Default: `true`<br>
 Enable/disable the plugin.
 
+### `verbose`
+Type: `boolean` Default: `false`<br>
+Show the file information at processing of entry.
+
+### `pretty`
+Type: `boolean` Default: `false`<br>
+Pretty formatting the resulting HTML. Use this option for debugging only. For production build should be disabled.
+This option only works for pug files defined in the webpack entry.
+> ⚠️ The `pretty` option of the `pug-loader` is deprecated, therefore use this `pretty` option in `pug-plugin`.
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  plugins: [
+    new PugPlugin({
+      pretty: true, // use this to format HTML
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: PugPlugin.loader,
+        options: {
+          pretty: false, // deprecated, is always false, don't use it
+        }
+      },
+    ],
+  },
+};
+```
+
 ### `test`
 Type: `RegExp` Default: `/\.pug$/`<br>
-The search for a match of entry files.
+Use the `test` to match module options by source filename of a resource.\
+For example, save all extracted  `svg` files from `fonts/` to the separate output directory:
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  plugins: [
+    new PugPlugin({
+      modules: [
+        {
+          test: /fonts\/.+\.svg$/,
+          outputPath: path.join(__dirname, 'dist/some/other/path/'),
+        },
+      ],
+    }),
+  ],
+};
+```
 
 ### `sourcePath`
 Type: `string` Default: `webpack.options.context`<br>
@@ -346,14 +394,10 @@ The description of `@property` of the type `PluginOptions` see above, by Plugin 
  */
 ```
 
-### `verbose`
-Type: `boolean` Default: `false`<br>
-Show the file information at processing of entry.
-
 ## Usage examples
-<a id="UsageExamples"></a>
+<a id="UsageExamples" name="UsageExamples"></a>
 
-### Using source of JS, SCSS, images, fonts with `pug-plugin`
+### Using source files of JS, SCSS, images and fonts
 The simple example of resolving the asset resources via require() in pug and via url() in scss.
 
 The webpack config:
@@ -755,7 +799,7 @@ module.exports = {
 
 
 ## Recipes
-<a id="Recipes"></a>
+<a id="Recipes" name="Recipes"></a>
 
 ### HMR live reload
 

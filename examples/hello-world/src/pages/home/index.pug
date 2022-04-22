@@ -1,0 +1,23 @@
+extends ../layout
+
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+append script
+  script(src=require('./main.js'))
+
+block content
+  h1 Hello World!
+
+  main.main-content
+    #app-root
+      //- The dynamic content compiled at runtime in JavaScript.
+
+    #static-content
+      h2 Static content
+
+      p The static content rendered on server.
+      img(src=require('~Images/logo.jpeg'))
+      p.autoprefixer-example The paragraph with autoprefixer.
+      p
+        a(href='about.html') about

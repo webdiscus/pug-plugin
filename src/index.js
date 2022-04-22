@@ -4,6 +4,7 @@ const url = require('url');
 const ansis = require('ansis');
 const { merge } = require('webpack-merge');
 
+// TODO get instances from webpack
 const JavascriptParser = require('webpack/lib/javascript/JavascriptParser');
 const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator');
 
@@ -11,6 +12,7 @@ const { plugin } = require('./config');
 const { isFunction, parseRequest, outToConsole } = require('./utils');
 const { UrlDependencyResolver, ResourceResolver } = require('./resolvers');
 const { extractHtml, extractCss } = require('./modules');
+const pretty = require('./pretty');
 
 const AssetEntry = require('./AssetEntry');
 const AssetModule = require('./AssetModule');
@@ -41,6 +43,7 @@ const {
  * @property {function(string, ResourceInfo, Compilation): string | null =} postprocess The post process for extracted content from entry.
  * @property {function(): string | null =} extract
  * @property {boolean} [verbose = false] Show the information at processing entry files.
+ * @property {boolean} [pretty = false] Formatted output of generated HTML.
  */
 
 /**
@@ -87,11 +90,12 @@ const defaultOptions = {
   test: /\.(pug)$/,
   enabled: true,
   verbose: false,
+  pretty: false,
   sourcePath: null,
   outputPath: null,
   filename: '[name].html',
   postprocess: null,
-
+  // reserved
   preprocess(content) {},
 
   // each entry has its own local options that override global options
@@ -149,7 +153,8 @@ class PugPlugin {
     this.apply = this.apply.bind(this);
     this.options = merge(defaultOptions, options);
     this.enabled = this.options.enabled !== false;
-    this.verbose = this.options.verbose;
+    this.verbose = this.options.verbose === true;
+    this.pretty = this.options.pretty === true;
 
     if (options.modules && !Array.isArray(options.modules)) {
       optionModulesException(options.modules);
@@ -293,7 +298,7 @@ class PugPlugin {
           // TODO: detect correct type by usage other loaders like 'responsive-loader'
           module.isDependencyTypeUrl = true;
 
-          if (resolveData?.contextInfo.issuer) {
+          if (resolveData.contextInfo.issuer) {
             ResourceResolver.addToModuleCache(resource, rawRequest, issuer);
           }
         }
@@ -468,7 +473,8 @@ class PugPlugin {
 
             if (resourceQuery && resourceQuery.prop) {
               const prop = resourceQuery.prop;
-              const source = module?.originalSource()?.source()?.toString();
+              const originalSource = module.originalSource();
+              const source = originalSource ? originalSource.source().toString() : null;
 
               if (source) {
                 const contextObject = vm.createContext({
@@ -632,6 +638,14 @@ class PugPlugin {
     } catch (error) {
       executeTemplateFunctionException(error, sourceFile, source);
     }
+
+    // pretty format HTML
+    if (this.pretty === true && /\.(pug|jade|html)$/.test(sourceFile) && typeof result === 'string') {
+      result = pretty.format(result);
+    }
+
+    try {
+    } catch (error) {}
 
     if (pluginModule) {
       if (pluginModule.extract) {

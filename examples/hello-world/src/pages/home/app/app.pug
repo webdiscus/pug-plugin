@@ -1,0 +1,11 @@
+h2 Dynamic content
+
+p The dynamic content compiled at runtime in JavaScript.
+
+img(src=require('~Images/logo.jpeg'))
+
+- var colors = require('./colors.json')
+
+.colors
+  each color in colors
+    div(style=`background-color:${color.hex};`)= color.name

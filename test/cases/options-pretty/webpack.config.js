@@ -4,12 +4,6 @@ const PugPlugin = require('../../../');
 module.exports = {
   mode: 'production',
 
-  resolve: {
-    alias: {
-      Images: path.join(__dirname, 'src/assets/images/'),
-    },
-  },
-
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
@@ -21,8 +15,17 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      // test disable plugin
-      enabled: false,
+      // test pretty option
+      pretty: true,
+      modules: [
+        {
+          test: /\.pug$/,
+          postprocess: (content) => {
+            //console.log('\n### HTML:\n', content);
+            return content;
+          },
+        },
+      ],
     }),
   ],
 
@@ -33,6 +36,7 @@ module.exports = {
         loader: PugPlugin.loader,
         options: {
           method: 'render',
+          pretty: false, // not works, is deprecated
         },
       },
     ],

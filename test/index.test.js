@@ -33,7 +33,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  jest.setTimeout(10000);
+  jest.setTimeout(5000);
 });
 
 describe('utils tests', () => {
@@ -109,8 +109,12 @@ describe('options', () => {
     compareFileListAndContent(PATHS, 'options-modules-postprocess', done);
   });
 
-  test('options-outputpath', (done) => {
+  test('options.outputPath', (done) => {
     compareFileListAndContent(PATHS, 'options-outputpath', done);
+  });
+
+  test('options.pretty', (done) => {
+    compareFileListAndContent(PATHS, 'options-pretty', done);
   });
 });
 

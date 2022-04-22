@@ -1,0 +1,16 @@
+doctype html
+html
+  head
+    title= title
+    meta(charset='utf-8')
+
+    link(rel='icon' href=require('~Images/favicon.ico'))
+
+    block style
+      link(rel='stylesheet' href=require('~Styles/postcss-demo.scss'))
+
+    block head
+      script(src=require('../assets/js/libs.js'))
+  body
+    block content
+    block script

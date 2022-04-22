@@ -4,7 +4,7 @@ const PugPlugin = require('../../');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 
-const isProduction = false; //process.env.NODE_ENV === 'production';
+const isProduction = false;
 module.exports = {
   mode: 'production',
   devtool: isProduction ? false : 'source-map',
@@ -12,10 +12,8 @@ module.exports = {
   resolve: {
     // aliases used in the code example
     alias: {
-      App: path.join(__dirname, 'src/app/'),
       Images: path.join(__dirname, 'src/assets/images/'),
       Styles: path.join(__dirname, 'src/assets/styles/'),
-      Templates: path.join(__dirname, 'src/templates/'),
     },
   },
 
@@ -26,15 +24,9 @@ module.exports = {
   },
 
   entry: {
-    app: './src/main.js',
-
-    about: './src/assets/styles/about.css',
-    vendor: './src/assets/styles/vendor.css',
-    'post-css-demo.min': './src/assets/styles/post-css-demo.scss',
-
-    index: './src/templates/index.pug',
+    index: './src/pages/home/index.pug?' + JSON.stringify({ title: 'Homepage' }),
     aboutHtml: {
-      import: './src/templates/about.html',
+      import: './src/pages/about/index.pug?' + JSON.stringify({ title: 'About' }),
       filename: 'about.html',
     },
   },
@@ -125,6 +117,7 @@ module.exports = {
   devServer: {
     static: {
       directory: path.join(__dirname, 'public'),
+      watch: true,
     },
     port: 9000,
     https: false,
@@ -134,11 +127,14 @@ module.exports = {
     //   progress: true,
     // },
     // compress: true,
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
+    // headers: {
+    //   'Cross-Origin-Opener-Policy': 'same-origin',
+    //   'Cross-Origin-Embedder-Policy': 'require-corp',
+    // },
     // open in default browser
     // open: true,
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
 };
