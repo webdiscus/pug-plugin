@@ -1,5 +1,12 @@
 # Change log
 
+## 2.3.0 (2022-05-09)
+- feat: add supports for module type `asset/inline` the inline SVG in HTML and data-URL for binary images
+- feat: add supports for module type `asset/inline` the utf8 encoding for SVG data-URL in CSS
+- feat: add supports for module type `asset` to automatically choose between `resource` and `inline`
+- chor: new `hello world` web app example
+- test: add tests for module types `asset/inline` and `asset`
+
 ## 2.2.0 (2022-04-21)
 - feat: added the `pretty` option to format the resulting HTML
 
@@ -19,8 +26,8 @@
 - test: caching for styles required with same name
 
 ## 2.0.1 (2022-04-03)
-- fixed incorrect output directory for a module if the option `outputPath` was relative
-- update readme
+- fix: incorrect output directory for a module if the option `outputPath` was relative
+- docs: update readme
 
 ## 2.0.0 (2022-04-01)
 ### NEW feature
@@ -32,7 +39,7 @@ For example, using the `pug-plugin` now following is possible:
 html
   head
     script(src=require('./main.js'))
-  body  
+  body
 ```
 Output:
 ```html
@@ -49,18 +56,18 @@ Output:
 Added supports a function in loader option `data` for `compile` method.
 
 ## 1.5.0 (2022-03-06)
-- update pug-loader to v1.8.0 containing the resolving and watching improvements
-- update npm packages
+- feat: update pug-loader to v1.8.0 containing the resolving and watching improvements
+- chore: update npm packages
 
 ## 1.4.3 (2022-02-21)
-- fix for the webpack option inline-source-map to save css and source map in single file
-- update pug-loader to the latest version
+- fix: the webpack option inline-source-map to save css and source map in single file
+- chore: update pug-loader to the latest version
 
 ## 1.4.2 (2022-02-19)
-- update pug-loader to fix collision with local variables passed in template function for compile method
+- fix: update pug-loader to fix collision with local variables passed in template function for compile method
 
 ## 1.4.1 (2022-02-19)
-- update pug-loader to fix path error in Windows when watching dependencies 
+- fix: update pug-loader to fix path error in Windows when watching dependencies 
 
 ## 1.4.0 (2022-02-18)
 
@@ -90,78 +97,76 @@ new PugPlugin({
 For mode details see [plugin options](https://github.com/webdiscus/pug-plugin#plugin-options).
 
 ### CHANGES
-- added resolving url in CSS and export resolved resource to output path 
-- added caching of already resolved resources by enhanced resolver
-- improved html and css extraction
-- complete refactoring of all code
-- fixed issue for the option `outputPath`
-- fixed resolving issue by import styles directly from node_modules, e.g.: @import 'material-icons';
-- fixed some invisible issues
+- feat: add resolving url in CSS and export resolved resource to output path 
+- feat: add caching of already resolved resources by enhanced resolver
+- feat: improved html and css extraction
+- refactor: complete refactoring of all code
+- fix: issue for the option `outputPath`
+- fix: resolving issue by import styles directly from node_modules, e.g.: @import 'material-icons';
 
 ## 1.3.2 (2022-02-10)
-- fix issue in module extractCss by usage the data-url in css property, #3
-- update pug-loader to the latest version with fixed issues
+- fix: issue in module extractCss by usage the data-url in css property, #3
+- fix: update pug-loader to the latest version with fixed issues
 
 ## 1.3.1 (2022-02-10)
-- added test case for @font-face src
+- test: add test case for @font-face src
 
 ## 1.3.0 (2022-02-07)
-- added extraction of source map for CSS in separate file
-- fix not extracted source map for CSS in node <=14
-- replace console.log with process.stdout by output in terminal
-- update the pug-loader to new version
-- update readme: remove unsupported substitutions `[base]` `[path]` `[ext]` by the option filename 
+- feat: add extraction of source map for CSS in separate file
+- fix: no extract source map for CSS in node <=14
+- chore: replace console.log with process.stdout by output in terminal
+- chore: update the pug-loader to new version
+- docs: update readme: remove unsupported substitutions `[base]` `[path]` `[ext]` by the option filename 
 
 ## 1.2.5 (2022-01-31)
-- update the pug-loader to the latest version supported the `htmlWebpackPlugin.options` in pug template
-- added test case for require fonts in pug template
-- refactoring of tests
-- update readme
+- feat: update the pug-loader to the latest version supported the `htmlWebpackPlugin.options` in pug template
+- test: add test case for require fonts in pug template
+- refactor: tests
+- docs: update readme
 
 ## 1.2.4 (2022-01-28)
-- fix issue by output info with enabled verbose and filename as a function
-- fix issue by usage a query string in entry filename
-- fix issue when same asset file is defined webpack entry-point and required in pug
-- refactoring exceptions
-- update npm packages
-- update readme
+- fix: issue by output info with enabled verbose and filename as a function
+- fix: issue by usage a query string in entry filename
+- fix: issue when same asset file is defined webpack entry-point and required in pug
+- refactor: exceptions
+- chore: update npm packages
+- docs: update readme
 
 ## 1.2.3 (2022-01-21)
-- fix issue with path in windows
-- update npm packages
+- fix: issue with path in windows
+- chore: update npm packages
 
 ## 1.2.2 (2022-01-20)
-- fix webpack bug in windows generating wrong backslash in url
-- update the `pug-loader` package
+- fix: webpack bug in windows generating wrong backslash in url
+- chore: update the `pug-loader` package
 
 ## 1.2.1 (2022-01-14)
-- fix throw an exception if `output.publicPath` is `undefined` or `auto`
-- fix real source path of required CSS file
-- fix extract styles and images via require with method `html`
+- fix: throw an exception if `output.publicPath` is `undefined` or `auto`
+- fix: real source path of required CSS file
+- fix: extract styles and images via require with method `html`
 
 ## 1.2.0 (2022-01-11)
-- added support for `webpack serve`
-- added support for require of style source directly in pug
-- added ansi styling by console output
-- improve performance
-- code optimisation
+- feat: add support for `webpack serve`
+- feat: add support for require of style source directly in pug
+- feat: add ansi styling by console output
+- refactor: code optimisation
+- perf: improve performance
 
 ## 1.1.1 (2021-12-10)
-- update pug-loader: fixed path issues on Windows 
+- fix: update pug-loader: fixed path issues on Windows 
 
 ## 1.1.0 (2021-12-07)
-In this release was follow features tested, described and activated:
-- added option `enabled` for enable/disable the plugin
-- added option `verbose` for show the compilation information
-- added option `sourcePath` as absolute path to sources
-- added option `outputPath` as output directory for assets
-- added option `filename` as file name of output file, can be a template string or function 
-- added option `modules` for processing different types of entries separately
-- added module `extractCss` to fast extract CSS and source map from webpack entry without `mini-css-extract-plugin`
-- added tests for code coverage more than 90%
-- update readme
+- feat: add option `enabled` for enable/disable the plugin
+- feat: add option `verbose` for show the compilation information
+- feat: add option `sourcePath` as absolute path to sources
+- feat: add option `outputPath` as output directory for assets
+- feat: add option `filename` as file name of output file, can be a template string or function 
+- feat: add option `modules` for processing different types of entries separately
+- feat: add module `extractCss` to fast extract CSS and source map from webpack entry without `mini-css-extract-plugin`
+- test: add tests for code coverage more than 90%
+- docs: update readme
 
 ## 1.0.0 (2021-12-03)
 First release
-- handles pug templates from webpack entry
-- zero config
+- feat: handles pug templates from webpack entry
+- feat: zero config

@@ -26,13 +26,13 @@ const extractHtml = function (options = {}) {
     // },
 
     /**
+     * The usage example of the postprocess.
      * @param {string} content The extracted html.
      * @param {ResourceInfo} info
      * @param {Compilation} compilation
      * @return {string | null}
      */
     //postprocess(content, info, compilation) {
-    //  // todo For example, pretty format the content of html.
     //  if (this.verbose) console.log(`Extract HTML: ${info.outputFile}\n`);
     //  return content;
     //},

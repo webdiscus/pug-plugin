@@ -1,4 +1,4 @@
-The app example used single `pug-plugin`.
+The demo app `Hello World` used the `pug-plugin`.
 
 ## Install
 ```
@@ -13,9 +13,4 @@ npm run start
 ## Build
 ```
 npm run build
-```
-
-## Watch
-```
-npm run watch
 ```

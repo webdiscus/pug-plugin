@@ -1,0 +1,118 @@
+@font-face {
+  font-family: 'GlyphIcons';
+  src:
+    url('~Fonts/icons/GlyphIcons/glyphicons-halflings-regular.svg') format('svg'),
+    url('~Fonts/icons/GlyphIcons/glyphicons-halflings-regular.woff2') format('woff2');
+  font-style: normal;
+}
+
+.glyphicon{
+  &::before {
+    font-family: 'Glyphicons';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.glyphicon-ok::before {
+  content: "\e013";
+}
+
+.glyphicon-picture::before {
+  content: "\e060";
+}
+
+.glyphicon-user::before {
+  content: "\e008";
+}
+
+.icon {
+  max-width: 32px;
+  max-height: 32px;
+}
+
+.webicon {
+  width: 48px;
+  height: 48px;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+// icons with size < 4 KB as data-URL
+
+.webicon-mac-svg {
+  background-image: url('~Images/icons/webicons/webicon-mac.svg');
+}
+
+.webicon-mac-png {
+  background-image: url('~Images/icons/webicons/webicon-mac.png');
+}
+
+.webicon-apple-svg {
+  background-image: url('~Images/icons/webicons/webicon-apple.svg');
+}
+
+.webicon-apple-png {
+  background-image: url('~Images/icons/webicons/webicon-apple.png');
+}
+
+.webicon-android {
+  background-image: url('~Images/icons/webicons/webicon-android.svg');
+}
+
+.webicon-windows {
+  background-image: url('~Images/icons/webicons/webicon-windows.svg');
+}
+
+.webicon-facebook {
+  background-image: url('~Images/icons/webicons/webicon-facebook.svg');
+}
+
+.webicon-twitter {
+  background-image: url('~Images/icons/webicons/webicon-twitter.svg');
+}
+
+.webicon-dropbox {
+  background-image: url('~Images/icons/webicons/webicon-dropbox.svg');
+}
+
+.webicon-github {
+  background-image: url('~Images/icons/webicons/webicon-github.svg');
+}
+
+.webicon-html5 {
+  background-image: url('~Images/icons/webicons/webicon-html5.svg');
+}
+
+.webicon-skitch {
+  background-image: url('~Images/icons/webicons/webicon-skitch.svg');
+}
+
+// icons with size > 4 KB as file
+
+.webicon-google {
+  background-image: url('~Images/icons/webicons/webicon-google.svg');
+}
+
+.webicon-evernote {
+  background-image: url('~Images/icons/webicons/webicon-evernote.svg');
+}
+
+.webicon-yahoo {
+  background-image: url('~Images/icons/webicons/webicon-yahoo.svg');
+}
+
+.webicon-picasa {
+  background-image: url('~Images/icons/webicons/webicon-picasa.svg');
+}
+
+.webicon-reddit {
+  background-image: url('~Images/icons/webicons/webicon-reddit.svg');
+}
+
+.webicon-f500px {
+  background-image: url('~Images/icons/webicons/webicon-f500px.svg');
+}

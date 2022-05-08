@@ -3,17 +3,16 @@ const path = require('path');
 const ansis = require('ansis');
 const { plugin } = require('./config');
 
+const ansisPluginName = `\n${ansis.black.bgRedBright(`[${plugin}]`)}`;
 let lastError = null;
 
-/**
- * @param {string} message
- * @constructor
- */
-const PugPluginException = function (message) {
-  this.name = 'PugPluginException';
-  this.message = message;
-  this.toString = () => this.message;
-};
+class PugPluginException extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'PugPluginException';
+    this.message = message;
+  }
+}
 
 /**
  * @param {string} message The error description.
@@ -40,9 +39,9 @@ const PugPluginError = function (message, error = '') {
  */
 const optionModulesException = (modules) => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${plugin}]`)} The plugin option ${ansis.green(
-      'modules'
-    )} must be the array of ${ansis.green('ModuleOptions')} but given:\n` + ansis.cyanBright(JSON.stringify(modules));
+    `${ansisPluginName} The plugin option ${ansis.green('modules')} must be the array of ${ansis.green(
+      'ModuleOptions'
+    )} but given:\n` + ansis.cyanBright(JSON.stringify(modules));
 
   PugPluginError(message);
 };
@@ -52,9 +51,7 @@ const optionModulesException = (modules) => {
  */
 const publicPathException = () => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${plugin}]`)} This plugin yet not support 'auto' or undefined ${ansis.yellow(
-      'output.publicPath'
-    )}.\n` +
+    `${ansisPluginName} This plugin yet not support 'auto' or undefined ${ansis.yellow('output.publicPath')}.\n` +
     `Define a publicPath in the webpack configuration, for example: \n` +
     `${ansis.magenta("output: { publicPath: '/' }")}\n` +
     `  or as a function (will be called in compilation time)\n` +
@@ -69,9 +66,7 @@ const publicPathException = () => {
  * @throws {Error}
  */
 const resolveException = (file, issuer) => {
-  let message = `\n${ansis.black.bgRedBright(`[${plugin}]`)} Can't resolve the file ${ansis.cyan(
-    file
-  )} in ${ansis.blueBright(issuer)}`;
+  let message = `${ansisPluginName} Can't resolve the file ${ansis.cyan(file)} in ${ansis.blueBright(issuer)}`;
 
   if (path.isAbsolute(file) && !fs.existsSync(file)) {
     message += `\n${ansis.yellow('The reason:')} this file not found!`;
@@ -90,8 +85,7 @@ const resolveException = (file, issuer) => {
  */
 const executeTemplateFunctionException = (error, sourceFile, source) => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${plugin}]`)} Failed to execute template function'.\n` +
-    `The source file: '${ansis.cyan(sourceFile)}'.`;
+    `${ansisPluginName} Failed to execute template function'.\n` + `The source file: '${ansis.cyan(sourceFile)}'.`;
 
   PugPluginError(message, error);
 };
@@ -103,9 +97,8 @@ const executeTemplateFunctionException = (error, sourceFile, source) => {
  */
 const postprocessException = (error, info) => {
   const message =
-    `\n${ansis.black.bgRedBright(`[${plugin}]`)} Postprocess execution failed by the output file '${
-      info.outputFile
-    }'.\n` + `The source file '${info.sourceFile}'.`;
+    `${ansisPluginName} Postprocess execution failed by the output file '${info.outputFile}'.\n` +
+    `The source file '${info.sourceFile}'.`;
 
   PugPluginError(message, error);
 };

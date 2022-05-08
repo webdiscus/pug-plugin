@@ -1,0 +1,155 @@
+extends ~Views/layouts/layout.default.pug
+
+//- set variables used in layout
+block variables
+  - const title = 'Home'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+  script(src=require('./main.js'))
+
+block content
+  section
+    .container.flex-column.center-x
+      h1 Hello Pug World!
+      .teaser.
+        Very simple web app to demonstrate how to easy include resources in Pug,
+        using the <a href="https://github.com/webdiscus/pug-plugin/" class="link">pug-plugin</a>.
+      //- override original attribute `viewBox` for inline SVG to reduce padding top/bottom in SVG
+      img.pug-logo(src=require('~Images/pug-logo.svg?inline') viewBox='0 25 128 80')
+
+  section
+    .container
+      .flex-row.fit-max
+        img.image-size(src=require('~Images/delphin.jpeg'))
+        div Use a source file of an image in Pug:
+          pre: code.language-pug.
+            img(src=require('~Images/delphin.jpeg'))
+
+          div Generated HTML:
+          pre: code.language-html
+            :escape
+              <img src="/assets/img/delphin.f78b30f4.jpeg">
+
+  section
+    .container
+      .flex-row.fit-max
+        span.glyphicon.glyphicon-picture.iconfont-image-size
+        div Use a source file of a font or background image in SCSS:
+          pre: code.language-css.
+            @font-face {
+              font-family: 'GlyphIcons';
+              src: url('~Fonts/GlyphIcons/glyphicons-halflings-regular.woff2') format('woff2');
+            }
+            .header-bg {
+              background-image: url('~Images/header-bg.png');
+            }
+
+          div Generated CSS:
+          pre: code.language-css.
+            @font-face {
+              font-family: 'GlyphIcons';
+              src: url(/assets/fonts/glyphicons-halflings-regular.woff2) format("woff2");
+            }
+            .header-bg {
+              background-image: url(/assets/img/header-bg.30f4f78b.png);
+            }
+
+  section
+    .container
+      .flex-row.fit-max
+        img.pug-logo.image-size(src=require('~Images/icons/webpack.svg'))
+        div Supports the inline SVG in HTML.<br>Pug:
+          pre: code.language-pug.
+            img.logo(src=require('~Images/webpack.svg'))
+
+          div Generated HTML:
+          pre: code.language-html
+            :escape
+              <svg viewBox="0 0 200 200" class="logo">
+                <path d="m600 0 530.3 300v600l-530.3 300-530.3-300v-600z" fill="#fff"></path>
+                ...
+              </svg>
+
+  section
+    .container
+      -
+        const icons = [
+          'MeasureGroup.png',
+          'PaginatedReport.png',
+          'Premium.png',
+        ]
+      .flex-row.fit-max
+        div.image-size
+          each icon in icons
+            img.icon(src=require('~Images/icons/' + icon))
+        div Supports the inline images as data-URL in HTML.<br>Pug:
+          pre: code.language-pug.
+            img(src=require('~Images/icons/Premium.png'))
+
+          div Generated HTML:
+          pre: code.language-html
+            :escape
+              <img src="data:image/png;base64,iVBORw0K...ABJRU5ErkJggg==">
+
+  section
+    .container
+      .flex-row.fit-max
+        div.image-size
+          .webicon.webicon-mac-svg
+        div Supports the inline SVG as data-URL in CSS.<br>SCSS:
+          pre: code.language-css.
+            .webicon-mac-svg {
+              background-image: url('~Images/icons/webicons/webicon-mac.svg');
+            }
+
+          div Generated CSS:
+          pre: code.language-css
+            :escape
+              .webicon-mac-svg {
+                background-image: url("data:image/svg+xml,<svg>...</svg>");
+              }
+
+  section
+    .container
+      .flex-row.fit-max
+        div.image-size
+          .webicon.webicon-apple-png
+        div Supports the inline images as data-URL in CSS.<br>SCSS:
+          pre: code.language-css.
+            .webicon-apple-png {
+              background-image: url('~Images/icons/webicons/webicon-apple.png');
+            }
+
+          div Generated CSS:
+          pre: code.language-css.
+            .webicon-apple-png {
+              background-image: url(data:image/png;base64,iVBORw0K...ABJRU5ErkJggg==);
+            }
+
+  section
+    .container
+      .flex-row.center-x Icons as background image in CSS.
+      .icon-bar.flex-row.center-x.center-y.mt-m
+        //- icons with size < 4 KB as data-URL
+        .webicon.webicon-mac-svg
+        .webicon.webicon-apple-svg
+        .webicon.webicon-android
+        .webicon.webicon-windows
+        .webicon.webicon-facebook
+        .webicon.webicon-twitter
+        .webicon.webicon-dropbox
+        .webicon.webicon-github
+        .webicon.webicon-html5
+        .webicon.webicon-skitch
+        //- icons with size > 4 KB as file
+        .webicon.webicon-google
+        .webicon.webicon-evernote
+        .webicon.webicon-yahoo
+        .webicon.webicon-picasa
+        .webicon.webicon-reddit
+        .webicon.webicon-f500px

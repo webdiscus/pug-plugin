@@ -22,7 +22,6 @@ module.exports = {
     path: outputPath,
     publicPath: '/',
     filename: 'js/[name].[contenthash:8].js',
-    //filename: 'js/[name].js',
     clean: true,
   },
 
@@ -33,13 +32,20 @@ module.exports = {
   devServer: {
     static: {
       directory: outputPath,
-      watch: true,
     },
-    port: 1234,
-    devMiddleware: {
-      // allow to reload the pages by a change in any file
-      writeToDisk: true,
+    port: 8080,
+    https: false,
+    compress: true,
+
+    watchFiles: {
+      paths: ['src/**/*.*'],
+      options: {
+        usePolling: true,
+      },
     },
+
+    // open in default browser
+    open: true,
   },
 
   plugins: [
@@ -77,14 +83,9 @@ module.exports = {
       {
         test: /\.(pug)$/,
         use: [
-          // 'html-loader', // <-- it's required for the 'html' method of pug-loader
-          // {
-          //   loader: 'posthtml-loader' // expected pure HTML, therefore use the `html` method for pug loader and additional `html-loader`
-          // },
           {
             loader: PugPlugin.loader,
             options: {
-              //method: 'html' // <-- required for 'posthtml-loader', 10x slower than `render` method by serv and watch
               method: 'render', // <-- fastest render method by serv and watch
             },
           },

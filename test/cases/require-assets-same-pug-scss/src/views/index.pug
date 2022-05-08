@@ -1,0 +1,8 @@
+html
+  head
+    link(rel='stylesheet' href=require('../assets/scss/styles.scss'))
+  body
+    //- test require same asset in pug and in scss, but with different raw request. e.g.
+      - in pug with alias: `~Images/pug-logo.svg`
+      - in scss relative: `../images/pug-logo.svg`
+    img(src=require('~Images/pug-logo.svg'))

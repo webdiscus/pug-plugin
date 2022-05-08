@@ -1,0 +1,10 @@
+html
+  head
+    link(rel='stylesheet' href=require('../assets/scss/styles.scss'))
+  body
+    //- test same inline assets used in both HTML and CSS
+
+    //- src must be as `data:image/png;base64,iVBO...`
+    img.inline(src=require('~Images/icons/iphone.png'))
+    //- tag `<img>` must be replaced with inline `<svg>...</svg>`
+    img.inline(src=require('../assets/images/icons/iphone.svg'))

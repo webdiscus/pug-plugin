@@ -1,0 +1,52 @@
+// import default prismjs styles from installed npm package
+// important: omit the file extension, e.g. .scss, .css
+@use 'prismjs/themes/prism.min';
+
+// override default styles of prismjs
+pre[class*="language-"] {
+  padding: 5px 10px;
+}
+pre[class*="language-"],
+code[class*="language-"] {
+  font-size: 13px;
+  line-height: inherit;
+}
+
+// page styles
+h1 {
+  color: coral;
+}
+
+.pug-logo {
+  width: 200px;
+}
+
+.image-size {
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+  height: 100%;
+}
+
+.iconfont-image-size {
+  &::before {
+    font-size: 100px;
+  }
+}
+
+.icon-bar {
+  min-height: 64px;
+  > * {
+    &:hover {
+      transform: scale(1.5);
+      margin: 0 10px;
+
+      & + .icon {
+        margin: 0;
+      }
+    }
+
+    transition: all 0.3s;
+    transform-origin: center bottom;
+  }
+}

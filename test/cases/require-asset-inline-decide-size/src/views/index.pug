@@ -1,0 +1,15 @@
+html
+  head
+    link(rel='icon' href=require('~Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
+    link(rel='icon' href=require('~Images/favicons/favicon-32px.png') type='image/png' sizes='32x32')
+
+    link(rel='stylesheet' href=require('../assets/scss/styles.scss'))
+  body
+    h1 Home
+    //- size < 2K, data-URL
+    img.inline(src=require('~Images/icons/iphone.png'))
+    img.inline(src=require('~Images/icons/iphone.svg'))
+
+    //- size > 2K than resource file
+    img.file(src=require('~Images/pug-logo.png'))
+    img.file(src=require('~Images/pug-logo.svg'))

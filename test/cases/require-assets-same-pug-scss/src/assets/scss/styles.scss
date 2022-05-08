@@ -1,0 +1,10 @@
+.icon-iphone {
+  background: url('../images/icons/iphone.svg');
+}
+
+// test require same asset in pug and in scss, but with different raw request. e.g.
+// - in pug with alias: `~Images/pug-logo.svg`
+// - in scss relative: `../images/pug-logo.svg`
+.logo {
+  background: url('../images/pug-logo.svg');
+}

@@ -1,0 +1,20 @@
+html
+  head
+  body
+    span.icon
+      //- native way of inserting inline svg has contras:
+        - if svg file contain `<?xml version="1.0" encoding="utf-8"?>` it will be too insert in html
+        - svg must be wrapped in a tag to define a class name for svg
+      include ~Images/icons/imac.svg
+
+    //- test merging the svg attributes with img attributes into resulting inline svg
+    img#logo.inline(src=require('~Images/icons/imac.svg?inline') style='width: 32px;' aria-hidden='true' stroke="red")
+
+    //- src must be output filename
+    img.file(src=require('~Images/icons/imac.svg'))
+    img.file(src=require('~Images/icons/imac.png'))
+
+    //- test replace all same assets with inline svg in one file
+    img.inline(src=require('~Images/icons/imac.svg?inline'))
+    //- test inline not svg image
+    img.inline(src=require('~Images/icons/imac.png?inline'))

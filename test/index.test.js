@@ -257,10 +257,32 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-css-image-render', done);
   });
 
+  test('require same asset with different raw request', (done) => {
+    compareFileListAndContent(PATHS, 'require-assets-same-pug-scss', done);
+  });
+
   // TODO: fix the issue
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
   // });
+});
+
+describe('require asset/inline', () => {
+  test('query ?inline, method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-asset-inline-query', done);
+  });
+
+  test('data-URL and inline-SVG in pug and css, method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-asset-inline-pug-css', done);
+  });
+
+  test('decide by size data-URL/inline-SVG or file, method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-asset-inline-decide-size', done);
+  });
+
+  test('data-URL and inline-SVG exclude fonts, method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-asset-inline-exclude-svg-fonts', done);
+  });
 });
 
 describe('require in script tag', () => {

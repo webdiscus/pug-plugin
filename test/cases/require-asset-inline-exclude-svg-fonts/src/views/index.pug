@@ -1,0 +1,12 @@
+html
+  head
+    link(rel='stylesheet' href=require('../assets/scss/styles.scss'))
+  body
+    //- size > 2K than resource file
+    img(src=require('~Images/delphin.jpeg'))
+    img(src=require('~Images/pug-logo.png'))
+    img(src=require('~Images/pug-logo.svg'))
+
+    //- size < 2K, data-URL for binary images and inline for SVG
+    img.inline(src=require('~Images/icons/iphone.png'))
+    img.inline(src=require('~Images/icons/iphone.svg'))

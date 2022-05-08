@@ -2,7 +2,8 @@ const path = require('path');
 const { isFunction, parseRequest } = require('./utils');
 
 /**
- * AssetEntry singleton.
+ * AssetEntry.
+ * @singleton
  */
 const AssetEntry = {
   /** @type {AssetEntryOptions[]} */

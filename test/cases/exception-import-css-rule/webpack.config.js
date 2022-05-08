@@ -2,7 +2,7 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'development',
-  devtool: 'source-map',
+  devtool: 'inline-source-map',
 
   output: {
     publicPath: '/',

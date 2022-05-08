@@ -54,25 +54,18 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'public'),
     },
-    port: 9000,
+    port: 8080,
     https: false,
-    // liveReload: true,
-    // hot: true,
-    // client: {
-    //   progress: true,
-    // },
-    // compress: true,
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
-    // open in default browser
-    // open: true,
-    open: {
-      app: {
-        name: 'Firefox',
+    compress: true,
+
+    watchFiles: {
+      paths: ['src/**/*.*'],
+      options: {
+        usePolling: true,
       },
-      target: ['/'],
     },
+
+    // open in default browser
+    open: true,
   },
 };

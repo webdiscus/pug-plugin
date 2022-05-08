@@ -1,0 +1,20 @@
+extends ~Views/layouts/layout.default.pug
+
+//- set variables used in layout
+block variables
+  - const title = 'About'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+  script(src=require('./main.js'))
+
+block content
+  section
+    .container.flex-column.center-x
+      h1 About
+      .teaser The pug-plugin makes using Pug very easy. Please see details on <a href="https://github.com/webdiscus/pug-plugin/" class="link">GitHub</a>.
+      img.about-logo(src=require('~Images/about-logo.png'))

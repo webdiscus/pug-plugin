@@ -3,7 +3,8 @@ const AssetEntry = require('./AssetEntry');
 const { parseRequest } = require('./utils');
 
 /**
- * AssetScript singleton.
+ * AssetScript.
+ * @singleton
  */
 const AssetScript = {
   files: [],
@@ -36,6 +37,10 @@ const AssetScript = {
 
       const { request: sourceFile } = asset;
       const chunkGroup = compilation.namedChunkGroups.get(asset.name);
+      if (!chunkGroup) {
+        // prevent error when in HRM mode after removing a script in pug
+        continue;
+      }
       const chunkFiles = chunkGroup.getFiles();
       const content = compilation.assets[issuerFile].source();
       let newContent = content;

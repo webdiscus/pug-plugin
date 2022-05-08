@@ -1,0 +1,21 @@
+extends ~Views/layouts/layout.default.pug
+
+//- set variables used in layout
+block variables
+  - const title = 'Contact'
+
+//- add page specifically styles
+append style
+  link(rel='stylesheet' href=require('./styles.scss'))
+
+//- add page specifically scripts
+append script
+  script(src=require('./main.js'))
+
+block content
+  section
+    .container.flex-column.center-x
+      h1 Contact
+      .teaser Ask how we can help you on <a href="https://github.com/webdiscus/pug-plugin/discussions" class="link">GitHub</a>.
+      //-img.pug-logo(src=require('~Images/pug-logo.svg') viewBox='0 25 128 80')
+      img.contact-logo(src=require('~Images/contact-logo.png'))

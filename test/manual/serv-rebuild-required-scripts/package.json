@@ -9,8 +9,8 @@
     "watch": "webpack --mode=production --watch"
   },
   "devDependencies": {
-    "@webdiscus/pug-loader": "^2.0.0",
     "css-loader": "^6.7.1",
+    "pug-plugin": "^2.3.0",
     "sass": "^1.50.0",
     "sass-loader": "^12.6.0",
     "webpack": "^5.72.0",
