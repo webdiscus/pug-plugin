@@ -1,5 +1,8 @@
 # Change log
 
+## 2.3.1 (2022-05-11)
+- fix: support resolving npm modules in pug template
+
 ## 2.3.0 (2022-05-09)
 - feat: add supports for module type `asset/inline` the inline SVG in HTML and data-URL for binary images
 - feat: add supports for module type `asset/inline` the utf8 encoding for SVG data-URL in CSS

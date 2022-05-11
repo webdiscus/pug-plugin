@@ -212,7 +212,7 @@ The generated HTML:
 - utf8 encoding in data-URL for SVG in CSS using module type `asset/inline`
   ```scss
   .svg-icon {
-    background:url('./icons/iphone.svg') // CSS: url("data:image/svg+xml;utf8,<svg>...</svg>")
+    background:url('./icons/iphone.svg') // CSS: url("data:image/svg+xml,<svg>...</svg>")
   }
   ```
 - base64 encoding in data-URL for binary images in HTML and CSS using module type `asset/inline`

@@ -35,7 +35,7 @@ module.exports = (env, argv) => {
 
     plugins: [
       new PugPlugin({
-        //verbose: true,
+        verbose: true,
         modules: [
           PugPlugin.extractCss({
             // output filename of styles
@@ -52,7 +52,7 @@ module.exports = (env, argv) => {
           loader: PugPlugin.loader,
           options: {
             method: 'render',
-            // enable embedded `:escape` filter escapes HTML tags in pug
+            // enable embedded `:escape` filter to escape HTML tags in pug
             embedFilters: {
               escape: true,
             },
@@ -91,7 +91,6 @@ module.exports = (env, argv) => {
         // inline images: png or svg icons with size < 4 KB
         {
           test: /\.(png|svg)$/i,
-          //resourceQuery: { not: [/inline/] },
           type: 'asset',
           include: /assets\/images/,
           exclude: /favicon/, // don't inline favicon
