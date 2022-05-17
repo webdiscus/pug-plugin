@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://./src/views/pages/about/styles.scss"],"names":[],"mappings":"AAAA,GACE,UAAA,CAGF,YACE,YAAA","sourcesContent":["h1 {\n  color: #000;\n}\n\n.about-logo {\n  height: 125px;\n}\n"],"sourceRoot":""}

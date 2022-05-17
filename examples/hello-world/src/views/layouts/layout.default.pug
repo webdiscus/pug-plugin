@@ -1,3 +1,6 @@
+//- Local variables
+- const fullYear = (new Date).getFullYear();
+
 //- External variables
 block variables
 
@@ -7,6 +10,7 @@ html(lang='en' dir='ltr')
     //- Meta
     meta(charset='utf-8')
     meta(name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1')
+    meta(property='description' content='Hello world')
 
     //- Favicons
     link(rel='icon' href=require('~Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
@@ -18,7 +22,7 @@ html(lang='en' dir='ltr')
     //- Page styles
     block style
       //- common used styles
-      link(rel='stylesheet' href=require('~Styles/main.scss'))
+      link(rel='stylesheet' href=require('~Styles/base/main.scss'))
 
     //- Additional head block, e.g. for preload scripts in head
     block head
@@ -46,14 +50,9 @@ html(lang='en' dir='ltr')
 
     //- Main footer
     .footer-container
-      - const fullYear = (new Date).getFullYear();
-      div
-        span.mr-s Copyleft
-        span.mr-s.copyleft
-        span #{fullYear}
-        //-span |
-        | &nbsp;
-        a(href="https://github.com/webdiscus/pug-plugin") Pug Plugin
+      div.
+        Copyleft #[span.copyleft] #{fullYear} #[a(href="https://github.com/webdiscus") @webdiscus].
+        Powered by #[a(href="https://github.com/webdiscus/pug-plugin") Pug Plugin].
 
     //- Page scripts
     block script

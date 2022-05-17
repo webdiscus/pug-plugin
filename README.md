@@ -10,7 +10,7 @@
         Pug Plugin
         </a>
     </h1>
-  <div>Webpack plugin to extract HTML, CSS and JS from Pug templates into separate files</div>
+  <div>Webpack plugin to compile Pug to HTML and extract CSS, JS hashed files from theirs sources required in Pug</div>
 </div>
 
 ---
@@ -70,8 +70,8 @@ You can replace all of the above packages with just one pug plugin.
 > ⚠️ **HIGHLY NOT RECOMMENDED** to use the `pug-plugin` together with `html-webpack-plugin` and `mini-css-extract-plugin`.
 > 
 > The `pug-plugin` is designed to replace these plugins. The `pug-plugin` does the same thing, but much easy, more efficiently and faster.
-> 
-> Please see [usage examples](#usage-examples) and the demo app [Hello World](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
+
+💡 Please see the GitHub Page [Hello World](https://webdiscus.github.io/pug-plugin/hello-world/) and the [sources](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world) of these example.
 
 ## Contents
 

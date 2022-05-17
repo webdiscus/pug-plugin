@@ -11,6 +11,12 @@ npm run start
 ```
 
 ## Build
-```
-npm run build
-```
+Build resources for GitHub Page: https://webdiscus.github.io/pug-plugin/hello-world/
+
+1. Generate resources:
+    ```
+    npm run build
+    ```
+2. Copy generated files from `/examples/hello-world/dist/` to `/docs/hello-world/`.
+
+3. Commit and push to `master`.

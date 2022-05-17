@@ -1,5 +1,9 @@
 # Change log
 
+## 2.4.0 (2022-05-17)
+- feat: add supports for pug filters `:code` and `:highlight`
+- chore: update pug-loader
+
 ## 2.3.1 (2022-05-11)
 - fix: support resolving npm modules in pug template
 
@@ -34,7 +38,7 @@
 
 ## 2.0.0 (2022-04-01)
 ### NEW feature
-Added supports the require() of the javascript source files directly in pug. \
+Added supports the require() of the javascript source files directly in pug.\
 It is no longer necessary to define a js file in webpack entry-point.
 
 For example, using the `pug-plugin` now following is possible:
