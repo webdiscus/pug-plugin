@@ -1,5 +1,8 @@
 # Change log
 
+## 2.4.1 (2022-05-19)
+- fix: pug error in dependency requires restart of webpack
+
 ## 2.4.0 (2022-05-17)
 - feat: add supports for pug filters `:code` and `:highlight`
 - chore: update pug-loader
