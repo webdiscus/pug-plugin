@@ -1,5 +1,8 @@
 # Change log
 
+## 2.5.0 (2022-05-22)
+- feat: add supports for pug filter `:markdown` with highlighting code blocks
+
 ## 2.4.1 (2022-05-19)
 - fix: pug error in dependency requires restart of webpack
 
@@ -40,30 +43,17 @@
 - docs: update readme
 
 ## 2.0.0 (2022-04-01)
-### NEW feature
-Added supports the require() of the javascript source files directly in pug.\
-It is no longer necessary to define a js file in webpack entry-point.
-
-For example, using the `pug-plugin` now following is possible:
-```pug
-html
-  head
-    script(src=require('./main.js'))
-  body
-```
-Output:
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <script src="/assets/js/main.1234abcd.js"></script>
-  </head>
-  <body></body>
-</html>
-```
-
-### Improving for passing data in pug
-Added supports a function in loader option `data` for `compile` method.
+- feat: added supports the require() of the javascript source files directly in pug.\
+  It is no longer necessary to define a js file in webpack entry-point.\
+  For example, using the `pug-plugin` now is possible usage of source js files in pug:
+  ```pug
+  script(src=require('./main.js'))
+  ```
+  Generated HTML:
+  ```html
+  <script src='/assets/js/main.1234abcd.js'></script>
+  ```
+- feat: add support a function in loader option `data` for `compile` method  
 
 ## 1.5.0 (2022-03-06)
 - feat: update pug-loader to v1.8.0 containing the resolving and watching improvements
@@ -80,33 +70,30 @@ Added supports a function in loader option `data` for `compile` method.
 - fix: update pug-loader to fix path error in Windows when watching dependencies 
 
 ## 1.4.0 (2022-02-18)
+- BREAKING CHANGE (low probability):
+  When using required style in pug, like `link(rel='stylesheet' href=require('./styles.css'))` then no need anymore the `type: 'asset/resource'` in the rule for styles.\
+  **UPDATE** your `webpack.config.js`: remove in the rule for styles (css, scss, sass, etc.) the `type` and the `generator` fields.\
+  Following is enough to extract CSS everywhere:
+  ```js
+  {
+    test: /\.(css|sass|scss)$/,
+    // type: 'asset/resource', <-- remove the type property
+    // generator: { 'assets/css/[name].[contenthash:8].css' } <-- remove the generator property
+    use: [ 'css-loader', 'sass-loader' ],
+  },
+  ```
+  To define a filename for extracted CSS use the option `filename` in the `extractCss` module:
+  ```js
+  new PugPlugin({
+    modules: [
+      PugPlugin.extractCss({
+        filename: 'assets/css/[name].[contenthash:8].css'
+      }),
+    ],
+  }),
+  ```
+  For mode details see [plugin options](https://github.com/webdiscus/pug-plugin#plugin-options).
 
-### BREAKING CHANGE (low probability).
-When using required style in pug, like `link(rel='stylesheet' href=require('./styles.css'))` then no need anymore the `type: 'asset/resource'` in the rule for styles.\
-**UPDATE** your `webpack.config.js`: remove in the rule for styles (css, scss, sass, etc.) the `type` and the `generator` fields.\
-Following is enough to extract CSS everywhere:
-```js
-{
-  test: /\.(css|sass|scss)$/,
-  // type: 'asset/resource', <-- remove the type property
-  // generator: { 'assets/css/[name].[contenthash:8].css' } <-- remove the generator property
-  use: [ 'css-loader', 'sass-loader' ],
-},
-```
-
-To define a filename for extracted CSS use the option `filename` in the `extractCss` module:
-```js
-new PugPlugin({
-  modules: [
-    PugPlugin.extractCss({
-      filename: 'assets/css/[name].[contenthash:8].css'
-    }),
-  ],
-}),
-```
-For mode details see [plugin options](https://github.com/webdiscus/pug-plugin#plugin-options).
-
-### CHANGES
 - feat: add resolving url in CSS and export resolved resource to output path 
 - feat: add caching of already resolved resources by enhanced resolver
 - feat: improved html and css extraction
