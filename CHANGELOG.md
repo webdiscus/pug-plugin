@@ -1,5 +1,8 @@
 # Change log
 
+## 2.5.1 (2022-05-23)
+- fix: using @import with external url
+
 ## 2.5.0 (2022-05-22)
 - feat: add supports for pug filter `:markdown` with highlighting code blocks
 

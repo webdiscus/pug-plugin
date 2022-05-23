@@ -141,36 +141,6 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-html-pug', done);
   });
 
-  test('entry: css data-url', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-data-url', done);
-  });
-
-  test('entry: css font-face src', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-font-face-src', done);
-  });
-
-  test('entry: sass resolve url', (done) => {
-    // tested for: compile, render
-    compareFileListAndContent(PATHS, 'entry-sass-resolve-url', done);
-  });
-
-  test('entry: sass resolve url with `resolve-url-loader`', (done) => {
-    // tested for: compile, render
-    compareFileListAndContent(PATHS, 'entry-sass-resolve-url-loader', done);
-  });
-
-  test('entry: pug require style used url', (done) => {
-    compareFileListAndContent(PATHS, 'entry-pug-sass-import-url', done);
-  });
-
-  test('entry: sass, pug (production)', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);
-  });
-
-  test('entry: sass, pug (development)', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
-  });
-
   test('entry: load styles from entry with same base names using generator', (done) => {
     compareFileListAndContent(PATHS, 'entry-sass-with-same-names', done);
   });
@@ -201,6 +171,43 @@ describe('integration tests', () => {
 
   test('entry: alias resolve.plugins, method compile', (done) => {
     compareFileListAndContent(PATHS, 'entry-alias-resolve.plugins-compile', done);
+  });
+});
+
+describe('extract css', () => {
+  test('entry: css data-url', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-data-url', done);
+  });
+
+  test('entry: css font-face src', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-font-face-src', done);
+  });
+
+  test('entry: sass resolve url', (done) => {
+    // tested for: compile, render
+    compareFileListAndContent(PATHS, 'entry-sass-resolve-url', done);
+  });
+
+  test('entry: sass resolve url with `resolve-url-loader`', (done) => {
+    // tested for: compile, render
+    compareFileListAndContent(PATHS, 'entry-sass-resolve-url-loader', done);
+  });
+
+  test('entry: pug require style used url', (done) => {
+    compareFileListAndContent(PATHS, 'entry-pug-sass-import-url', done);
+  });
+
+  test('entry: sass, pug (production)', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);
+  });
+
+  test('entry: sass, pug (development)', (done) => {
+    compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
+  });
+
+  test('@import url()', (done) => {
+    // tested for: compile, render
+    compareFileListAndContent(PATHS, 'extract-css-import-url', done);
   });
 });
 

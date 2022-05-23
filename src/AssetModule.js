@@ -190,21 +190,26 @@ const AssetModule = {
       const svgAttrs = parseAttributes(svgAttrsString, ['id', 'version', 'xml', 'xmlns']);
       const innerSVG = svg.slice(svgAttrsEndPos + 1, svgCloseTagPos - svgOpenTagStartPos);
 
-      // encode SVG in data URL for modern browsers
-      const dataUrl = 'data:image/svg+xml,' + svg.replace(/\s+/g, ' ').replace(/"/g, `'`).replace(/#/g, '%23');
+      // encode reserved chars in data URL for IE 9-11 (reserved)
+      //const reservedChars = /["#%{}<>]/g;
+      // const charReplacements = {
+      //   '"': "'",
+      //   '#': '%23',
+      //   '%': '%25',
+      //   '{': '%7B',
+      //   '}': '%7D',
+      //   '<': '%3C',
+      //   '>': '%3E',
+      // };
 
-      // encode SVG in data URL for IE 9-11 (reserved)
-      // const dataUrl =
-      //   'data:image/svg+xml,' +
-      //   svg
-      //     .replace(/\s+/g, ' ')
-      //     .replace(/"/g, `'`)
-      //     .replace(/%/g, '%25')
-      //     .replace(/#/g, '%23')
-      //     .replace(/{/g, '%7B')
-      //     .replace(/}/g, '%7D')
-      //     .replace(/</g, '%3C')
-      //     .replace(/>/g, '%3E');
+      // encode reserved chars in data URL for modern browsers
+      const reservedChars = /["#]/g;
+      const charReplacements = {
+        '"': "'",
+        '#': '%23',
+      };
+      const dataUrl =
+        'data:image/svg+xml,' + svg.replace(/\s+/g, ' ').replace(reservedChars, (char) => charReplacements[char]);
 
       cache = {
         svgAttrs,

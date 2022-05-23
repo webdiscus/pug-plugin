@@ -79,43 +79,73 @@ const extractCss = function (options = {}) {
      */
     extract(sourceMaps, assetFile, compilation) {
       const { compiler } = compilation;
-      const webpackOptions = compiler.options;
-      const isInlineSourceMap = webpackOptions.devtool && webpackOptions.devtool.startsWith('inline-');
-      const RawSource = compiler.webpack.sources.RawSource;
-      const [item] = sourceMaps;
-      const [sourceFile, cssCode, media, cssMapping, supports, layer] = item;
-      let content = cssCode,
-        mapFile;
+      const { RawSource, ConcatSource } = compiler.webpack.sources;
+      const { devtool } = compiler.options;
+      const isInlineSourceMap = devtool && devtool.startsWith('inline-');
+      const concatMapping = new ConcatSource();
 
-      if (cssMapping) {
+      let contentCSS = '';
+      let contentMapping = '';
+      let mapFile;
+      let isMapping = false;
+      let file = '';
+
+      for (const item of sourceMaps) {
+        if (!Array.isArray(item)) continue;
+
+        const [sourceFile, content, media, sourceMap, supports, layer] = item;
+
+        if (contentCSS) contentCSS += '\n';
+
+        // the case in scss: @import url('./style.css');
+        // `sourceFile` is null and `content` contains the output CSS filename
+        if (sourceFile == null && content.endsWith('.css')) {
+          contentCSS += `@import url(${content});`;
+          continue;
+        }
+
+        contentCSS += content;
+
+        if (sourceMap) {
+          if (isInlineSourceMap) {
+            const sourceURLs = sourceMap.sources
+              .map((source) => '/*# sourceURL=' + (sourceMap.sourceRoot || '') + source + ' */')
+              .join('\n');
+            const base64 = Buffer.from(JSON.stringify(sourceMap)).toString('base64');
+            contentMapping +=
+              '\n' + sourceURLs + '\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64 + ' */';
+          } else {
+            concatMapping.add(new RawSource(JSON.stringify(sourceMap)));
+          }
+          isMapping = true;
+        }
+
+        if (!file && sourceFile) file = sourceFile;
+      }
+
+      if (isMapping) {
         if (isInlineSourceMap) {
-          const sourceURLs = cssMapping.sources
-            .map((source) => '/*# sourceURL=' + (cssMapping.sourceRoot || '') + source + ' */')
-            .join('\n');
-          const base64 = Buffer.from(JSON.stringify(cssMapping)).toString('base64');
-          const sourceMapping = '\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64 + ' */';
-          content += '\n' + sourceURLs + sourceMapping;
+          contentCSS += contentMapping;
         } else {
           mapFile = assetFile + '.map';
-          const sourceMapping = new RawSource(JSON.stringify(cssMapping));
-          content += `\n/*# sourceMappingURL=${path.basename(mapFile)} */`;
-          compilation.emitAsset(mapFile, sourceMapping);
+          contentCSS += `\n/*# sourceMappingURL=${path.basename(mapFile)} */`;
+          compilation.emitAsset(mapFile, concatMapping);
         }
       }
 
       if (this.verbose) {
         let verbose =
-          ansis.black.bgYellow(`[${plugin}]`) +
-          ansis.black.bgGreen(` Extract CSS `) +
+          ansis.black.bgGreen(`[${plugin}]`) +
+          ansis.black.bgWhite(` Extract CSS `) +
           ' in ' +
-          ansis.cyan(sourceFile) +
+          ansis.cyan(file) +
           `\n` +
           ` - ${ansis.magenta(assetFile)}\n`;
         if (mapFile) verbose += ` - ${ansis.magenta(mapFile)}\n`;
         outToConsole(verbose);
       }
 
-      return content;
+      return contentCSS;
     },
 
     /**

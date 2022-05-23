@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+$color: darkred;
+
+h1 {
+  color: $color;
+}
+
+@import url('./test.css');
+
+body {
+  background-color: gray;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;800&display=swap');

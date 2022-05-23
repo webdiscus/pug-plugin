@@ -261,14 +261,15 @@ const ResourceResolver = {
    * @throws {Error}
    */
   require(rawRequest) {
-    // @import CSS rule is not supported
-    if (rawRequest.indexOf('??ruleSet') > 0) resolveException(rawRequest);
-
     // bypass the asset contained data-URL
     if (AssetModule.isDataUrl(rawRequest)) return rawRequest;
 
     const self = ResourceResolver;
     const { issuer, context } = self;
+
+    // @import CSS rule is not supported
+    if (rawRequest.indexOf('??ruleSet') > 0) resolveException(rawRequest, issuer);
+
     const request = path.resolve(context, rawRequest);
 
     // bypass the asset/inline as inline SVG
