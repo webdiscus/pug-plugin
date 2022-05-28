@@ -363,7 +363,7 @@ describe('exception tests', () => {
   });
 
   test('exception: @import CSS is not supported', (done) => {
-    const containString = `Avoid CSS imports`;
+    const containString = `Disable the 'import' option in 'css-loader'`;
     exceptionContain(PATHS, 'exception-import-css-rule', containString, done);
   });
 

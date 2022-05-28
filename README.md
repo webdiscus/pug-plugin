@@ -73,7 +73,7 @@ The single Pug plugin perform the most commonly used functions of the following 
 
 You can replace all of the above packages with just one Pug plugin.
 
-> ⚠️ **NOT RECOMMENDED** to use the `pug-plugin` together with `html-webpack-plugin` and `mini-css-extract-plugin`.
+> ⚠️ **Not recommended** to use the `pug-plugin` together with `html-webpack-plugin` and `mini-css-extract-plugin`.
 > 
 > The `pug-plugin` is designed to replace these plugins. The `pug-plugin` does the same thing, but much easy, more efficiently and faster.
 
@@ -204,7 +204,7 @@ Generated HTML:
 </html>
 ```
 
-> ⚠️ **ATTENTION**
+> ⚠️ **Attention**
 > 
 > - Don't define styles and JS files in entry. You can use `require()` for source files of JS and SCSS in Pug.
 > - Don't import styles in JS. Use `require()` for style files in Pug.
@@ -617,10 +617,29 @@ module.exports = {
 > 
 > ⚠️ When using `PugPlugin.extractCss()` don't use the `style-loader`. 
 
-> ⚠️ **Limitation for CSS**\
-> The `@import` CSS rule is not supported. 
-> This is a [BAD practice](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/page-speed-rules-and-recommendations?hl=en#avoid_css_imports), avoid CSS imports.
-> Use any CSS preprocessor like the Sass to create a style bundle using the preprocessor import.
+> ⚠️ **Limitation for CSS only**\
+> The handling of `@import` at-rules in CSS files is not supported.
+> If in a CSS file used `@import`, like following:
+> ```css
+> @import 'assets/css/style.css;
+> ```
+> To leave `@import` rule as is, disable at-rules handling in `css-loader`:
+> ```js
+> {
+>   test: /\.(css|scss)$/i,
+>   use: [
+>     {
+>       loader: 'css-loader',
+>       options: {
+>         import: false, // disable @import at-rules handling
+>       },
+>     },
+>     'sass-loader',
+>   ],
+> },
+> ```
+> **Note:** the `@import` handling in a style preprocessor like SASS, LESS, etc. works fine.
+
 ---
 
 ### Usage `pug-plugin` and `pug-loader` with `html` render method.

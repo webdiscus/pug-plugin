@@ -28,8 +28,15 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        // Load the CSS, set url = false to prevent following urls to fonts and images.
-        use: [{ loader: 'css-loader', options: { url: false, importLoaders: 1, sourceMap: true } }],
+        use: [
+          {
+            loader: 'css-loader',
+            options: {
+              // node: to allow using @import in CSS file disable the `import` option
+              import: true,
+            },
+          },
+        ],
       },
     ],
   },

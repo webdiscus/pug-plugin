@@ -58,7 +58,7 @@ const extractHtml = function (options = {}) {
  */
 const extractCss = function (options = {}) {
   this.options = {
-    test: /\.(css|sass|scss)$/,
+    test: /\.(css|scss|sass|less|styl)$/,
     enabled: true,
     verbose: false,
     sourcePath: undefined,
@@ -68,8 +68,20 @@ const extractCss = function (options = {}) {
     /**
      * Extract CSS and source map.
      *
-     * @note: The @import in CSS is not supported,
-     *  therefore css will be extracted from one module in the chunk of css asset.
+     * @note The @import handling in CSS is not supported, e.g.: @import 'assets/css/style.css'.
+     *    Disable @import at-rules handling in `css-loader`:
+     *    {
+     *      test: /\.(css|scss)$/i,
+     *      use: [
+     *        {
+     *          loader: 'css-loader'
+     *          options: {
+     *            import: false, // disable @import at-rules handling
+     *          },
+     *        },
+     *        'sass-loader',
+     *      ],
+     *    },
      *
      * @param {array} sourceMaps
      * @param {string} assetFile
@@ -86,8 +98,8 @@ const extractCss = function (options = {}) {
 
       let contentCSS = '';
       let contentMapping = '';
+      let hasMapping = false;
       let mapFile;
-      let isMapping = false;
       let file = '';
 
       for (const item of sourceMaps) {
@@ -117,13 +129,13 @@ const extractCss = function (options = {}) {
           } else {
             concatMapping.add(new RawSource(JSON.stringify(sourceMap)));
           }
-          isMapping = true;
+          hasMapping = true;
         }
 
         if (!file && sourceFile) file = sourceFile;
       }
 
-      if (isMapping) {
+      if (hasMapping) {
         if (isInlineSourceMap) {
           contentCSS += contentMapping;
         } else {

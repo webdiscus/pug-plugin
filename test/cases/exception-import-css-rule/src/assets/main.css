@@ -1,4 +1,5 @@
-@import url("./test.css");
+@import "test.css";
+@import url("test.css");
 
 .bar {
   color: red;

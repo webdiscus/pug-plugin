@@ -1,5 +1,9 @@
 # Change log
 
+## 2.5.2 (2022-05-23)
+- fix: add support style types `.less` `.styl` in extract CSS module
+- chore: update pug-loader to last version
+
 ## 2.5.1 (2022-05-23)
 - fix: using @import with external url
 

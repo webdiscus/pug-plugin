@@ -71,7 +71,24 @@ const resolveException = (file, issuer) => {
   if (path.isAbsolute(file) && !fs.existsSync(file)) {
     message += `\n${ansis.yellow('The reason:')} this file not found!`;
   } else if (/\.css$/.test(file) && file.indexOf('??ruleSet')) {
-    message += `\nThe ${ansis.yellow('@import CSS rule')} is not supported. Avoid CSS imports!`;
+    //message += `\nThe ${ansis.yellow('@import CSS rule')} is not supported. Avoid CSS imports!`;
+    message +=
+      `\nThe handling of ${ansis.yellow(
+        '@import at-rules in CSS'
+      )} is not supported. Disable the 'import' option in 'css-loader':\n` +
+      ansis.white(`
+{
+  test: /\.(css|scss)$/i,
+  use: [
+    {
+      loader: 'css-loader',
+      options: {
+        import: false, // disable @import at-rules handling
+      },
+    },
+    'sass-loader',
+  ],
+},`);
   }
 
   PugPluginError(message);
