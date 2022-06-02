@@ -1,0 +1,8 @@
+html
+  head
+    link(rel='stylesheet' href=require('./assets/styles.scss'))
+    link(rel='stylesheet' href=require('./assets/markdown.scss'))
+    script(src=require('./assets/main.js'))
+  body
+    .content: h1 Preview README.md
+    .markdown-body: include:markdown ../../../README.md

@@ -235,7 +235,7 @@ const PugPlugin = require('pug-plugin');
 module.exports = {
   plugins: [
     new PugPlugin({
-      pretty: true, // use this to format HTML
+      pretty: true, // formatting of HTML
     }),
   ],
   module: {

@@ -1,5 +1,10 @@
 # Change log
 
+## 2.6.0 (2022-06-02)
+- feat: add `watchFiles` loader option to watch for file changes in resolved dependencies
+- fix: in `:markdown` filter enable HTML tags in markdown source
+- chore: add example - preview README.md
+
 ## 2.5.2 (2022-05-23)
 - fix: add support style types `.less` `.styl` in extract CSS module
 - chore: update pug-loader to last version
