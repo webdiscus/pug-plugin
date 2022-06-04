@@ -48,14 +48,13 @@ module.exports = {
         use: {
           loader: 'responsive-loader',
           options: {
-            adapter: require('responsive-loader/sharp'),
             // image output filename
             // note: github generate different hash as local test
             //name: 'assets/img/[name].[hash:8]-[width]w.[ext]',
             name: 'assets/img/[name]-[width]w.[ext]',
             sizes: [120, 200, 320],
             format: 'webp',
-            placeholder: true,
+            //placeholder: true, // NOTE: v3.0.2 has bug, this option must be false
           },
         },
       },

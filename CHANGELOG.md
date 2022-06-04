@@ -1,5 +1,9 @@
 # Change log
 
+## 2.7.0 (2022-06-04)
+- feat: add support the resolving an alias as full path to a file in `include`
+- chore: update modules
+
 ## 2.6.0 (2022-06-02)
 - feat: add `watchFiles` loader option to watch for file changes in resolved dependencies
 - fix: in `:markdown` filter enable HTML tags in markdown source
