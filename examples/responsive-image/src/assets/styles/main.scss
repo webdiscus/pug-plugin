@@ -57,11 +57,31 @@ code a {
   }
 }
 
+// placeholder for responsive image in header
 .header-container {
   width: 100%;
   height: 300px;
   max-height: 300px;
   overflow: hidden;
+  background-size: cover;
+  // placeholder of responsive image
+  // 2 ways to define placeholder: one is in Pug via style attribute, other is in CSS
+  background-image: url('Images/astronaft.jpg?prop=placeholder&placeholder=true&placeholderSize=100');
+  background-position: 0 35%;
+
+  // responsive image
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 0 35%;
+    //background-color: transparent !important;
+    //background: green;
+    //visibility: hidden;
+  }
+}
+
+.header-container {
   color: white;
 
   .header-content {
@@ -80,11 +100,6 @@ code a {
     width: fit-content;
     font-size: 40px;
     z-index: 10;
-  }
-
-  img {
-    margin-top: -10%;
-    width: 100%;
   }
 }
 
@@ -118,12 +133,29 @@ section {
 table,
 td {
   border: 0;
+  border-spacing: 0;
+  border-collapse: collapse;
+
+  pre[class*="language-"] {
+    margin: 0;
+  }
 }
 
 table.image-preview {
+  td {
+    vertical-align: top;
+    padding: 0;
+  }
   td:first-of-type {
     text-align: right;
   }
+  td:last-of-type {
+    padding: 0 0 0 10px;
+  }
+}
+
+ul {
+  margin: 5px 0 0 0;
 }
 
 .copyleft {
@@ -154,4 +186,13 @@ table.image-preview {
     color: $footer-text-color;
     text-decoration: underline;
   }
+}
+
+// styles for demo on page
+$width: 260;
+$height: 145;
+.demo-image {
+  width: #{$width}px;
+  height: #{$height}px;
+  background-image: url('~Images/gate.jpg?size=#{$width}');
 }

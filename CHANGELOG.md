@@ -1,5 +1,8 @@
 # Change log
 
+## 2.7.3 (2022-06-10)
+- fix: add supports for webpack resolve modules
+
 ## 2.7.2 (2022-06-10)
 - fix: encode reserved chars for resource query
 - fix: parse require() value with complex interpolation

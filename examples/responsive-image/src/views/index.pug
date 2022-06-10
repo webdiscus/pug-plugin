@@ -7,20 +7,19 @@ append variables
 
 block header
   -
-    // Use the resource query parameter `prop=PROPERTY_NAME` (feature of pug-plugin)
-    // to extract a property from object.
-    // For example, to extract the `srcSet` from the result of `responsive-loader`, add the query: `?prop=srcSet`.
-    // If result of `responsive-loader` contains many rendered assets, then returns all images joined with `,`.
-    // So, to extract the `placeholder` from the `responsive-loader` result, use: `?prop=placeholder`, etc.
+    // To extract a single property from result of `responsive-loader`
+    // use the `prop=PROPERTY_NAME` query parameter (feature of pug-plugin)
 
     const getImage = (file, size) => require(`${file}?size=${size}`);
 
     const responsiveImage = {
       // use default image size
-      src: require('~Images/astronaft.jpg?size=480'),
-      srcSet: require('~Images/astronaft-org.jpg?sizes[]=480,sizes[]=640,sizes[]=800,sizes[]=1024,sizes[]=1450,sizes[]=1920&format=webp'),
+      src: require('~Images/astronaft.jpg?size=1920'),
+      srcSet: require('~Images/astronaft-org.jpg?sizes[]=480,sizes[]=640,sizes[]=800,sizes[]=1024,sizes[]=1450,sizes[]=1920&format=png'),
+      placeholder: require('~Images/astronaft.jpg?prop=placeholder&placeholder=true&placeholderSize=100'),
     }
 
+  //-.header-container(style=`background-image: url(${responsiveImage.placeholder})`)
   .header-container
     .header-content
       h1.text Responsive image
@@ -41,7 +40,7 @@ block body
     +code: :highlight()
       npm install responsive-loader sharp --save-dev
 
-    p Add to Webpack module rules following configuration:
+    p Add to Webpack module rules the following configuration:
     +code: :highlight(js)
       {
         test: /\.(gif|png|jpe?g|svg|webp)$/i,
@@ -75,6 +74,12 @@ block body
     +code: :highlight(pug)
       img(src=require('./image.jpg?size=200&format=webp'))
 
+    p Usage of the image in SCSS as the background-image:
+    +code: :highlight(scss)
+      .image {
+        background-image: url('./image.jpg?size=200');
+      }
+
     h3 Examples
 
     table.image-preview
@@ -88,6 +93,19 @@ block body
         td: img(src=require('~Images/gate.jpg?size=140&format=webp') alt="fix image")
         td: +code: :highlight(pug) img(src=require('./image.jpg?size=140&format=webp'))
 
+      tr
+        //- see the styles for this demo in `main.scss`
+        td: .demo-image
+        td
+          +code: :highlight(scss)
+            // scss
+            $width: 260;
+            $height: 145;
+            .demo-image {
+              width: #{$width}px;
+              height: #{$height}px;
+              background-image: url('./image.jpg?size=#{$width}');
+            }
 
     h3 Usage of responsive image
     p.
@@ -120,19 +138,88 @@ block body
           /assets/images/image.1c1d5de33673303eacdfa27b9b7b6e00-1450w.jpg 1450w,
           /assets/images/image.c62bf05c4abc346d0239e964ab096228-1920w.jpg 1920w">
 
-    p The result of responsive image see in header of this site.
+
+    h3 Usage of responsive image with placeholder
+
+    p.
+      When the connection speed is low, the background is blank while loading a full size image.
+      In this case, we can show a very small version of the image as #[:code background-image] before the original image is fully loaded.
+      The original image must be wrapped in a div container with an inline background image - placeholder.
+
+    div.
+      To generate a placeholder as inline data URL use the following query parameters:
+    ul
+      li #[:code prop=placeholder] extract the placeholder from a result object (feature of pug-plugin)
+      li #[:code placeholder=true] enable generating of the image as data URL
+      li #[:code placeholderSize=100] the width of the placeholder image in px, default is 40px
+      li.
+        #[:code emitFile=false] disable writing the original image file to the output directory,
+        because we only need the generated string of the data URL
+
+    p.
+      For example we have an header with responsive image. The image has the width 100% and fixed height 300px.
+
+    div Using the object #[:code responsiveImage] (see above) write in Pug:
+    +code: :highlight(pug)
+      .box: img(src=responsiveImage.src srcset=responsiveImage.srcSet alt="responsive image")
+
+    div SCSS:
+    +code: :highlight(scss)
+      $imgHeight: 300px; // fixed height of the image in header
+
+      .box {
+        width: 100%;
+        height: $imgHeight;
+        max-height: $imgHeight;
+        overflow: hidden;
+        background-size: cover; // fit image with aspect ratio in the content box
+
+        // placeholder of responsive image as inline data URL
+        background-image: url('./image.jpg?prop=placeholder&placeholder=true&placeholderSize=100');
+
+        // responsive image
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover; // fit image with aspect ratio in the content box
+        }
+      }
+    div The result of the responsive image you can see in the header of this site.
+
+    p
+    div Other way to set the placeholder is to use it in the style property as the #[:code background-image: url(...)].
+    +code: :highlight(js)
+      - const placeholder = require('./image.jpg?prop=placeholder&emitFile=false&placeholder=true&placeholderSize=35')
+      - const width = 200
+      - const height = require("./image.jpg?prop=height&emitFile=false&size=" + width)
+      .box(style=`background-image: url(${placeholder}); width:${width}px; height:${height}px; background-size:cover;`)
+
+    div #[b Note:] Don't use require() directly in the style property, the image file will not be resolved.
+
+    p
+    div The generated HTML:
+    +code: :highlight(html)
+      <div
+        class="box"
+        style="background-image: url(data:image/jpeg;base64,...); width:200px; height:110px; background-size:cover;">
+      </div>
+
+    p
+    div What you see in the browser:
+    - const placeholder = require("~Images/gate.jpg?prop=placeholder&emitFile=false&placeholder=true&placeholderSize=35")
+    - const width = 200
+    - const height = require("~Images/gate.jpg?prop=height&emitFile=false&size=" + width)
+    .box(style=`background-image: url(${placeholder}); width:${width}px; height:${height}px; background-size:cover;`)
 
     h3 Extract property
-    p.
-      To extract any single property from original #[:code responsible-loader] object use the #[:code prop=PROP_NAME] query parameter.<br>
-      Supported properties: #[:code srcSet] #[:code src] #[:code width] and #[:code height].<br>
+    div.
+      To extract any single property from the #[:code responsible-loader] processing result, use the #[:code prop=PROP_NAME] query parameter.<br>
+      Supported properties: #[:code srcSet] #[:code src] #[:code width] #[:code height] and #[:code placeholder].<br>
       For example:
 
-    +code: :highlight(pug)
-      p.
-        width: #{require("./image.jpg?prop=width&sizes[]=100,sizes[]=200")}
-        height: #{require("./image.jpg?prop=height&sizes[]=100,sizes[]=200")}
-
+    +code: :highlight(js)
       p srcSet: #{require("./image.jpg?prop=srcSet&format=webp&sizes[]=100,sizes[]=200,sizes[]=300")}
-
       p src webp: #{require("./image.jpg?prop=src&format=webp&size=200")}
+      p placeholder: #{require("./image.jpg?prop=placeholder&emitFile=false&placeholder=true&placeholderSize=50")}
+      p width of original image size: #{require("./image.jpg?prop=width&emitFile=false")}
+      p height of resised image: #{require("./image.jpg?prop=height&size=200")}
