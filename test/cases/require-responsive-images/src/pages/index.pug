@@ -1,14 +1,22 @@
 html
   head
-    link(rel='icon' href=require('~Images/favicon.png?size=92'))
+    link(rel='icon' href=require('~Images/favicon.png?size=32'))
   body
     -
       const img = {
-        src: require('~Images/delfin.jpg?size=320'),
-        srcSet: require('~Images/delfin.jpg?prop=srcSet'),
+        src: require('~Images/delfin.jpg?size=200'),
+        srcSet: require('~Images/delfin.jpg?sizes[]=100,sizes[]=200,sizes[]=300&format=png'),
       }
 
-    - const defaultSrcSet = require('~Images/delfin.jpg')
+    p.default= require('~Images/delfin.jpg')
+    img.responsible(srcset=img.srcSet src=img.src alt="responsive image")
+    img.json(src=require('~Images/delfin.jpg?{size:105, format:"webp"}'))
 
-    img(srcset=img.srcSet src=img.src alt="responsive image")
-    p= defaultSrcSet
+
+    p src webp: #{require("~Images/delfin.jpg?prop=src&format=webp&size=200")}
+    p srcSet: #{require("~Images/delfin.jpg?prop=srcSet&format=webp&sizes[]=100,sizes[]=200,sizes[]=300&placeholder=true")}
+
+    p.
+      Site
+      width: #{require("~Images/delfin.jpg?prop=width")}
+      height: #{require("~Images/delfin.jpg?prop=height&sizes[]=100,sizes[]=200")}

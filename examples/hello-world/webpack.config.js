@@ -164,3 +164,18 @@ module.exports = (env, argv) => {
     },
   };
 };
+
+var q = {
+  module: {
+    rules: [
+      {
+        test: /\.(png|svg|jpe?g|webp)$/i,
+        type: 'asset/resource', // this is very important
+        generator: {
+          // output filename of images
+          filename: 'assets/img/[name].[hash:8][ext]',
+        },
+      },
+    ],
+  },
+};

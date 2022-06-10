@@ -1,0 +1,138 @@
+extends ./layouts/default
+
+include Views/mixins/code
+
+append variables
+  - title = 'Responsive image'
+
+block header
+  -
+    // Use the resource query parameter `prop=PROPERTY_NAME` (feature of pug-plugin)
+    // to extract a property from object.
+    // For example, to extract the `srcSet` from the result of `responsive-loader`, add the query: `?prop=srcSet`.
+    // If result of `responsive-loader` contains many rendered assets, then returns all images joined with `,`.
+    // So, to extract the `placeholder` from the `responsive-loader` result, use: `?prop=placeholder`, etc.
+
+    const getImage = (file, size) => require(`${file}?size=${size}`);
+
+    const responsiveImage = {
+      // use default image size
+      src: require('~Images/astronaft.jpg?size=480'),
+      srcSet: require('~Images/astronaft-org.jpg?sizes[]=480,sizes[]=640,sizes[]=800,sizes[]=1024,sizes[]=1450,sizes[]=1920&format=webp'),
+    }
+
+  .header-container
+    .header-content
+      h1.text Responsive image
+    img(srcset=responsiveImage.srcSet src=responsiveImage.src alt="responsive image")
+
+block body
+  section
+    h1 How to use responsive images with Pug
+    p.
+      For responsive images is recommended to use the #[a(href="https://github.com/dazuaz/responsive-loader") responsible-loader].
+      This is a very fast, high-quality and powerful module.
+
+    h3 Setup
+
+    p.
+      Firstly, install and configure the #[a(href="https://github.com/webdiscus/pug-plugin#install") pug-plugin],
+      then install modules:
+    +code: :highlight()
+      npm install responsive-loader sharp --save-dev
+
+    p Add to Webpack module rules following configuration:
+    +code: :highlight(js)
+      {
+        test: /\.(gif|png|jpe?g|svg|webp)$/i,
+        type: 'asset/resource',
+        use: {
+          loader: 'responsive-loader',
+          options: {
+            // output filename of images
+            name: 'assets/img/[name].[hash:8]-[width]w.[ext]',
+          },
+        },
+      },
+
+    b Note:
+    ul
+      li the type must be defined as #[:code asset/resource]
+      li in responsible-loader version >= 3.0.4 the default adapter is #[:code sharp]
+      li define in the #[:code name] option both public path and output filename
+
+  section
+    h3 Usage of image with fixed size
+
+    p Defaults, an image without queries will stay in its original size and format.
+
+    p To resize an single image use the #[:code size] query parameter:
+
+    +code: :highlight(pug)
+      img(src=require('./image.jpg?size=200'))
+
+    p To convert an image in other format, e.g. #[:code webp], use the #[:code format] query parameter:
+    +code: :highlight(pug)
+      img(src=require('./image.jpg?size=200&format=webp'))
+
+    h3 Examples
+
+    table.image-preview
+      tr
+        td: img(src=require('~Images/gate.jpg?size=100') alt="fix image")
+        td: +code: :highlight(pug) img(src=require('./image.jpg?size=100'))
+      tr
+        td: img(src=require('~Images/gate.jpg?size=120&format=png') alt="fix image")
+        td: +code: :highlight(pug) img(src=require('./image.jpg?size=120&format=png'))
+      tr
+        td: img(src=require('~Images/gate.jpg?size=140&format=webp') alt="fix image")
+        td: +code: :highlight(pug) img(src=require('./image.jpg?size=140&format=webp'))
+
+
+    h3 Usage of responsive image
+    p.
+      For a responsive image use the #[:code sizes&lbrack;&rbrack;] query parameter.<br>
+      For the readability of your code, define the image object in a JS context, like so:
+    +code: :highlight(pug)
+      -
+        const responsiveImage = {
+          // default image
+          src: require('./image.jpg?size=640'),
+          // responsive images
+          srcSet: require('./image.jpg?sizes[]=480,sizes[]=640,sizes[]=800,sizes[]=1024,sizes[]=1450,sizes[]=1920'),
+        }
+
+    p.
+     #[b Note:] the #[:code require('./image.jpg?sizes&lbrack;&rbrack;=480,sizes&lbrack;&rbrack;=640,...')]
+     in Pug returns directly a string with a comma-separated list of images.
+
+    p Then set the #[:code srcset] and #[:code src] image attributes:
+    +code: :highlight(pug)
+      img(src=responsiveImage.src srcset=responsiveImage.srcSet alt="responsive image")
+
+    p Generated HTML of responsive image:
+    +code: :highlight(html)
+      <img src="/assets/images/image.af5d288cf6d0be8269fb6785de4dca47-640w.jpg.jpg"
+        srcset="/assets/images/image.c89a9aadd767f562f8cea83cf8d31b90-480w.jpg 480w,
+          /assets/images/image.af5d288cf6d0be8269fb6785de4dca47-640w.jpg 640w,
+          /assets/images/image.39668d49ebd9fba351e0df395b762f30-800w.jpg 800w,
+          /assets/images/image.1b62e4707c5462a41627051bc4b26d54-1024w.jpg 1024w,
+          /assets/images/image.1c1d5de33673303eacdfa27b9b7b6e00-1450w.jpg 1450w,
+          /assets/images/image.c62bf05c4abc346d0239e964ab096228-1920w.jpg 1920w">
+
+    p The result of responsive image see in header of this site.
+
+    h3 Extract property
+    p.
+      To extract any single property from original #[:code responsible-loader] object use the #[:code prop=PROP_NAME] query parameter.<br>
+      Supported properties: #[:code srcSet] #[:code src] #[:code width] and #[:code height].<br>
+      For example:
+
+    +code: :highlight(pug)
+      p.
+        width: #{require("./image.jpg?prop=width&sizes[]=100,sizes[]=200")}
+        height: #{require("./image.jpg?prop=height&sizes[]=100,sizes[]=200")}
+
+      p srcSet: #{require("./image.jpg?prop=srcSet&format=webp&sizes[]=100,sizes[]=200,sizes[]=300")}
+
+      p src webp: #{require("./image.jpg?prop=src&format=webp&size=200")}

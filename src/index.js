@@ -1,6 +1,5 @@
 const vm = require('vm');
 const path = require('path');
-const url = require('url');
 const ansis = require('ansis');
 const { merge } = require('webpack-merge');
 const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator');
@@ -15,6 +14,9 @@ const Pretty = require('./Pretty');
 const AssetEntry = require('./AssetEntry');
 const AssetModule = require('./AssetModule');
 const AssetScript = require('./AssetScript');
+
+// supports for responsive-loader
+const ResponsiveLoader = require('./extras/responsive-loader');
 
 const {
   optionModulesException,
@@ -186,6 +188,9 @@ class PugPlugin {
     AssetEntry.clear();
     AssetScript.clear();
     AssetTrash.reset();
+
+    // initialize responsible-loader module
+    ResponsiveLoader.init(compiler);
 
     // enable library type `jsonp` for compilation JS from source into HTML string via Function()
     if (webpackOptions.output.enabledLibraryTypes.indexOf('jsonp') < 0) {
@@ -487,69 +492,24 @@ class PugPlugin {
               // require a resource in pug or in css via url()
               let assetFile = buildInfo.filename;
 
-              // TODO: refactoring code for 'responsive-loader'
-              // -- BEGIN resource loader --
-              const resourceQuery = url.parse(module.rawRequest, true).query;
+              // supports for resources processed via responsive-loader
+              if (ResponsiveLoader.isUsed()) {
+                const asset = ResponsiveLoader.getAsset(module);
+                if (asset != null) {
+                  AssetTrash.toTrash(assetFile);
+                  ResourceResolver.addToChunkCache(module, asset);
 
-              if (resourceQuery && resourceQuery.prop) {
-                const prop = resourceQuery.prop;
-                const originalSource = module.originalSource();
-                const source = originalSource ? originalSource.source().toString() : null;
-
-                if (source) {
-                  const contextObject = vm.createContext({
-                    __webpack_public_path__: webpackPublicPath,
-                    module: { exports: {} },
-                  });
-                  const script = new vm.Script(source, { filename: sourceFile });
-                  const result = script.runInContext(contextObject);
-                  if (result && result.hasOwnProperty(prop)) {
-                    AssetTrash.toTrash(assetFile);
-                    assetFile = result[prop];
-                    ResourceResolver.addToChunkCache(module, assetFile);
-
-                    if (verbose) {
-                      this.verboseExtractResource({
-                        issuerFile,
-                        sourceFile,
-                        outputPath: webpackOutputPath,
-                        assetFile,
-                      });
-                    }
-                    continue;
+                  if (verbose) {
+                    this.verboseExtractResource({
+                      issuerFile,
+                      sourceFile,
+                      outputPath: webpackOutputPath,
+                      assetFile: asset,
+                    });
                   }
+                  continue;
                 }
               }
-
-              // fallback: retrieve all generated assets as coma-separated list
-              // get the real filename of the asset by usage a loader for the resource, e.g. `responsive-loader`
-              // and add the original asset file to trash to remove it from compilation
-              if (buildInfo.assetsInfo != null) {
-                const assets = Array.from(buildInfo.assetsInfo.keys());
-                if (assets.length > 0) {
-                  // dummy size for srcSec attribute with more than 2 files
-                  let defaultSize = assets.length > 1 ? ' 1' : '';
-                  const realAssetFile = assets
-                    .map((value) => path.posix.join(webpackPublicPath, value) + defaultSize)
-                    .join(',');
-                  if (realAssetFile) {
-                    AssetTrash.toTrash(assetFile);
-                    assetFile = realAssetFile;
-                    ResourceResolver.addToChunkCache(module, assetFile);
-
-                    if (verbose) {
-                      this.verboseExtractResource({
-                        issuerFile,
-                        sourceFile,
-                        outputPath: webpackOutputPath,
-                        assetFile,
-                      });
-                    }
-                    continue;
-                  }
-                }
-              }
-              // -- END resource loader --
 
               assetFile = path.posix.join(webpackPublicPath, assetFile);
 
@@ -679,9 +639,6 @@ class PugPlugin {
     if (this.pretty === true && /\.(pug|jade|html)$/.test(sourceFile) && typeof result === 'string') {
       result = Pretty.format(result);
     }
-
-    try {
-    } catch (error) {}
 
     if (pluginModule) {
       if (pluginModule.extract) {

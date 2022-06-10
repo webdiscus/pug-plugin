@@ -1,0 +1,157 @@
+@use 'prismjs/themes/prism-tomorrow.min';
+
+// spacers
+$gap-s: 5px;
+$gap-m: 10px;
+$gap-l: 20px;
+
+// main content
+$content-max-width: 960px;
+$content-padding-x: 50px;
+
+// footer
+$footer-text-color: #b1c4d0;
+$footer-bg-color: #15384f;
+
+// override default styles of prismjs
+pre[class*="language-"] {
+  padding: 5px 10px;
+}
+pre[class*="language-"],
+code[class*="language-"] {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+:not(pre) > code,
+:not(pre) > code[class*="language-"] {
+  padding: 0.1em 0.4em;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  line-height: 1.3;
+}
+
+a {
+  color: #235e84;
+  text-decoration: none;
+
+  &.link {
+    color: #1993ff;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+code a {
+  color: #aaa;
+  text-decoration: underline;
+
+  &:hover {
+    color: #95cef8;
+  }
+}
+
+.header-container {
+  width: 100%;
+  height: 300px;
+  max-height: 300px;
+  overflow: hidden;
+  color: white;
+
+  .header-content {
+    position: relative;
+    display: flex;
+    max-width: $content-max-width;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: $content-padding-x;
+    padding-right: $content-padding-x;
+  }
+
+  .text {
+    position: absolute;
+    left: $content-padding-x;
+    width: fit-content;
+    font-size: 40px;
+    z-index: 10;
+  }
+
+  img {
+    margin-top: -10%;
+    width: 100%;
+  }
+}
+
+.main-container {
+  display: flex;
+  flex: 1 0 auto;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: $content-max-width;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $content-padding-x;
+  padding-right: $content-padding-x;
+}
+
+section {
+  &:first-of-type {
+  margin-top: $gap-l;
+  }
+  .container {
+    padding: $gap-l $gap-l * 1.5;
+    background-color: #fff;
+  }
+}
+
+table,
+td {
+  border: 0;
+}
+
+table.image-preview {
+  td:first-of-type {
+    text-align: right;
+  }
+}
+
+.copyleft {
+  &:before {
+    content: '\00a9';
+  }
+  font-size: 18px;
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
+.footer-container {
+  margin-top: $gap-l;
+  padding: 30px 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  color: $footer-text-color;
+  background-color: $footer-bg-color;
+
+  > :not(:first-child) {
+    margin-left: $gap-m;
+  }
+
+  a {
+    color: $footer-text-color;
+    text-decoration: underline;
+  }
+}

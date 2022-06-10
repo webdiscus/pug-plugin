@@ -188,11 +188,6 @@ describe('extract css', () => {
     compareFileListAndContent(PATHS, 'entry-sass-resolve-url', done);
   });
 
-  test('entry: sass resolve url with `resolve-url-loader`', (done) => {
-    // tested for: compile, render
-    compareFileListAndContent(PATHS, 'entry-sass-resolve-url-loader', done);
-  });
-
   test('entry: pug require style used url', (done) => {
     compareFileListAndContent(PATHS, 'entry-pug-sass-import-url', done);
   });

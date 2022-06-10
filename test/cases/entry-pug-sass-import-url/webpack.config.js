@@ -46,10 +46,6 @@ module.exports = {
             loader: 'css-loader',
             options: {},
           },
-          // using the extractCss this loader is needles
-          // {
-          //   loader: 'resolve-url-loader',
-          // },
           {
             loader: 'sass-loader',
             options: {},

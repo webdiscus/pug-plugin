@@ -1,5 +1,15 @@
 # Change log
 
+## 2.7.2 (2022-06-10)
+- fix: encode reserved chars for resource query
+- fix: parse require() value with complex interpolation
+- refactor: optimized working with [responsible-loader](https://github.com/dazuaz/responsive-loader)
+- docs: add the documentation: How to use responsive images with Pug
+
+## 2.7.1 (2022-06-06)
+- fix: add support the prefixes `~` `@` for file alias
+- chore: code cleanup, remove unused modules
+
 ## 2.7.0 (2022-06-04)
 - feat: add support the resolving an alias as full path to a file in `include`
 - chore: update modules

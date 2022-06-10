@@ -84,7 +84,8 @@ You can replace all of the above packages with just one Pug plugin.
 2. [Features](#features)
 3. [Plugin options](#plugin-options)
 4. [Usage examples](#usage-examples)
-5. [Recipes](#recipes)
+5. [How to use HMR live reload](#recipe-hmr)
+5. [How to use responsive images with Pug](https://webdiscus.github.io/pug-plugin/responsive-image/)
 
 ## Features
 <a id="features" name="features" href="#features"></a>
@@ -107,7 +108,7 @@ You can replace all of the above packages with just one Pug plugin.
 - support the plugin modules to define a separate source / output path and filename for each file type
 - support the `post process` for modules to handle the extracted content
 - pug-plugin already contains the [pug-loader](https://github.com/webdiscus/pug-loader)
-- support the [responsive-loader](https://github.com/dazuaz/responsive-loader), see [usage example](https://github.com/webdiscus/pug-plugin/tree/master/test/manual/require-responsive-image)
+- support the [responsive-loader](https://github.com/dazuaz/responsive-loader), see [docs](https://webdiscus.github.io/pug-plugin/responsive-image/) and [usage example](https://github.com/webdiscus/pug-plugin/tree/master/examples/responsive-image)
 
 
 ## Install and Quick start
@@ -759,6 +760,7 @@ module.exports = {
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes
 
+<a id="recipe-hmr" name="recipe-hmr" href="#recipe-hmr"></a>
 ### HMR live reload
 
 To enable live reload by changes any file add in the webpack config following options:

@@ -65,7 +65,7 @@ module.exports = {
           // ACHTUNG BUG in `resolve-url-loader`:
           // when same file imported from different directories,
           // then at 2nd iteration in source file will be the filename not replaced
-          //'resolve-url-loader',
+          // Don't use `resolve-url-loader`, the `pug-plugin` resolves urls in sass much better and faster.
           'sass-loader',
         ],
       },
