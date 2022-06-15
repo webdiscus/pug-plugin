@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "Pug plugin to extract HTML, CSS and JS from Pug files defined in webpack entry. Replaces asset's source filename with hashed output filename. Replaces SVG images with inline SVG in generated HTML.",
   "keywords": [
     "pug",
@@ -66,7 +66,7 @@
     "webpack-merge": "^5.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.2",
+    "@babel/core": "^7.18.5",
     "@babel/preset-env": "^7.18.2",
     "@types/jest": "^28.1.1",
     "autoprefixer": "^10.4.7",
@@ -74,7 +74,7 @@
     "cssnano": "^5.1.11",
     "html-loader": "^3.1.0",
     "jest": "^28.1.1",
-    "material-icons": "^1.11.1",
+    "material-icons": "1.11.2",
     "mini-css-extract-plugin": "^2.6.0",
     "postcss-loader": "^7.0.0",
     "prettier": "^2.6.2",

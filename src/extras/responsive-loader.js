@@ -1,6 +1,7 @@
 const vm = require('vm');
 const path = require('path');
 const { parseQuery } = require('../utils');
+const { isWin } = require('../config');
 
 const ResponsiveLoader = {
   /**
@@ -40,11 +41,12 @@ const ResponsiveLoader = {
    * Note: in Pug is impossible use `responsive-loader` as object,
    * because a processing happen in a later stage then used result in Pug template.
    *
-   * @param {{}} module The webpack module of resource.
+   * @param {{loaders: []}} module The webpack module of resource.
    * @returns {null | string} The compiled result as string to replace required resource with this result.
    */
   getAsset(module) {
-    const loader = module.loaders.find((item) => item.loader.indexOf('/node_modules/responsive-loader/') > 0);
+    const searchString = isWin ? '\\node_modules\\responsive-loader\\' : '/node_modules/responsive-loader/';
+    const loader = module.loaders.find((item) => item.loader.indexOf(searchString) > 0);
 
     if (!loader) return null;
 
