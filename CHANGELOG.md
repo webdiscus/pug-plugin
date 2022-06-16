@@ -1,5 +1,8 @@
 # Change log
 
+## 2.7.4 (2022-06-16)
+- fix: issue by usage webpack context with webpack alias as relative path
+
 ## 2.7.3 (2022-06-15)
 - fix: issue with responsive-loader under Win10
 

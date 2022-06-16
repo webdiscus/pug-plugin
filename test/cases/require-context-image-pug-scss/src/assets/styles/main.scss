@@ -1,0 +1,7 @@
+// test for same file with same query in both Pug and SCSS
+.image {
+  height: 200px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url('~Images/logo.png?format=jpg');
+}

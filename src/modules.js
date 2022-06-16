@@ -50,7 +50,6 @@ const extractHtml = function (options = {}) {
  *
  * TODO:
  *   - add supports a chunk name template with [id]
- *   - add supports multiple entries, https://github.com/webpack-contrib/mini-css-extract-plugin/blob/master/test/cases/at-import-in-the-entry/webpack.config.js
  *   - add option `chunkFilename` https://webpack.js.org/configuration/output/#outputchunkfilename
  *
  * @param {ModuleOptions} options The custom options.

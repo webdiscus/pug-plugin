@@ -78,6 +78,8 @@ const UrlDependencyResolver = {
   },
 
   /**
+   * Resolves relative URL and URL in node_modules.
+   *
    * @param {{}} resolveData The callback parameter for the hooks beforeResolve of NormalModuleFactory.
    */
   resolve(resolveData) {
@@ -87,10 +89,7 @@ const UrlDependencyResolver = {
 
     if (!fs.existsSync(path.resolve(resolveData.context, request))) {
       const dependency = resolveData.dependencies[0];
-
-      //const parentModule = dependency._parentModule || {};
       const parentModule = this.moduleGraph.getParentModule(dependency);
-
       const buildInfo = parentModule.buildInfo || {};
       const snapshot = buildInfo.snapshot || {};
       const issuers = snapshot.fileTimestamps || snapshot.fileTshs;

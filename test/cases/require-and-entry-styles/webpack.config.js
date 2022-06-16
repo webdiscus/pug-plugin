@@ -61,10 +61,7 @@ module.exports = {
               esModule: true,
             },
           },
-          {
-            loader: 'sass-loader',
-            options: {},
-          },
+          'sass-loader',
         ],
       },
     ],

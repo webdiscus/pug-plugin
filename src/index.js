@@ -177,7 +177,7 @@ class PugPlugin {
       filename: webpackScriptFilename,
     } = webpackOptions.output;
 
-    // TODO: resolveInPaths 'auto' publicPath
+    // TODO: add supports for publicPath: 'auto' (possible will be never released)
     if (webpackPublicPath == null || webpackPublicPath === 'auto') publicPathException();
 
     ResourceResolver.init({

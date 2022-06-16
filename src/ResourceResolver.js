@@ -52,9 +52,9 @@ const ResourceResolver = {
   moduleCache: new Map(),
 
   /**
-   * @param {string} publicPath
+   * @param {string} publicPath The webpack output public path.
    */
-  init({ publicPath }) {
+  init({ context, publicPath }) {
     this.publicPath = publicPath;
     // clean cache for multiple calling of webpack.run(), e.g. by tests, webpack watch or webpack serve
     this.clearChunkCache();
@@ -110,11 +110,10 @@ const ResourceResolver = {
    * @param {string} assetFile The web path of the asset.
    */
   addToChunkCache(module, assetFile) {
-    const request = module.rawRequest;
     const resourceContext = module.resourceResolveData.context;
     const context = resourceContext.issuer ? path.dirname(resourceContext.issuer) : module.context;
+    const assetId = this.getId('', module.resource);
 
-    const assetId = this.getId(context, request);
     this.chunkCache.files.set(assetId, assetFile);
     this.chunkCache.paths.add(context);
   },
@@ -219,6 +218,7 @@ const ResourceResolver = {
     }
     assetId = this.getId('', file);
     assetFile = chunkCache.files.get(assetId);
+
     if (assetFile != null) return assetFile;
 
     // try to resolve a resource required in pug relative by context directory

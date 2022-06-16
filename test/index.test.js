@@ -219,10 +219,6 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-images-render', done);
   });
 
-  test('require images via responsive-loader', (done) => {
-    compareFileListAndContent(PATHS, 'require-responsive-images', done);
-  });
-
   test('require assets in pug, method render', (done) => {
     compareFileListAndContent(PATHS, 'require-assets-method-render', done);
   });
@@ -263,10 +259,20 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-assets-same-pug-scss', done);
   });
 
+  test('require same image in pug and scss in context', (done) => {
+    compareFileListAndContent(PATHS, 'require-context-image-pug-scss', done);
+  });
+
   // TODO: fix the issue
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
   // });
+});
+
+describe('responsive images', () => {
+  test('require images in pug', (done) => {
+    compareFileListAndContent(PATHS, 'require-responsive-images', done);
+  });
 });
 
 describe('require asset/inline', () => {
