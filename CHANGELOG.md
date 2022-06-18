@@ -1,5 +1,8 @@
 # Change log
 
+## 2.7.5 (2022-06-19)
+- fix: missing script attributes after re-compiling with HMR, #21
+
 ## 2.7.4 (2022-06-16)
 - fix: issue by usage webpack context with webpack alias as relative path
 

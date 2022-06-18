@@ -1,4 +1,4 @@
-extends ~Views/layouts/layout.default.pug
+extends ~Views/layouts/default.pug
 
 //- set variables used in layout
 block variables
@@ -6,11 +6,11 @@ block variables
 
 //- add page specifically styles
 append style
-  link(rel='stylesheet' href=require('./styles.scss'))
+  link(href=require('./styles.scss') rel='stylesheet')
 
 //- add page specifically scripts
 append script
-  script(src=require('./main.js'))
+  script(src=require('./main.js') defer='')
 
 block content
   section

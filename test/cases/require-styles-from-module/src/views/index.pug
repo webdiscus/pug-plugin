@@ -1,0 +1,8 @@
+html
+  head
+    //- test require css from node_modules
+    link(rel='stylesheet' href=require('material-icons/css/material-icons.css'))
+    //- test require css from local directory
+    link(rel='stylesheet' href=require('./styles.css'))
+  body
+    h1 Hello Pug!

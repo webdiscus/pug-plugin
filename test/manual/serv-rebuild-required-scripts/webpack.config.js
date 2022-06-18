@@ -66,6 +66,6 @@ module.exports = {
     },
 
     // open in default browser
-    open: true,
+    //open: true,
   },
 };

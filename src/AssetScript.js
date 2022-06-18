@@ -41,11 +41,13 @@ const AssetScript = {
         // prevent error when in HRM mode after removing a script in pug
         continue;
       }
-      const chunkFiles = chunkGroup.getFiles();
+      let chunkFiles = chunkGroup.getFiles();
       const content = compilation.assets[issuerFile].source();
       let newContent = content;
       let scriptTags = '';
 
+      // filter only scripts w/o hmr
+      chunkFiles = chunkFiles.filter((file) => compilation.assetsInfo.get(file).hotModuleReplacement !== true);
       asset.chunkFiles = chunkFiles;
 
       // replace source filename with asset filename
@@ -53,28 +55,31 @@ const AssetScript = {
         const assetFile = path.posix.join(outputPublicPath, chunkFiles.values().next().value);
         newContent = content.replace(sourceFile, assetFile);
       } else {
+        // extract original script tag with all attributes for usage it as template for chunks
+        let srcStartPos = content.indexOf(sourceFile);
+        let srcEndPos = srcStartPos + sourceFile.length;
+        let tagStartPos = srcStartPos;
+        let tagEndPos = srcEndPos;
+        while (tagStartPos >= 0 && content.charAt(--tagStartPos) !== '<') {}
+        tagEndPos = content.indexOf('</script>', tagEndPos) + 9;
+
+        const tmplScriptStart = content.slice(tagStartPos, srcStartPos);
+        const tmplScriptEnd = content.slice(srcEndPos, tagEndPos);
+
         // generate additional scripts of chunks
         const chunkScripts = usedScripts.get(issuerFile);
         for (let file of chunkFiles) {
           // avoid generate a script of the same split chunk used in different js files required in one pug file,
           // happens when used optimisation.splitChunks
           if (chunkScripts.indexOf(file) < 0) {
-            const assetsInfo = compilation.assetsInfo.get(file);
-            if (assetsInfo.hotModuleReplacement === true) continue;
-
             const scriptFile = path.posix.join(outputPublicPath, file);
-            scriptTags += `<script src="${scriptFile}"></script>`;
+            scriptTags += tmplScriptStart + scriptFile + tmplScriptEnd;
             chunkScripts.push(file);
           }
         }
 
         // inject generated chunks <script> and replace source file with output filename
         if (scriptTags) {
-          const srcPos = content.indexOf(sourceFile);
-          let tagStartPos = srcPos;
-          let tagEndPos = srcPos + sourceFile.length;
-          while (tagStartPos >= 0 && content.charAt(--tagStartPos) !== '<') {}
-          tagEndPos = content.indexOf('</script>', tagEndPos) + 9;
           newContent = content.slice(0, tagStartPos) + scriptTags + content.slice(tagEndPos);
         }
       }

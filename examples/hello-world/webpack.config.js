@@ -9,6 +9,10 @@ module.exports = (env, argv) => {
     mode: isProd ? 'production' : 'development',
     devtool: isProd ? 'source-map' : 'inline-source-map',
 
+    stats: {
+      preset: 'minimal',
+    },
+
     resolve: {
       // aliases used in pug, scss, js
       alias: {
@@ -26,6 +30,7 @@ module.exports = (env, argv) => {
       publicPath: isProd ? '/pug-plugin/hello-world/' : '/',
       // output filename of scripts
       filename: 'assets/js/[name].[contenthash:8].js',
+      chunkFilename: 'assets/js/[name].[id].js',
     },
 
     entry: {
@@ -51,7 +56,8 @@ module.exports = (env, argv) => {
     plugins: [
       // enable processing of Pug files from entry
       new PugPlugin({
-        verbose: true, // output information about the process to console
+        verbose: !isProd, // output information about the process to console
+        pretty: !isProd, // formatting of HTML
         modules: [
           // module extracts CSS from style source files required directly in Pug
           PugPlugin.extractCss({
@@ -79,7 +85,7 @@ module.exports = (env, argv) => {
               },
               // :highlight
               highlight: {
-                verbose: true,
+                verbose: !isProd,
                 use: 'prismjs', // name of a highlighting npm package, must be extra installed
               },
             },
@@ -163,19 +169,4 @@ module.exports = (env, argv) => {
       open: true,
     },
   };
-};
-
-var q = {
-  module: {
-    rules: [
-      {
-        test: /\.(png|svg|jpe?g|webp)$/i,
-        type: 'asset/resource', // this is very important
-        generator: {
-          // output filename of images
-          filename: 'assets/img/[name].[hash:8][ext]',
-        },
-      },
-    ],
-  },
 };

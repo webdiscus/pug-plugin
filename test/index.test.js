@@ -231,6 +231,10 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-styles', done);
   });
 
+  test('require styles in pug from node_modules', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-from-module', done);
+  });
+
   test('require styles with same name', (done) => {
     compareFileListAndContent(PATHS, 'require-styles-with-same-name', done);
   });
