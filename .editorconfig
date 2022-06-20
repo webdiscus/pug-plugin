@@ -8,6 +8,6 @@ insert_final_newline = true
 indent_size = 2
 tab_width = 2
 
-[{*.htm,*.html,*.pug}]
+[{*.htm,*.html,*.pug,*.md}]
 indent_size = 2
 tab_width = 2

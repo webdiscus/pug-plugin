@@ -1,5 +1,9 @@
 # Change log
 
+## 2.7.6 (2022-06-20)
+- fix: warning by watching interpolated dependencies with `compile` method of pug loader
+- docs: update readme
+
 ## 2.7.5 (2022-06-19)
 - fix: missing script attributes after re-compiling with HMR, #21
 

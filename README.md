@@ -10,7 +10,7 @@
         Pug Plugin
         </a>
     </h1>
-  <div>Pug plugin for webpack compiles Pug files into HTML and extract CSS, JS hashed files from theirs sources used in Pug</div>
+  <div>Pug plugin for webpack compiles Pug files into HTML and extract CSS, JS from theirs sources used in Pug</div>
 </div>
 
 ---
@@ -21,10 +21,16 @@
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
 
-Pug plugin enable to define Pug files in webpack entry.
-Pug plugin extract JavaScript and CSS from Pug files.
+Pug Plugin Philosophy:
+- The Pug file is the Entrypoint for all assets.
+- Source scripts and styles should be used directly in Pug.
+- No longer need to define scripts and styles in the webpack entry.
+- No longer need to import styles in JavaScript to inject them into HTML.
+- All required resources in Pug will be automatically processed.
+- Keep your webpack config clean and clear.
 
->💡 See the demo site [Hello World](https://webdiscus.github.io/pug-plugin/hello-world/) and [sources](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
+
+>💡 See the demo site [Hello World](https://webdiscus.github.io/pug-plugin/hello-world/) and its [sources](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
 
 Define Pug files in webpack entry, so easy:
 ```js
@@ -36,13 +42,16 @@ module.exports = {
     // ..
   },
   plugins: [
-    new PugPlugin(), // enable using Pug files in entry
+    // enable using Pug files in webpack entry
+    new PugPlugin({
+      // options
+    }),
   ],
   // ...
 };
 ```
 
-Use source files of styles and scripts directly in pug:
+Use source scripts and styles directly in pug:
 ```pug
 link(href=require('./styles.scss') rel='stylesheet')
 script(src=require('./main.js'))
@@ -54,12 +63,7 @@ Generated HTML contains hashed CSS and JS output filenames:
 <script src="/assets/js/main.f4b855d8.js"></script>
 ```
 
-> 💡 The Pug file is entry point for all assets. 
-> Do not need more to define styles and scripts in the webpack entry and inject them via other plugins.
-> All required resources in Pug will be automatically processed.
-
-
-The single Pug plugin perform the most commonly used functions of the following packages:
+Just one Pug plugin replaces the functionality of many plugins and loaders:
 
 | Package                                                                                   | Features                                                         | 
 |-------------------------------------------------------------------------------------------|------------------------------------------------------------------|
@@ -71,11 +75,17 @@ The single Pug plugin perform the most commonly used functions of the following 
 | [posthtml-inline-svg](https://github.com/andrey-hohlov/posthtml-inline-svg)               | inline SVG icons in HTML                                         |
 | [pug-loader](https://github.com/webdiscus/pug-loader)                                     | the Pug loader is already included in the Pug plugin             |
 
-You can replace all of the above packages with just one Pug plugin.
-
 > ⚠️ **Not recommended** to use the `pug-plugin` together with `html-webpack-plugin` and `mini-css-extract-plugin`.
 > 
-> The `pug-plugin` is designed to replace these plugins. The `pug-plugin` does the same thing, but much easy, more efficiently and faster.
+> The `pug-plugin` is designed to replace these plugins.\
+> The `pug-plugin` does the same, but much easier and faster.
+> 
+
+
+The fundamental difference between `PugPlugin.extractCss` and `mini-css-extract-plugin`:
+- `mini-css-extract-plugin` extracts CSS from imported styles in JS and inject `<style>` tag somewhere in HTML
+- `PugPlugin.extractCss` extracts CSS from the source styles used in Pug and replaces the original filename with the hashed output name
+
 
 ## Contents
 
@@ -149,7 +159,7 @@ module.exports = {
   },
 
   plugins: [
-    // enable processing of Pug files from entry
+    // enable using Pug files in entry
     new PugPlugin({
       modules: [
         // module extracts CSS from style source files required in Pug
@@ -167,7 +177,7 @@ module.exports = {
         test: /\.pug$/,
         loader: PugPlugin.loader, // pug-plugin already contain the pug-loader
         options: {
-          method: 'render', // fastest method to generate static HTML files
+          method: 'render', // fast method to generate static HTML files
         }
       },
       {
@@ -414,7 +424,7 @@ The Pug template `./src/pages/home/index.pug`:
 html
   head
     link(rel="icon" type="image/png" href=require('~Images/favicon.png'))
-    link(rel='stylesheet' href=require('./styles.scss'))
+    link(href=require('./styles.scss') rel='stylesheet')
   body
     .header Here is the header with background image
     h1 Hello Pug!
@@ -431,14 +441,13 @@ The source styles `./src/pages/home/styles.scss`
 ```scss
 // Pug plugin can resolve styles in node_modules. 
 // The package 'material-icons' must be installed in packages.json.
-@import 'material-icons'; 
+@use 'material-icons'; 
 
 // Resolve the font in the directory using the webpack alias.
 @font-face {
   font-family: 'Montserrat';
   src: url('~Fonts/Montserrat/Montserrat-Regular.woff2'); // pug-plugin can resolve url
-  font-style: normal;
-  font-weight: 400;
+  ...
 }
 
 body {
@@ -446,9 +455,8 @@ body {
 }
 
 .header {
-  width: 100%;
-  height: 120px;
   background-image: url('~Images/header.png'); // pug-plugin can resolve url
+  ...
 }
 ```
 
@@ -462,21 +470,15 @@ The generated CSS `dist/assets/css/styles.f57966f4.css`:
  */
 @font-face {
   font-family: "Material Icons";
-  font-style: normal;
-  font-weight: 400;
-  font-display: block;
   src: 
       url(/assets/fonts/material-icons.woff2) format("woff2"),
       url(/assets/fonts/material-icons.woff) format("woff");
+  ...
 }
 .material-icons {
   font-family: "Material Icons";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  /* ... */
+  ...
 }
-/* ... */
 
 /* 
  * Fonts from local directory. 
@@ -484,8 +486,7 @@ The generated CSS `dist/assets/css/styles.f57966f4.css`:
 @font-face {
   font-family: 'Montserrat';
   src: url(/assets/fonts/Montserrat-Regular.woff2);
-  font-style: normal;
-  font-weight: 400;
+  ...
 }
 
 body {
@@ -493,9 +494,8 @@ body {
 }
 
 .header {
-  width: 100%;
-  height: 120px;
   background-image: url(/assets/img/header.4fe56ae8.png);
+  ...
 }
 ```
 
@@ -564,198 +564,6 @@ module.exports = {
   },
 };
 ```
----
-
-### Extract CSS from SASS defined in webpack entry
-
-Dependencies:
-- `css-loader` handles `.css` files and prepare CSS for any CSS extractor
-- `sass-loader` handles `.scss` files
-- `sass` compiles Sass to CSS
-
-Install: `npm install css-loader sass sass-loader --save-dev`
-
-webpack.config.js
-```js
-const path = require('path');
-const PugPlugin = require('pug-plugin');
-module.exports = {
-  output: {
-    path: path.join(__dirname, 'public/'),
-    publicPath: '/',
-  },
-  entry: {
-    'css/styles': './src/assets/main.scss', // output to public/css/styles.css
-  },
-  plugins: [
-    new PugPlugin({
-      modules: [
-        // add the module to extract CSS
-        // see options https://github.com/webdiscus/pug-plugin#options
-        PugPlugin.extractCss({
-          filename: '[name].[contenthash:8].css',
-        })
-      ],
-    }),
-  ],
-  module: {
-    rules: [
-      {
-        test: /\.(css|sass|scss)$/,
-        use: ['css-loader', 'sass-loader'],
-      },
-    ],
-  },
-};
-```
-
-> 
-> When using `PugPlugin.extractCss()` to extract CSS from `webpack entry` the following plugins are not needed:
-> - [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin)
-> - [webpack-remove-empty-scripts](https://github.com/webdiscus/webpack-remove-empty-scripts) - fix plugin for mini-css-extract-plugin
-> 
-> The plugin module `PugPlugin.extractCss` extract and save pure CSS without empty JS files.
-> 
-> ⚠️ When using `PugPlugin.extractCss()` don't use the `style-loader`. 
-
-> ⚠️ **Limitation for CSS only**\
-> The handling of `@import` at-rules in CSS files is not supported.
-> If in a CSS file used `@import`, like following:
-> ```css
-> @import 'assets/css/style.css;
-> ```
-> To leave `@import` rule as is, disable at-rules handling in `css-loader`:
-> ```js
-> {
->   test: /\.(css|scss)$/i,
->   use: [
->     {
->       loader: 'css-loader',
->       options: {
->         import: false, // disable @import at-rules handling
->       },
->     },
->     'sass-loader',
->   ],
-> },
-> ```
-> **Note:** the `@import` handling in a style preprocessor like SASS, LESS, etc. works fine.
-
----
-
-### Usage `pug-plugin` and `pug-loader` with `html` render method.
-
-> Don't use it if you don't know why you need it.\
-> It's only the example of the solution for possible trouble by usage the `html-loader`.\
-> Usually is used the `render` or `compile` method in `pug-loader` options.
-
-For example, by usage in Pug both static and dynamic resources.
-
-index.pug
-```pug
-html
-  head
-    //- Static resource URL from public web path should not be parsed, leave as is.
-    link(rel='stylesheet' href='/absolute/assets/about.css')
-    //- Required resource must be processed.
-        Output to /assets/css/styles.8c1234fc.css
-    link(rel='stylesheet' href=require('./styles.scss'))
-  body
-    h1 Hello World!
-    
-    //- Static resource URL from public web path should not be parsed, leave as is.
-    img(src='relative/assets/logo.jpeg')
-    //- Required resource must be processed.
-        Output to /assets/images/image.f472de4f4.jpg
-    img(src=require('./image.jpeg'))
-
-```
-
-webpack.config.js
-```js
-const fs = require('fs');
-const path = require('path');
-const PugPlugin = require('pug-plugin');
-
-module.exports = {
-  mode: 'production',
-
-  output: {
-    path: path.join(__dirname, 'public/'),
-    publicPath: '/',
-  },
-
-  entry: {
-    index: './src/index.pug',
-  },
-
-  plugins: [
-    new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: 'assets/css/[name].[contenthash:8].css',
-        })
-      ],
-    }),
-  ],
-
-  module: {
-    rules: [
-      {
-        test: /\.pug$/,
-        use: [
-          {
-            loader: 'html-loader',
-            options: {
-              // Webpack use CommonJS module
-              esModule: false,
-              sources: {
-                // ignore not exists sources
-                urlFilter: (attribute, value) => path.isAbsolute(value) && fs.existsSync(value),
-              },
-            },
-          },
-          {
-            loader: PugPlugin.loader,
-            options: {
-              method: 'html', // usually is used the `render` method
-            },
-          },
-        ],
-      },
-
-      {
-        test: /\.(css|sass|scss)$/,
-        use: ['css-loader', 'sass-loader'],
-      },
-
-      {
-        test: /\.(png|jpg|jpeg)/,
-        type: 'asset/resource', // process required images in pug
-        generator: {
-          filename: 'assets/images/[name].[hash:8][ext]',
-        },
-      },
-    ],
-  },
-};
-```
-
-> ### ⚠️ When used `PugPlugin` and `html-loader` 
->
-> A static resource URL from a public web path should not be parsed by the `html-loader`. Leave the URL as is:
-> ```html
-> img(src='/assets/image.jpg')
-> link(rel='stylesheet' href='assets/styles.css')
-> ```
-> Loading a resource with `require()` should be handled via webpack:
-> ```html
-> img(src=require('./image.jpg'))
-> link(rel='stylesheet' href=require('./styles.css'))
-> ```
-> For this case add to `html-loader` the option:\
-> `sources: { urlFilter: (attribute, value) => path.isAbsolute(value) && fs.existsSync(value) }`
-
 
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes
@@ -771,11 +579,10 @@ devServer: {
   },
   watchFiles: {
     paths: ['src/**/*.*'], 
-      options: {
-        usePolling: true,
-      },
+    options: {
+      usePolling: true,
+    },
   },
-  port: 8080,
 },
 ```
 > **Note:** Live reload works only if in Pug used a JS file.

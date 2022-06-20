@@ -154,9 +154,10 @@ module.exports = (env, argv) => {
       static: {
         directory: path.join(__dirname, 'public'),
       },
-      port: 8080,
+      //port: 8080,
       https: false,
       compress: true,
+      open: true, // open in default browser
 
       watchFiles: {
         paths: ['src/**/*.*'],
@@ -164,9 +165,6 @@ module.exports = (env, argv) => {
           usePolling: true,
         },
       },
-
-      // open in default browser
-      open: true,
     },
   };
 };
