@@ -54,7 +54,6 @@ module.exports = {
       {
         test: /\.(png|svg|jpe?g|webp)$/i,
         type: 'asset/resource',
-        include: /assets\/images/, // images from `assets/images` directory only
         generator: {
           filename: 'assets/img/[name].[hash:8][ext]',
         },
@@ -64,7 +63,6 @@ module.exports = {
       {
         test: /\.(png|svg)$/i,
         type: 'asset',
-        include: /assets\/images/,
         exclude: /favicon/, // don't inline favicon
         parser: {
           dataUrlCondition: {

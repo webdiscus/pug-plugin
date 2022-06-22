@@ -576,11 +576,10 @@ class PugPlugin {
           if (modules.length === 1) {
             const module = modules[0];
             const { managedFiles } = module.buildInfo.snapshot;
-            if (
-              managedFiles &&
-              managedFiles.has(module.request) &&
-              /\/node_modules\/(.+?)\/runtime\//.test(module.request)
-            ) {
+            const runtimeRegexp = /\/node_modules\/(.+?)\/runtime\//;
+
+            // note: on Windows only rawRequest has posix slashes in path
+            if (managedFiles && managedFiles.has(module.request) && runtimeRegexp.test(module.rawRequest)) {
               AssetTrash.toTrash(file);
             }
           }

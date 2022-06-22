@@ -1,5 +1,8 @@
 # Change log
 
+## 2.7.7 (2022-06-22)
+- fix: issue by resolving asset aliases on Windows
+
 ## 2.7.6 (2022-06-20)
 - fix: warning by watching interpolated dependencies with `compile` method of pug loader
 - docs: update readme

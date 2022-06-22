@@ -1,6 +1,7 @@
 const path = require('path');
 const AssetEntry = require('./AssetEntry');
-const { parseRequest } = require('./utils');
+const { isWin } = require('./config');
+const { parseRequest, pathToPosix } = require('./utils');
 
 /**
  * AssetScript.
@@ -35,8 +36,8 @@ const AssetScript = {
         usedScripts.set(issuerFile, []);
       }
 
-      const { request: sourceFile } = asset;
-      const chunkGroup = compilation.namedChunkGroups.get(asset.name);
+      const { name, request } = asset;
+      const chunkGroup = compilation.namedChunkGroups.get(name);
       if (!chunkGroup) {
         // prevent error when in HRM mode after removing a script in pug
         continue;
@@ -53,11 +54,11 @@ const AssetScript = {
       // replace source filename with asset filename
       if (chunkFiles.length === 1) {
         const assetFile = path.posix.join(outputPublicPath, chunkFiles.values().next().value);
-        newContent = content.replace(sourceFile, assetFile);
+        newContent = content.replace(request, assetFile);
       } else {
         // extract original script tag with all attributes for usage it as template for chunks
-        let srcStartPos = content.indexOf(sourceFile);
-        let srcEndPos = srcStartPos + sourceFile.length;
+        let srcStartPos = content.indexOf(request);
+        let srcEndPos = srcStartPos + request.length;
         let tagStartPos = srcStartPos;
         let tagEndPos = srcEndPos;
         while (tagStartPos >= 0 && content.charAt(--tagStartPos) !== '<') {}
@@ -95,7 +96,6 @@ const AssetScript = {
    */
   getUniqueName(request, issuer) {
     let { name } = path.parse(request);
-
     const entry = AssetEntry.findByName(name);
     let uniqueName = name;
     let result = name;
@@ -154,6 +154,7 @@ const AssetScript = {
   },
 
   has(request) {
+    if (isWin) request = pathToPosix(request);
     return this.files.find((item) => item.request === request);
   },
 

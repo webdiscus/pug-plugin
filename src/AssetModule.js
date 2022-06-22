@@ -1,4 +1,5 @@
 const path = require('path');
+const { isWin } = require('./config');
 
 /**
  * Parse tag attributes in a string.
@@ -84,7 +85,9 @@ const AssetModule = {
    * @returns {string|undefined}
    */
   getDataUrl(issuerFile, sourceFile) {
+    if (isWin) sourceFile = path.win32.normalize(sourceFile);
     const item = this.dataUrlAssets.get(sourceFile);
+
     return item != null && item.cache != null && item.issuers.has(issuerFile) ? item.cache.dataUrl : undefined;
   },
 
