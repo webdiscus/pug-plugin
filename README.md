@@ -95,7 +95,8 @@ The fundamental difference between `PugPlugin.extractCss` and `mini-css-extract-
 3. [Plugin options](#plugin-options)
 4. [Usage examples](#usage-examples)
 5. [How to use HMR live reload](#recipe-hmr)
-5. [How to use responsive images with Pug](https://webdiscus.github.io/pug-plugin/responsive-image/)
+6. [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
+7. [How to use responsive images with Pug](https://webdiscus.github.io/pug-plugin/responsive-image/)
 
 ## Features
 <a id="features" name="features" href="#features"></a>
@@ -565,6 +566,8 @@ module.exports = {
 };
 ```
 
+---
+
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes
 
@@ -595,6 +598,50 @@ devServer: {
 > //- script(src=require('./dummy.js'))
 > ```
 
+<a id="recipe-import-style-from-module" name="recipe-import-style-from-module" href="#recipe-import-style-from-module"></a>
+### Import CSS/SCSS from module
+
+Pug plugin can resolve styles in `node_modules`.
+
+> 💡 Pug plugin resolves styles much fasted than the [resolve-url-loader](https://github.com/bholloway/resolve-url-loader) 
+> and don't require to use the source map in `sass-loader`.
+
+
+```scss
+@use 'MODULE_NAME/path/to/style';
+```
+
+> **Important:** the file extension, e.g. .scss, .css, must be omitted.
+
+Example how to import styles of [material-icons](https://github.com/marella/material-icons):
+
+```scss
+// import styles from installed module `material-icons`
+@use 'material-icons';
+
+// define short class name
+.mat-icon {
+  @extend .material-icons-outlined;
+}
+```
+
+Usage of the icon `home` in Pug:
+
+```pug
+.mat-icon home
+```
+
+Example how to import the style theme `tomorrow` of the [prismjs](https://github.com/PrismJS/prism) module:
+
+```scss
+// import default prismjs styles from installed module `prismjs`
+@use 'prismjs/themes/prism-tomorrow.min';
+```
+
+
+> **Note:** use the `@use` instead of `@import`, because it is [deprecated](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
+
+---
 
 ## Testing
 
