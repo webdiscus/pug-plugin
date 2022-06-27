@@ -243,14 +243,6 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-styles-with-same-name-hash', done);
   });
 
-  test('require styles with relative path in url', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-url-relative', done);
-  });
-
-  test('require styles with alias in url', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-url-alias', done);
-  });
-
   test('require styles in pug and use compiled styles from webpack entry', (done) => {
     compareFileListAndContent(PATHS, 'require-and-entry-styles', done);
   });
@@ -271,6 +263,16 @@ describe('require assets tests', () => {
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
   // });
+});
+
+describe('resolve url in style', () => {
+  test('relative path in url', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-url-relative', done);
+  });
+
+  test('alias in url', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-url-alias', done);
+  });
 });
 
 describe('responsive images', () => {

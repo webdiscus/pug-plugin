@@ -1,6 +1,9 @@
 # Change log
 
 ## 2.7.8 (2022-06-27)
+- refactor: optimize resolving of url in styles
+
+## 2.7.8 (2022-06-27)
 - fix: resolving of relative url in deep imported style files
 - fix: resolving url with a query in CSS
 

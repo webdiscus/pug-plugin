@@ -20,36 +20,48 @@ const UrlDependencyResolver = {
   },
 
   /**
-   * @param {Set<string>} files List of parent files/path in whose directory the resolved file can be.
-   * @param {string} request The file to be resolved.
-   * @returns {null|{file: string, context: string}}
-   * @private
+   * Resolves relative URL and URL in node_modules.
+   *
+   * @param {{}} resolveData The callback parameter for the hooks beforeResolve of NormalModuleFactory.
    */
-  resolveInPaths(files, request) {
+  resolve(resolveData) {
     const fs = this.fs;
-    let context, file, tmpFile;
-    for (tmpFile of files) {
-      context = path.dirname(tmpFile);
-      file = path.resolve(context, request);
-      if (fs.existsSync(file)) {
-        return {
-          context,
-          file,
-        };
+    const [resource, query] = resolveData.request.split('?');
+
+    if (!fs.existsSync(path.resolve(resolveData.context, resource))) {
+      const dependency = resolveData.dependencies[0];
+      const parentModule = this.moduleGraph.getParentModule(dependency);
+      const snapshot = parentModule.buildInfo.snapshot;
+      const dependencies = snapshot.fileTimestamps || snapshot.fileTshs;
+      let result;
+
+      // resolve in dependencies
+      if (dependencies != null && dependencies.size > 0) {
+        result = this.resolveInPaths(dependencies.keys(), resource);
+      }
+
+      // resolve in node modules
+      if (result == null) {
+        result = this.resolveInSnapshot(snapshot, resource);
+      }
+
+      if (result != null) {
+        const resolvedRequest = query ? result.file + '?' + query : result.file;
+        resolveData.request = resolvedRequest;
+        dependency.request = resolvedRequest;
+        dependency.userRequest = resolvedRequest;
+        ResourceResolver.addResolvedPath(result.context);
       }
     }
-
-    return null;
   },
 
   /**
-   * @param {{snapshot: {managedFiles: Set<string>, children: Set<{managedFiles: Set<string>}>}}} buildInfo
+   * @param {{managedFiles: Set<string>, children: Set<{managedFiles: Set<string>}>}} snapshot The Webpack SnapshotSummary of build info.
    * @param {string} resource The file to be resolved.
    * @returns {null|{file: string, context: string}}
    * @private
    */
-  resolveInBuildInfo(buildInfo, resource) {
-    const { snapshot } = buildInfo;
+  resolveInSnapshot(snapshot, resource) {
     const { managedFiles, children } = snapshot;
     let result;
 
@@ -76,72 +88,36 @@ const UrlDependencyResolver = {
   },
 
   /**
-   * Resolves relative URL and URL in node_modules.
-   *
-   * @param {{}} resolveData The callback parameter for the hooks beforeResolve of NormalModuleFactory.
+   * @param {Set<string>} files List of parent files/path in whose directory the resolved file can be.
+   * @param {string} resource The file to be resolved.
+   * @returns {null|{file: string, context: string}}
+   * @private
    */
-  resolve(resolveData) {
+  resolveInPaths(files, resource) {
     const fs = this.fs;
-    const [resource, query] = resolveData.request.split('?');
+    const cache = new Set();
+    let context, file, tmpFile;
 
-    if (!fs.existsSync(path.resolve(resolveData.context, resource))) {
-      const dependency = resolveData.dependencies[0];
-      const parentModule = this.moduleGraph.getParentModule(dependency);
-      const buildInfo = parentModule.buildInfo || {};
-      const snapshot = buildInfo.snapshot || {};
-      const dependencies = snapshot.fileTimestamps || snapshot.fileTshs;
-
-      let context = resolveData.context;
-      let resolvedFile;
-
-      // 1. try to resolve relative path in context or in dependency directories
-      if (dependencies != null && dependencies.size > 0) {
-        const files = dependencies.keys();
-        const cache = new Set();
-        let file;
-
-        for (file of files) {
-          if (fs.lstatSync(file).isFile()) {
-            let dir = path.dirname(file);
-            if (cache.has(dir)) {
-              // skip directory that is already checked and the resource was not resolved in this directory
-              continue;
-            }
-
-            let tmpFile = path.resolve(dir, resource);
-            if (fs.existsSync(tmpFile)) {
-              context = dir;
-              resolvedFile = tmpFile;
-              break;
-            }
-            cache.add(dir);
-          }
+    for (tmpFile of files) {
+      if (fs.lstatSync(tmpFile).isFile()) {
+        context = path.dirname(tmpFile);
+        if (cache.has(context)) {
+          // skip directory that is already checked and the resource was not resolved in this directory
+          continue;
         }
-      } else {
-        context = resolveData.context;
-        let tmpFile = path.resolve(context, resource);
-        if (fs.existsSync(tmpFile)) {
-          resolvedFile = tmpFile;
-        }
-      }
 
-      // 2. try to resolve in node modules
-      if (resolvedFile == null) {
-        let res = this.resolveInBuildInfo(buildInfo, resource);
-        if (res != null) {
-          context = res.context;
-          resolvedFile = res.file;
+        file = path.resolve(context, resource);
+        if (fs.existsSync(file)) {
+          return {
+            context,
+            file,
+          };
         }
-      }
-
-      if (resolvedFile != null) {
-        const resolvedRequest = query ? resolvedFile + '?' + query : resolvedFile;
-        resolveData.request = resolvedRequest;
-        dependency.request = resolvedRequest;
-        dependency.userRequest = resolvedRequest;
-        ResourceResolver.addResolvedPath(context);
+        cache.add(context);
       }
     }
+
+    return null;
   },
 };
 

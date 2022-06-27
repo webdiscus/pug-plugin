@@ -1,0 +1,15 @@
+@use '../../icons/mat-icons';
+
+// test resolve url directly from first loaded style
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'),
+    // test request with a query
+  url('../../fonts/Roboto/roboto-v30-latin-300.woff2') format('woff2');
+}
+
+h2 {
+  color: red;
+}
