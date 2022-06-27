@@ -41,7 +41,16 @@ module.exports = {
 
       {
         test: /\.(css|sass|scss)$/,
-        use: ['css-loader', 'sass-loader'],
+        //use: ['css-loader', 'sass-loader'],
+        use: [
+          {
+            loader: 'css-loader',
+            options: {
+              import: false, // disable @import at-rules handling in CSS
+            },
+          },
+          'sass-loader',
+        ],
       },
 
       {

@@ -1,5 +1,9 @@
 # Change log
 
+## 2.7.8 (2022-06-27)
+- fix: resolving of relative url in deep imported style files
+- fix: resolving url with a query in CSS
+
 ## 2.7.7 (2022-06-22)
 - fix: issue by resolving asset aliases on Windows
 

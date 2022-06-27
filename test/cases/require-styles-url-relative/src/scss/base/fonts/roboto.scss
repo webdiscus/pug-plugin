@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'),
+  // test request with a query
+  url('../../../fonts/Roboto/roboto-v30-latin-300.woff2?query=123') format('woff2');
+}
