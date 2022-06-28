@@ -1,6 +1,9 @@
 # Change log
 
-## 2.7.8 (2022-06-27)
+## 2.8.0 (2022-06-28)
+- feat: improve url dependency resolving in styles using webpack snapshot
+
+## 2.7.9 (2022-06-27)
 - refactor: optimize resolving of url in styles
 
 ## 2.7.8 (2022-06-27)

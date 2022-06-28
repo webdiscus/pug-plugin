@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "2.7.9",
+  "version": "2.8.0",
   "description": "Pug plugin to extract HTML, CSS and JS from Pug files defined in webpack entry. Replaces asset's source filename with hashed output filename. Replaces SVG images with inline SVG in generated HTML.",
   "keywords": [
     "pug",

@@ -1,4 +1,6 @@
 const path = require('path');
+const ansis = require('ansis');
+const { plugin } = require('./config');
 const ResourceResolver = require('./ResourceResolver');
 
 /**
@@ -8,9 +10,10 @@ const ResourceResolver = require('./ResourceResolver');
 const UrlDependencyResolver = {
   fs: null,
   compilation: null,
+  maxDependencyDeep: 256,
+  dependencyDeep: 0,
 
   /**
-   *
    * @param {fs: FileSystem} fs
    * @param {compilation: Compilation} compilation
    */
@@ -29,21 +32,10 @@ const UrlDependencyResolver = {
     const [resource, query] = resolveData.request.split('?');
 
     if (!fs.existsSync(path.resolve(resolveData.context, resource))) {
+      this.dependencyDeep = 0;
       const dependency = resolveData.dependencies[0];
       const parentModule = this.moduleGraph.getParentModule(dependency);
-      const snapshot = parentModule.buildInfo.snapshot;
-      const dependencies = snapshot.fileTimestamps || snapshot.fileTshs;
-      let result;
-
-      // resolve in dependencies
-      if (dependencies != null && dependencies.size > 0) {
-        result = this.resolveInPaths(dependencies.keys(), resource);
-      }
-
-      // resolve in node modules
-      if (result == null) {
-        result = this.resolveInSnapshot(snapshot, resource);
-      }
+      const result = this.resolveInSnapshot(parentModule.buildInfo.snapshot, resource);
 
       if (result != null) {
         const resolvedRequest = query ? result.file + '?' + query : result.file;
@@ -56,51 +48,29 @@ const UrlDependencyResolver = {
   },
 
   /**
-   * @param {{managedFiles: Set<string>, children: Set<{managedFiles: Set<string>}>}} snapshot The Webpack SnapshotSummary of build info.
+   * @param {Snapshot} snapshot The Webpack snapshot.
    * @param {string} resource The file to be resolved.
-   * @returns {null|{file: string, context: string}}
-   * @private
+   * @return {null|{file: string, context: string}}
    */
   resolveInSnapshot(snapshot, resource) {
-    const { managedFiles, children } = snapshot;
-    let result;
-
-    if (managedFiles != null && managedFiles.size > 0) {
-      result = this.resolveInPaths(managedFiles, resource);
-      if (result != null) {
-        return result;
-      }
-    }
-
-    if (children != null && children.size > 0) {
-      for (let item of children) {
-        const childrenManagedFiles = item.managedFiles;
-        if (childrenManagedFiles != null && childrenManagedFiles.size > 0) {
-          result = this.resolveInPaths(childrenManagedFiles, resource);
-          if (result != null) {
-            return result;
-          }
-        }
-      }
-    }
-
-    return null;
-  },
-
-  /**
-   * @param {Set<string>} files List of parent files/path in whose directory the resolved file can be.
-   * @param {string} resource The file to be resolved.
-   * @returns {null|{file: string, context: string}}
-   * @private
-   */
-  resolveInPaths(files, resource) {
     const fs = this.fs;
     const cache = new Set();
-    let context, file, tmpFile;
+    let files = [];
+    let context, file, dependency;
 
-    for (tmpFile of files) {
-      if (fs.lstatSync(tmpFile).isFile()) {
-        context = path.dirname(tmpFile);
+    // fileTimestamps is filled when started webpack dev server
+    if (snapshot.hasFileTimestamps()) files.push(...snapshot.fileTimestamps.keys());
+    // fileTshs is filled when webpack builds
+    if (snapshot.hasFileTshs()) files.push(...snapshot.fileTshs.keys());
+    // should be clarified when fileHashes is filled
+    if (snapshot.hasFileHashes()) files.push(...snapshot.fileHashes.keys());
+    // managedFiles is filled by import from node modules
+    if (snapshot.hasManagedFiles()) files.push(...snapshot.managedFiles);
+
+    for (dependency of files) {
+      // whether is dependency file
+      if (!!path.extname(dependency)) {
+        context = path.dirname(dependency);
         if (cache.has(context)) {
           // skip directory that is already checked and the resource was not resolved in this directory
           continue;
@@ -114,6 +84,25 @@ const UrlDependencyResolver = {
           };
         }
         cache.add(context);
+      }
+    }
+
+    if (snapshot.hasChildren()) {
+      // paranoid check for possible nested style imports, in real project should never be reached
+      if (++this.dependencyDeep > this.maxDependencyDeep) {
+        throw new Error(
+          `\n${ansis.black.bgRedBright(`[${plugin}]`)} Max ${ansis.yellow(
+            this.maxDependencyDeep.toString()
+          )} nesting by resolving is reached.\nPlease use an alias to resolve the ${ansis.cyan(resource)} url in style.`
+        );
+      }
+
+      let snapshotChild, result;
+      for (snapshotChild of snapshot.children) {
+        result = this.resolveInSnapshot(snapshotChild, resource);
+        if (result != null) {
+          return result;
+        }
       }
     }
 
