@@ -3,7 +3,7 @@ const path = require('path');
 const ansis = require('ansis');
 const { plugin } = require('./config');
 
-const ansisPluginName = `\n${ansis.black.bgRedBright(`[${plugin}]`)}`;
+const ansisPluginName = `\n${ansis.red(`[${plugin}]`)}`;
 let lastError = null;
 
 class PugPluginException extends Error {

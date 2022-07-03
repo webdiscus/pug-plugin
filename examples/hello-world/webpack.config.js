@@ -1,6 +1,5 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin'); // use it in your code
-//const PugPlugin = require('../../'); // use local code of pug-plugin for development
+const PugPlugin = require('pug-plugin');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
@@ -72,7 +71,7 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.pug$/,
-          loader: PugPlugin.loader, // PugPlugin already contain the pug-loader
+          loader: PugPlugin.loader,
           options: {
             method: 'render', // fastest method to generate static HTML files
             // enable filters only those used in pug
@@ -152,13 +151,10 @@ module.exports = (env, argv) => {
 
     devServer: {
       static: {
-        directory: path.join(__dirname, 'public'),
+        directory: path.join(__dirname, 'dist'),
       },
-      //port: 8080,
-      https: false,
       compress: true,
       open: true, // open in default browser
-
       watchFiles: {
         paths: ['src/**/*.*'],
         options: {

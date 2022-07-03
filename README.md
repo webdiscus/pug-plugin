@@ -21,37 +21,34 @@
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
 
-Pug Plugin Philosophy:
-- The Pug file is the Entrypoint for all assets.
-- Source scripts and styles should be used directly in Pug.
+Pug Plugin enable to specify Pug files in webpack entry and generates HTML file that includes the hashed output JS and CSS filenames whose source files are used in the Pug template.
+
+💡 **Highlights**:
+
+- The Pug file is the entry point for all scripts and styles.
+- Source scripts and styles should be specified directly in Pug.
+- All JS and CSS files will be extracted from their sources specified in Pug.
 - No longer need to define scripts and styles in the webpack entry.
-- No longer need to import styles in JavaScript to inject them into HTML.
-- All required resources in Pug will be automatically processed.
-- Keep your webpack config clean and clear.
+- No longer need to import styles in JavaScript to inject them into HTML via additional plugins such as `html-webpack-plugin` and `mini-css-extract-plugin`.
 
+> See the demo site [Hello World](https://webdiscus.github.io/pug-plugin/hello-world/) and its [sources](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
 
->💡 See the demo site [Hello World](https://webdiscus.github.io/pug-plugin/hello-world/) and its [sources](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
+Specify the Pug files in the webpack entry:
 
-Define Pug files in webpack entry, so easy:
 ```js
 const PugPlugin = require('pug-plugin');
 module.exports = {
   entry: {
-    index: './src/views/index.pug',      // output index.html
-    about: './src/views/about/index.pug' // output about.html
-    // ..
+    index: './src/views/home/index.pug',  // output dist/index.html
+    about: './src/views/about/index.pug', // output dist/about.html
   },
   plugins: [
-    // enable using Pug files in webpack entry
-    new PugPlugin({
-      // options
-    }),
+    new PugPlugin({/* options */}), // enable to specify Pug files in webpack entry
   ],
-  // ...
 };
 ```
 
-Use source scripts and styles directly in pug:
+Add source scripts and styles directly to Pug using `require()`:
 ```pug
 link(href=require('./styles.scss') rel='stylesheet')
 script(src=require('./main.js'))
@@ -83,8 +80,8 @@ Just one Pug plugin replaces the functionality of many plugins and loaders:
 
 
 The fundamental difference between `PugPlugin.extractCss` and `mini-css-extract-plugin`:
-- `mini-css-extract-plugin` extracts CSS from imported styles in JS and inject `<style>` tag somewhere in HTML
-- `PugPlugin.extractCss` extracts CSS from the source styles used in Pug and replaces the original filename with the hashed output name
+- `mini-css-extract-plugin` extracts CSS from source styles imported in JS and inject `<style>` tag somewhere in HTML
+- `PugPlugin.extractCss` extracts CSS from source styles used in Pug and replaces the source filename with the hashed output name
 
 
 ## Contents
