@@ -1,5 +1,8 @@
 # Change log
 
+## 2.9.2 (2022-07-03)
+- fix: HMR issue on Windows
+
 ## 2.9.1 (2022-07-03)
 - fix: remove unused module
 
