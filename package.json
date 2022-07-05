@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "description": "Pug plugin renders Pug files to HTML, extracts JS and CSS from sources specified directly in Pug.",
   "keywords": [
     "pug",

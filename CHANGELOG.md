@@ -1,5 +1,9 @@
 # Change log
 
+## 2.9.3 (2022-07-05)
+- fix: remove wrong runtime files split when using splitChunks
+- docs: update readme with info how to use split chunk for JS only
+
 ## 2.9.2 (2022-07-03)
 - fix: HMR issue on Windows
 

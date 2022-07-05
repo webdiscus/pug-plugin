@@ -259,6 +259,10 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-context-image-pug-scss', done);
   });
 
+  test('resolve assets when used split chunk', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-assets-split-chunk', done);
+  });
+
   // TODO: fix the issue
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);

@@ -349,16 +349,13 @@ class PugPlugin {
           // process only entries supported by this plugin
           if (!entry) return;
 
-          const chunkModules = chunkGraph.getChunkModulesIterable(chunk);
           const sources = new Set();
           const contentHashType = 'javascript';
-          let assetFile = compilation.getPath(chunk.filenameTemplate, { contentHashType, chunk });
-
-          // the current resource issuer
+          const chunkModules = chunkGraph.getChunkModulesIterable(chunk);
           let resourceIssuer = '';
 
-          entry.filename = assetFile;
-          AssetScript.setIssuerFilename(entry.importFile, assetFile);
+          entry.filename = compilation.getPath(chunk.filenameTemplate, { contentHashType, chunk });
+          AssetScript.setIssuerFilename(entry.importFile, entry.filename);
 
           if (verbose) this.verboseEntry(entry);
 
@@ -392,6 +389,7 @@ class PugPlugin {
               if (source == null) return;
 
               const pluginModule = this.getModule(sourceFile) || entry;
+              const assetFile = entry.filename;
 
               const postprocessInfo = {
                 isEntry: true,
@@ -428,14 +426,13 @@ class PugPlugin {
               if (pluginModule == null) continue;
 
               let { name } = path.parse(sourceFile);
-              const filenameTemplate = pluginModule.filename ? pluginModule.filename : entry.filenameTemplate;
 
-              // TODO: research why sometimes the id is relative path instead of a number, it's ok?
+              // note: the `id` is
+              // - in production mode as a number
+              // - in development mode as a relative path
               const id = chunkGraph.getModuleId(module);
-
-              // reserved: get real hash of module source
-              //const hash = codeGenerationResults.getHash(module, chunk.runtime);
               const hash = buildInfo.assetInfo ? buildInfo.assetInfo.contenthash : buildInfo.hash;
+              const filenameTemplate = pluginModule.filename ? pluginModule.filename : entry.filenameTemplate;
 
               /** @type {PathData} minimum data to generate an asset path by filenameTemplate */
               const contextData = {
@@ -528,6 +525,8 @@ class PugPlugin {
                 ResourceResolver.addToChunkCache(module, assetFile);
               }
             } else if (module.type === 'asset/inline') {
+              const assetFile = entry.filename;
+
               if (AssetModule.hasExt(sourceFile, 'svg')) {
                 // reserved: extract SVG from processed source of module
                 // const dataUrl = codeGenerationResults.getData(module, chunk.runtime, 'url').toString();
@@ -571,15 +570,19 @@ class PugPlugin {
       compilation.hooks.chunkAsset.tap(plugin, (chunk, file) => {
         // avoid saving runtime js files from node_modules as assets by usage of the splitChunks optimization,
         // because it is never used in assets, it's wrong extracted files by webpack
-        if (chunk.chunkReason && chunk.chunkReason.indexOf('defaultVendors') > 0) {
+
+        if (chunk.chunkReason && chunk.chunkReason.startsWith('split chunk')) {
           const modules = compilation.chunkGraph.getChunkModules(chunk);
-          if (modules.length === 1) {
+
+          if (modules.length > 0) {
             const module = modules[0];
             const { managedFiles } = module.buildInfo.snapshot;
-            const runtimeRegexp = /\/node_modules\/(.+?)\/runtime\//;
+            // note: rawRequest of module, e.g. require('lodash'), cannot contain `node_modules`
+            // if rawRequest contains the `node_modules`, then this file must be removed from assets
+            const excludeRegexp = /\/node_modules\//;
 
             // note: on Windows only rawRequest has posix slashes in path
-            if (managedFiles && managedFiles.has(module.request) && runtimeRegexp.test(module.rawRequest)) {
+            if (managedFiles && managedFiles.has(module.request) && excludeRegexp.test(module.rawRequest)) {
               AssetTrash.toTrash(file);
             }
           }
@@ -735,7 +738,6 @@ class PugPlugin {
       `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite(` Extract Resource `)} in ` +
         `${ansis.green(issuerFile)}\n` +
         `      source: ${ansis.cyan(sourceFile)}\n` +
-        //` output: ${ansis.cyanBright(assetFile)}\n`
         ` output path: ${ansis.cyanBright(outputPath)}\n` +
         `       asset: ${ansis.cyanBright(assetFile)}\n`
     );

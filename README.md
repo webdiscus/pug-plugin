@@ -91,9 +91,10 @@ The fundamental difference between `PugPlugin.extractCss` and `mini-css-extract-
 2. [Features](#features)
 3. [Plugin options](#plugin-options)
 4. [Usage examples](#usage-examples)
-5. [How to use HMR live reload](#recipe-hmr)
 6. [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
-7. [How to use responsive images with Pug](https://webdiscus.github.io/pug-plugin/responsive-image/)
+7. [How to config `splitChunks`](#recipe-split-chunks)
+5. [How to use HMR live reload](#recipe-hmr)
+8. [How to use responsive images with Pug](https://webdiscus.github.io/pug-plugin/responsive-image/)
 
 ## Features
 <a id="features" name="features" href="#features"></a>
@@ -568,33 +569,6 @@ module.exports = {
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes
 
-<a id="recipe-hmr" name="recipe-hmr" href="#recipe-hmr"></a>
-### HMR live reload
-
-To enable live reload by changes any file add in the webpack config following options:
-```js
-devServer: {
-  static: {
-    directory: path.join(__dirname, 'dist'),
-  },
-  watchFiles: {
-    paths: ['src/**/*.*'], 
-    options: {
-      usePolling: true,
-    },
-  },
-},
-```
-> **Note:** Live reload works only if in Pug used a JS file.
-> If your Pug template has not a JS, then create one empty JS file and add it in Pug:
-> ```js
-> script(src=require('./dummy.js'))
-> ```
-> Don't forget disable this dummy script for production build:
-> ```js
-> //- script(src=require('./dummy.js'))
-> ```
-
 <a id="recipe-import-style-from-module" name="recipe-import-style-from-module" href="#recipe-import-style-from-module"></a>
 ### Import CSS/SCSS from module
 
@@ -635,8 +609,64 @@ Example how to import the style theme `tomorrow` of the [prismjs](https://github
 @use 'prismjs/themes/prism-tomorrow.min';
 ```
 
-
 > **Note:** use the `@use` instead of `@import`, because it is [deprecated](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
+
+<a id="recipe-split-chunks" name="recipe-split-chunks" href="#recipe-split-chunks"></a>
+### Configuration of `splitChunks`
+
+Defaults, Webpack will split every entry module.
+Because the entry point is Pug files, Webpack tries to split those files too, 
+which completely breaks the compilation process in pug-plugin.
+
+To avoid this issue, you must specify which scripts should be split, using `optimization.splitChunks.cacheGroups`:
+
+```js
+module.exports = {
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        scripts: {
+          test: /\\.(js|ts)$/,
+          chunks: 'all',
+        },
+      },
+    },
+  },
+  // ...
+};
+```
+
+> **Note:** in the `test` option must be specified all extensions of scripts which should be split.
+
+See details by [splitChunks.cacheGroups](https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups).
+
+
+<a id="recipe-hmr" name="recipe-hmr" href="#recipe-hmr"></a>
+### HMR live reload
+
+To enable live reload by changes any file add in the webpack config following options:
+```js
+devServer: {
+  static: {
+    directory: path.join(__dirname, 'dist'),
+  },
+  watchFiles: {
+    paths: ['src/**/*.*'], 
+    options: {
+      usePolling: true,
+    },
+  },
+},
+```
+> **Note:** Live reload works only if in Pug used a JS file.
+> If your Pug template has not a JS, then create one empty JS file and add it in Pug:
+> ```js
+> script(src=require('./dummy.js'))
+> ```
+> Don't forget disable this dummy script for production build:
+> ```js
+> //- script(src=require('./dummy.js'))
+> ```
 
 ---
 
@@ -649,15 +679,15 @@ Example how to import the style theme `tomorrow` of the [prismjs](https://github
 
 - more examples of usages see in [test cases](https://github.com/webdiscus/pug-plugin/tree/master/test/cases)
 - [ansis][ansis] - ANSI color styling of text in terminal
-- [pug-loader][pug-loader]
-- [pug GitHub][pug]
-- [pug API Reference][pug-api]
+- [pug-loader][pug-loader] see here configuration options for `PugPlugin.loader`
+- [pug-loader `:highlight` filter][pug-filter-highlight] highlights code syntax
+- [pug-loader `:markdown` filter][pug-filter-markdown] transform markdown to HTML and highlights code syntax
 
 ## License
 
 [ISC](https://github.com/webdiscus/pug-loader/blob/master/LICENSE)
 
 [ansis]: https://github.com/webdiscus/ansis
-[pug]: https://github.com/pugjs/pug
-[pug-api]: https://pugjs.org/api/reference.html
 [pug-loader]: https://github.com/webdiscus/pug-loader
+[pug-filter-highlight]: https://webdiscus.github.io/pug-loader/pug-filters/highlight.html
+[pug-filter-markdown]: https://webdiscus.github.io/pug-loader/pug-filters/markdown.html
