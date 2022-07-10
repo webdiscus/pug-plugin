@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://./src/views/scss/about.scss"],"names":[],"mappings":"AAEA;EACE,YAHM;AAER","sourcesContent":["$color: green;\n\np.about {\n  color: $color;\n}"],"sourceRoot":""}

@@ -15,7 +15,7 @@ module.exports = {
   entry: {
     //styles: './src/assets/scss/main.scss',
     //font: './src/assets/scss/abstract/_variables.scss',
-    index: './src/pages/index.pug',
+    index: './src/views/index.pug',
   },
 
   plugins: [

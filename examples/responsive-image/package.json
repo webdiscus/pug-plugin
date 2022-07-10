@@ -1,24 +1,20 @@
 {
   "name": "responsive-image",
   "version": "1.0.3",
-  "description": "",
+  "description": "Responsive image",
   "main": "src/index.js",
   "scripts": {
-    "start": "rimraf dist build && webpack serve --config webpack.dev.js",
-    "watch": "rimraf dist build && webpack watch --config webpack.dev.js",
-    "build": "rimraf dist build && webpack --config webpack.prod.js",
-    "preview": "npm run build && http-server dist --port 4321 -o"
+    "start": "webpack serve --mode=development",
+    "build": "webpack --mode=production --progress",
+    "preview": "npm run build && http-server dist -og",
+    "docs": "webpack --mode=production --env type=docs --progress"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "css-loader": "^6.7.1",
     "http-server": "^14.1.1",
     "prismjs": "^1.28.0",
     "pug-plugin": "^2.9.2",
     "responsive-loader": "^3.0.4",
-    "rimraf": "^3.0.2",
     "sass": "^1.53.0",
     "sass-loader": "^13.0.2",
     "sharp": "^0.30.7",

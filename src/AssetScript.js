@@ -39,7 +39,7 @@ const AssetScript = {
       const { name, request } = asset;
       const chunkGroup = compilation.namedChunkGroups.get(name);
       if (!chunkGroup) {
-        // prevent error when in HRM mode after removing a script in pug
+        // prevent error when in HMR mode after removing a script in pug
         continue;
       }
       let chunkFiles = chunkGroup.getFiles();

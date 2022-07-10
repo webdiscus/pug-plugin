@@ -3,6 +3,7 @@ const PugPlugin = require('pug-plugin');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
+  const isDocs = env.type === 'docs';
 
   return {
     mode: isProd ? 'production' : 'development',
@@ -10,26 +11,6 @@ module.exports = (env, argv) => {
 
     stats: {
       preset: 'minimal',
-    },
-
-    resolve: {
-      // aliases used in pug, scss, js
-      alias: {
-        Views: path.join(__dirname, 'src/views/'),
-        Images: path.join(__dirname, 'src/assets/images/'),
-        Fonts: path.join(__dirname, 'src/assets/fonts/'),
-        Styles: path.join(__dirname, 'src/assets/styles/'),
-        Scripts: path.join(__dirname, 'src/assets/scripts/'),
-      },
-    },
-
-    output: {
-      path: path.join(__dirname, 'dist'),
-      // build for GitHub Page: https://webdiscus.github.io/pug-plugin/hello-world/
-      publicPath: isProd ? '/pug-plugin/hello-world/' : '/',
-      // output filename of scripts
-      filename: 'assets/js/[name].[contenthash:8].js',
-      chunkFilename: 'assets/js/[name].[id].js',
     },
 
     entry: {
@@ -50,6 +31,26 @@ module.exports = (env, argv) => {
       index: 'src/views/pages/home/index.pug',
       contact: 'src/views/pages/contact/index.pug',
       about: 'src/views/pages/about/index.pug',
+    },
+
+    output: {
+      path: path.join(__dirname, 'dist'),
+      // build for GitHub Page: https://webdiscus.github.io/pug-plugin/hello-world/
+      publicPath: isDocs ? '/pug-plugin/hello-world/' : '/',
+      // output filename of scripts
+      filename: 'assets/js/[name].[contenthash:8].js',
+      chunkFilename: 'assets/js/[name].[id].js',
+      clean: true,
+    },
+
+    resolve: {
+      alias: {
+        Views: path.join(__dirname, 'src/views/'),
+        Images: path.join(__dirname, 'src/assets/images/'),
+        Fonts: path.join(__dirname, 'src/assets/fonts/'),
+        Styles: path.join(__dirname, 'src/assets/styles/'),
+        Scripts: path.join(__dirname, 'src/assets/scripts/'),
+      },
     },
 
     plugins: [
@@ -101,7 +102,7 @@ module.exports = (env, argv) => {
         {
           test: /\.(woff2?|ttf|otf|eot|svg)$/,
           type: 'asset/resource',
-          include: /assets\/fonts/, // fonts from `assets/fonts` directory only
+          include: /assets[\\/]fonts/, // fonts from `assets/fonts` directory only, match posix and win paths
           generator: {
             // output filename of fonts
             filename: 'assets/fonts/[name][ext][query]',
@@ -113,7 +114,7 @@ module.exports = (env, argv) => {
           test: /\.(png|svg|jpe?g|webp)$/i,
           resourceQuery: { not: [/inline/] }, // ignore images with `?inline` query
           type: 'asset/resource',
-          include: /assets\/images/, // images from `assets/images` directory only
+          include: /assets[\\/]images/, // images from `assets/images` directory only, match posix and win paths
           generator: {
             // output filename of images
             filename: 'assets/img/[name].[hash:8][ext]',
@@ -124,7 +125,7 @@ module.exports = (env, argv) => {
         {
           test: /\.(png|svg)$/i,
           type: 'asset',
-          include: /assets\/images/,
+          include: /assets[\\/]images/,
           exclude: /favicon/, // don't inline favicon
           parser: {
             dataUrlCondition: {

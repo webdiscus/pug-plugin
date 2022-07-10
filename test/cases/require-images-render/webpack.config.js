@@ -24,7 +24,7 @@ module.exports = {
   },
 
   entry: {
-    index: './src/pages/index.pug?customData=' + JSON.stringify({ options: { title: 'The title' } }),
+    index: './src/views/index.pug?customData=' + JSON.stringify({ options: { title: 'The title' } }),
   },
 
   plugins: [

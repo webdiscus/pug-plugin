@@ -12,8 +12,8 @@ module.exports = {
   },
 
   entry: {
-    'main/index': './src/pages/main/index.pug',
-    'about/index': './src/pages/about/index.pug',
+    'main/index': './src/views/main/index.pug',
+    'about/index': './src/views/about/index.pug',
   },
 
   plugins: [

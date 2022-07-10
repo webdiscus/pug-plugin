@@ -20,14 +20,14 @@ module.exports = {
 
   entry: {
     //
-    index: './src/pages/index.pug',
-    'assets/css/styles': './src/pages/index.css',
+    index: './src/views/index.pug',
+    'assets/css/styles': './src/views/index.css',
     //
-    about: './src/pages/about/template.pug',
-    'assets/css/about': './src/pages/about/styles.css',
+    about: './src/views/about/template.pug',
+    'assets/css/about': './src/views/about/styles.css',
     //
-    'pages/page01': './src/pages/page01/template.pug',
-    'assets/css/page01': './src/pages/page01/styles.css',
+    'pages/page01': './src/views/page01/template.pug',
+    'assets/css/page01': './src/views/page01/styles.css',
   },
 
   plugins: [

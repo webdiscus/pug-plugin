@@ -1,26 +1,22 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = false;
-
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
-  devtool: isProduction ? false : 'source-map',
+  mode: 'production',
+  devtool: 'source-map',
 
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-
-    // determines the output filename for js
-    filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
+    filename: '[name].js',
   },
 
   entry: {
-    index: './src/pages/index.pug', //                   ==> /index.html
-    'assets/js/main': './src/pages/main.js', //          ==> /assets/js/main.js
+    index: './src/views/index.pug', //                   ==> /index.html
+    'assets/js/main': './src/views/main.js', //          ==> /assets/js/main.js
 
-    'about/index': './src/pages/about/index.pug', //     ==> /about/index.html
-    'assets/js/about': './src/pages/about/script.js', // ==> /assets/js/about.js
+    'about/index': './src/views/about/index.pug', //     ==> /about/index.html
+    'assets/js/about': './src/views/about/script.js', // ==> /assets/js/about.js
   },
 
   plugins: [

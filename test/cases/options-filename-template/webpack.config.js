@@ -11,14 +11,14 @@ module.exports = {
 
   entry: {
     index: {
-      import: './src/index.pug',
+      import: './src/views/index.pug',
       filename: '[name].html',
     },
     page01: {
-      import: './src/pages/page01.pug',
+      import: './src/views/page01.pug',
       filename: '../build/[name].html', // output __dirname/build/page01.html
     },
-    about: './src/about.pug',
+    about: './src/views/about.pug',
   },
 
   plugins: [

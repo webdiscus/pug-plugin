@@ -22,7 +22,7 @@ module.exports = {
     // test import scss via entry-point
     styles: './src/assets/scss/main.scss',
     styles2: './src/assets/main2.scss',
-    index: './src/pages/index.pug',
+    index: './src/views/index.pug',
   },
 
   plugins: [

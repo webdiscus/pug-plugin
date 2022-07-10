@@ -2,7 +2,6 @@ const path = require('path');
 const PugPlugin = require('../../../');
 
 const basePath = path.resolve(__dirname);
-const sourcePath = path.join(basePath, 'src/');
 
 module.exports = {
   mode: 'production',
@@ -20,12 +19,12 @@ module.exports = {
 
   entry: {
     // test default value of the option `sourcePath` to resolve the import filename
-    index: './src/templates/index.pug',
+    index: './src/views/index.pug',
     // test an absolute path for import
-    about: path.join(sourcePath, 'templates/about.pug'),
+    about: path.join(basePath, 'src/views/about.pug'),
     // test default value of the option `outputPath` to resolve the output filename
     page01: {
-      import: './src/templates/pages/page01.pug',
+      import: './src/views/pages/page01.pug',
       filename: 'pages/[name].html',
     },
   },

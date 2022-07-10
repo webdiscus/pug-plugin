@@ -12,7 +12,7 @@ module.exports = {
   },
 
   entry: {
-    index: './src/pages/home/index.pug',
+    index: './src/views/home/index.pug',
   },
 
   plugins: [
@@ -22,10 +22,6 @@ module.exports = {
         PugPlugin.extractCss({
           filename: 'css/[name].[contenthash:4].css',
         }),
-        // {
-        //   test: /\.pug$/,
-        //   outputPath: 'pages/',
-        // },
       ],
     }),
   ],

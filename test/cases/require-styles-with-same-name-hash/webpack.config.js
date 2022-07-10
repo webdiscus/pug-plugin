@@ -11,8 +11,8 @@ module.exports = {
   },
 
   entry: {
-    home: './src/pages/home/index.pug',
-    about: './src/pages/about/index.pug',
+    home: './src/views/home/index.pug',
+    about: './src/views/about/index.pug',
   },
 
   plugins: [

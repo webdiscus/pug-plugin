@@ -17,9 +17,9 @@ module.exports = {
   },
 
   entry: {
-    home: './src/pages/home/index.pug',
-    about: './src/pages/about/index.pug',
-    contact: './src/pages/contact/index.pug',
+    home: './src/views/home/index.pug',
+    about: './src/views/about/index.pug',
+    contact: './src/views/contact/index.pug',
   },
 
   plugins: [

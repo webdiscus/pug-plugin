@@ -12,7 +12,7 @@ module.exports = {
   },
 
   entry: {
-    index: './src/pages/index.pug',
+    index: './src/views/index.pug',
   },
 
   plugins: [

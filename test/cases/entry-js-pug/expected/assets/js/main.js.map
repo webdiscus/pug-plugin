@@ -1,1 +1,1 @@
-{"version":3,"file":"assets/js/main.js","mappings":";;;;;AAAA,qB","sources":["webpack:///./src/pages/main.js"],"sourcesContent":["console.log('index');"],"names":[],"sourceRoot":""}
+{"version":3,"file":"assets/js/main.js","mappings":"AAAAA,QAAQC,IAAI","sources":["webpack:///./src/views/main.js"],"sourcesContent":["console.log('index');"],"names":["console","log"],"sourceRoot":""}
