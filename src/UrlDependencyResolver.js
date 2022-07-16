@@ -35,14 +35,18 @@ const UrlDependencyResolver = {
       this.dependencyDeep = 0;
       const dependency = resolveData.dependencies[0];
       const parentModule = this.moduleGraph.getParentModule(dependency);
-      const result = this.resolveInSnapshot(parentModule.buildInfo.snapshot, resource);
+      const sourceFile = this.resolveInSnapshot(parentModule.buildInfo.snapshot, resource);
 
-      if (result != null) {
-        const resolvedRequest = query ? result.file + '?' + query : result.file;
+      if (sourceFile != null) {
+        const resolvedRequest = query ? sourceFile + '?' + query : sourceFile;
+        const rawRequest = resolveData.request;
+        const issuer = resolveData.contextInfo.issuer;
+
         resolveData.request = resolvedRequest;
         dependency.request = resolvedRequest;
         dependency.userRequest = resolvedRequest;
-        ResourceResolver.addResolvedPath(result.context);
+
+        ResourceResolver.addSourceFile(resolvedRequest, rawRequest, issuer);
       }
     }
   },
@@ -78,10 +82,7 @@ const UrlDependencyResolver = {
 
         file = path.resolve(context, resource);
         if (fs.existsSync(file)) {
-          return {
-            context,
-            file,
-          };
+          return file;
         }
         cache.add(context);
       }

@@ -25,12 +25,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      //verbose: true,
-      modules: [
-        PugPlugin.extractCss({
-          filename: 'assets/css/[name].[contenthash:4].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:4].css',
+      },
     }),
   ],
 
@@ -64,8 +61,5 @@ module.exports = {
         usePolling: true,
       },
     },
-
-    // open in default browser
-    //open: true,
   },
 };

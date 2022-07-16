@@ -6,23 +6,27 @@ const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator'
 
 const { plugin } = require('./config');
 const { isFunction, parseRequest, outToConsole } = require('./utils');
-const { extractHtml, extractCss } = require('./modules');
+
+const extractCss = require('./modules/extractCss');
+const extractHtml = require('./modules/extractHtml');
+
 const ResourceResolver = require('./ResourceResolver');
 const UrlDependencyResolver = require('./UrlDependencyResolver');
 const Pretty = require('./Pretty');
 
+const Asset = require('./Asset');
 const AssetEntry = require('./AssetEntry');
-const AssetModule = require('./AssetModule');
+const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
 
 // supports for responsive-loader
-const ResponsiveLoader = require('./extras/responsive-loader');
+const ResponsiveLoader = require('./extras/ResponsiveLoader');
 
 const {
   optionModulesException,
-  publicPathException,
   executeTemplateFunctionException,
   postprocessException,
+  webpackEntryWarning,
 } = require('./exceptions');
 
 /** @typedef {import('webpack').Compiler} Compiler */
@@ -32,23 +36,31 @@ const {
 /** @typedef {import('webpack-sources').RawSource} RawSource */
 
 /**
- * @typedef {Object} ModuleOptions
+ * @typedef {Object} PugPluginOptions
+ * @property {RegExp} [test = /\.(pug)$/] The search for a match of entry files.
  * @property {boolean} [enabled = true] Enable/disable the plugin.
- * @property {RegExp} test The search for a match of entry files.
+ * @property {boolean} [verbose = false] Show the information at processing entry files.
+ * @property {boolean} [pretty = false] Formatted output of generated HTML.
  * @property {string} [sourcePath = options.context] The absolute path to sources.
  * @property {string} [outputPath = options.output.path] The output directory for an asset.
  * @property {string | function(PathData, AssetInfo): string} [filename = '[name].html'] The file name of output file.
  *   See https://webpack.js.org/configuration/output/#outputfilename.
  *   Must be an absolute or a relative by the context path.
- * @property {function(string, ResourceInfo, Compilation): string | null =} postprocess The post process for extracted content from entry.
- * @property {function(sourceMaps: string, assetFile: string, compilation: Compilation): string | null =} extract
- * @property {boolean} [verbose = false] Show the information at processing entry files.
- * @property {boolean} [pretty = false] Formatted output of generated HTML.
+ * @property {function(string, ResourceInfo, Compilation): string | null} postprocess The post process for extracted content from entry.
+ * @property {ModuleOptions[]} [modules = []]
+ * @property {ModuleOptions} extractCss The options for embedded plugin module to extract CSS.
  */
 
 /**
- * @typedef {ModuleOptions} PugPluginOptions
- * @property {ModuleOptions[]} modules
+ * @typedef {Object} ModuleOptions
+ * @property {RegExp} test The search for a match of entry files.
+ * @property {boolean} [enabled = true] Enable/disable the plugin.
+ * @property {boolean} [verbose = false] Show the information at processing entry files.
+ * @property {string} [sourcePath = options.context] The absolute path to sources.
+ * @property {string} [outputPath = options.output.path] The output directory for an asset.
+ * @property {string | function(PathData, AssetInfo): string} [filename = '[name].html'] The file name of output file.
+ * @property {function(string, ResourceInfo, Compilation): string | null =} postprocess The post process for extracted content from entry.
+ * @property {function(sourceMaps: string, assetFile: string, compilation: Compilation): string | null =} extract
  */
 
 /**
@@ -84,7 +96,7 @@ const {
  */
 
 /**
- * @var {PugPluginOptions} defaultOptions
+ * @type {PugPluginOptions}
  */
 const defaultOptions = {
   test: /\.(pug)$/,
@@ -94,14 +106,11 @@ const defaultOptions = {
   sourcePath: null,
   outputPath: null,
   filename: '[name].html',
-  // experimental basic supports for inline svg
-  inlineAsset: true,
   postprocess: null,
-  // reserved
-  preprocess(content) {},
 
   // each entry has its own local options that override global options
   modules: [],
+  extractCss: {},
 };
 
 /**
@@ -152,16 +161,20 @@ class PugPlugin {
    * @param {PugPluginOptions|{}} options
    */
   constructor(options = {}) {
-    this.options = merge(defaultOptions, options);
+    this.options = merge({}, defaultOptions, options);
     this.enabled = this.options.enabled !== false;
     this.verbose = this.options.verbose === true;
     this.pretty = this.options.pretty === true;
-    this.inlineAsset = this.options.inlineAsset === true;
 
     if (options.modules && !Array.isArray(options.modules)) {
       optionModulesException(options.modules);
     }
-    ResourceResolver.clearCache();
+
+    let moduleOptions = extractCss(options.extractCss);
+    let hasModule = this.options.modules.find((item) => item.test.source === moduleOptions.test.source);
+    if (!hasModule) {
+      this.options.modules.unshift(moduleOptions);
+    }
   }
 
   apply(compiler) {
@@ -177,14 +190,13 @@ class PugPlugin {
       filename: webpackScriptFilename,
     } = webpackOptions.output;
 
-    // TODO: add supports for publicPath: 'auto' (possible will be never released)
-    if (webpackPublicPath == null || webpackPublicPath === 'auto') publicPathException();
-
-    ResourceResolver.init({
+    Asset.init({
+      outputPath: webpackOutputPath,
       publicPath: webpackPublicPath,
     });
 
     // clear caches by tests, webpack watch or serve
+    ResourceResolver.clear();
     AssetEntry.clear();
     AssetScript.clear();
     AssetTrash.reset();
@@ -260,14 +272,17 @@ class PugPlugin {
       const verbose = this.verbose;
       this.compilation = compilation;
 
+      ResourceResolver.init({
+        fs: normalModuleFactory.fs.fileSystem,
+      });
       UrlDependencyResolver.init({
         fs: normalModuleFactory.fs.fileSystem,
         moduleGraph: compilation.moduleGraph,
       });
       AssetEntry.init(compilation);
-      AssetTrash.reset();
+      Asset.reset();
       AssetScript.reset();
-      AssetModule.reset();
+      AssetTrash.reset();
 
       // before resolve
       normalModuleFactory.hooks.beforeResolve.tap(plugin, (resolveData) => {
@@ -302,34 +317,31 @@ class PugPlugin {
         const { context, rawRequest, resource } = createData;
         const issuer = resolveData.contextInfo.issuer;
 
-        if (AssetModule.isDataUrl(rawRequest)) return;
+        if (AssetInline.isDataUrl(rawRequest)) return;
 
         if (module.type === 'asset/inline' || module.type === 'asset') {
-          if (AssetModule.hasExt(resource, 'svg') && AssetModule.hasExt(issuer, 'pug')) {
-            AssetModule.addInlineSvg(issuer, resource);
+          if (AssetInline.hasExt(resource, 'svg') && AssetInline.hasExt(issuer, 'pug')) {
+            AssetInline.addInlineSvg(resource, issuer);
           } else {
-            AssetModule.addDataUrl(issuer, resource);
+            AssetInline.addDataUrl(resource, issuer);
           }
-        }
-
-        if (rawRequest !== resource) {
-          ResourceResolver.addResolvedFile(context, rawRequest, resource);
         }
 
         if (resolveData.dependencyType === 'url') {
-          // TODO: detect correct type by usage other loaders like 'responsive-loader'
           module.isDependencyTypeUrl = true;
-          if (resolveData.contextInfo.issuer) {
+          if (issuer) {
             ResourceResolver.addToModuleCache(resource, rawRequest, issuer);
           }
         }
+
+        ResourceResolver.addSourceFile(resource, rawRequest, issuer || context);
       });
 
       // build module
       compilation.hooks.buildModule.tap(plugin, (module) => {
         if (module.type === 'asset/resource') {
           // if used `html` method fix the CSS module to extract generated source code of CSS
-          if (AssetModule.isCssModule(module)) {
+          if (AssetInline.isCssModule(module)) {
             module.type = 'javascript/auto';
             module.binary = false;
             module.parser = new JavascriptParser('auto');
@@ -352,7 +364,6 @@ class PugPlugin {
           const sources = new Set();
           const contentHashType = 'javascript';
           const chunkModules = chunkGraph.getChunkModulesIterable(chunk);
-          let resourceIssuer = '';
 
           entry.filename = compilation.getPath(chunk.filenameTemplate, { contentHashType, chunk });
           AssetScript.setIssuerFilename(entry.importFile, entry.filename);
@@ -360,42 +371,49 @@ class PugPlugin {
           if (verbose) this.verboseEntry(entry);
 
           for (const module of chunkModules) {
-            const sourceFile = module.resource;
+            const { buildInfo, resource: sourceFile } = module;
 
-            if (!sourceFile || AssetModule.isDataUrl(sourceFile)) continue;
+            if (!sourceFile || AssetInline.isDataUrl(sourceFile)) continue;
 
             // add needless chunks to trash
             if (AssetScript.has(sourceFile)) {
-              const file = module.buildInfo.filename;
+              const file = buildInfo.filename;
               if (file != null) {
                 AssetTrash.toTrash(file);
               }
               continue;
             }
 
-            const { buildInfo } = module;
-            const resourceResolveDataContext = module.resourceResolveData.context || {};
-            const issuerFile = resourceResolveDataContext.issuer || sourceFile;
+            const { issuer } = module.resourceResolveData.context;
+            const issuerFile = issuer && !issuer.endsWith('.pug') ? issuer : entry.importFile;
 
             // decide asset type by webpack option parser.dataUrlCondition.maxSize
             if (module.type === 'asset') {
-              module.type = module.buildInfo.dataUrl === true ? 'asset/inline' : 'asset/resource';
+              module.type = buildInfo.dataUrl === true ? 'asset/inline' : 'asset/resource';
             }
 
             if (AssetEntry.isEntryModule(module) && chunkGraph.isEntryModuleInChunk(module, chunk)) {
-              // entry-point
+              // entry point
               const source = module.originalSource();
               // module builder error
               if (source == null) return;
 
+              const sourceFile = entry.importFile;
               const pluginModule = this.getModule(sourceFile) || entry;
-              const assetFile = entry.filename;
+              const { filename: assetFile } = entry;
+
+              const isScript = assetFile.endsWith('.js');
+              const isStyle = assetFile.endsWith('.css');
+              if (isScript || isStyle) {
+                const relativeSourceFile = path.relative(webpackOptions.context, sourceFile);
+                webpackEntryWarning(relativeSourceFile);
+              }
 
               const postprocessInfo = {
                 isEntry: true,
                 verbose: entry.verbose,
                 filename: chunk.filenameTemplate,
-                sourceFile: entry.importFile,
+                sourceFile,
                 outputFile: entry.file,
                 assetFile,
               };
@@ -404,7 +422,7 @@ class PugPlugin {
                 isEntry: true,
                 // compiler arguments
                 source: source.source().toString(),
-                sourceFile: entry.importFile,
+                sourceFile,
                 assetFile,
                 pluginModule,
                 // result options
@@ -415,22 +433,21 @@ class PugPlugin {
                 filenameTemplate: chunk.filenameTemplate,
               });
 
-              resourceIssuer = entry.importFile;
+              Asset.addFile(sourceFile, assetFile);
             } else if (module.type === 'javascript/auto') {
-              // require a resource supported via the plugin module, e.g. style
+              // processing of the asset supported via the plugin module
               const source = module.originalSource();
-              // module builder error
+              // break process by module builder error
               if (source == null) return;
 
               const pluginModule = this.getModule(sourceFile);
               if (pluginModule == null) continue;
 
-              let { name } = path.parse(sourceFile);
-
               // note: the `id` is
               // - in production mode as a number
               // - in development mode as a relative path
               const id = chunkGraph.getModuleId(module);
+              const { name } = path.parse(sourceFile);
               const hash = buildInfo.assetInfo ? buildInfo.assetInfo.contenthash : buildInfo.hash;
               const filenameTemplate = pluginModule.filename ? pluginModule.filename : entry.filenameTemplate;
 
@@ -445,11 +462,18 @@ class PugPlugin {
                 },
               };
 
-              let assetFile = compilation.getAssetPath(filenameTemplate, contextData);
-              assetFile = AssetModule.getUniqueFilename(sourceFile, assetFile);
+              const assetPath = compilation.getAssetPath(filenameTemplate, contextData);
+              const { isCached, filename: assetFile } = Asset.getUniqueFilename(sourceFile, assetPath);
+              const issuerAssetFile = Asset.findAssetFile(issuerFile);
+              const outputAssetFile = Asset.getOutputFile(assetFile, issuerAssetFile);
+
+              // using auto publicPath same asset file can have different output filenames in depend on issuer path
+              ResourceResolver.addToChunkCache(sourceFile, outputAssetFile, issuerFile);
 
               // skip already processed assets
-              if (assetFile === false) continue;
+              if (isCached === true) {
+                continue;
+              }
 
               const postprocessInfo = {
                 isEntry: false,
@@ -459,14 +483,6 @@ class PugPlugin {
                 outputFile: entry.file,
                 assetFile,
               };
-
-              if (verbose) {
-                this.verboseExtractModule({
-                  issuerFile,
-                  sourceFile,
-                  assetFile: path.join(webpackOutputPath, assetFile),
-                });
-              }
 
               sources.add({
                 isEntry: false,
@@ -483,18 +499,24 @@ class PugPlugin {
                 filenameTemplate,
               });
 
-              ResourceResolver.addToChunkCache(module, path.posix.join(webpackPublicPath, assetFile));
-              resourceIssuer = sourceFile;
+              if (verbose) {
+                this.verboseExtractModule({
+                  issuerFile,
+                  sourceFile,
+                  assetFile: path.join(webpackOutputPath, assetFile),
+                });
+              }
             } else if (module.type === 'asset/resource') {
               // require a resource in pug or in css via url()
-              let assetFile = buildInfo.filename;
+              const assetFile = buildInfo.filename;
 
               // supports for resources processed via responsive-loader
               if (ResponsiveLoader.isUsed()) {
-                const asset = ResponsiveLoader.getAsset(module);
+                const asset = ResponsiveLoader.getAsset(module, issuerFile);
+
                 if (asset != null) {
+                  ResourceResolver.addToChunkCache(sourceFile, asset, issuerFile);
                   AssetTrash.toTrash(assetFile);
-                  ResourceResolver.addToChunkCache(module, asset);
 
                   if (verbose) {
                     this.verboseExtractResource({
@@ -508,7 +530,13 @@ class PugPlugin {
                 }
               }
 
-              assetFile = path.posix.join(webpackPublicPath, assetFile);
+              if (module.isDependencyTypeUrl !== true) {
+                const issuerAssetFile = Asset.findAssetFile(issuerFile);
+                const outputAssetFile = Asset.getOutputFile(assetFile, issuerAssetFile);
+                ResourceResolver.addToChunkCache(sourceFile, outputAssetFile, issuerFile);
+              }
+              // try to find same resource that possible is used in styles
+              ResourceResolver.setAssetFileInModuleCache(sourceFile, assetFile);
 
               if (verbose) {
                 this.verboseExtractResource({
@@ -518,33 +546,49 @@ class PugPlugin {
                   assetFile,
                 });
               }
-
-              if (module.isDependencyTypeUrl) {
-                ResourceResolver.setAssetFileInModuleCache(module.resource, assetFile);
-              } else {
-                ResourceResolver.addToChunkCache(module, assetFile);
-              }
             } else if (module.type === 'asset/inline') {
               const assetFile = entry.filename;
 
-              if (AssetModule.hasExt(sourceFile, 'svg')) {
+              if (AssetInline.hasExt(sourceFile, 'svg')) {
                 // reserved: extract SVG from processed source of module
                 // const dataUrl = codeGenerationResults.getData(module, chunk.runtime, 'url').toString();
                 // const encodedData = dataUrl.slice(dataUrl.indexOf('base64,') + 7);
                 // const svg = Buffer.from(encodedData, 'base64').toString();
-                AssetModule.setInlineSvg(assetFile, module);
+                AssetInline.setInlineSvg(assetFile, module);
               } else {
-                if (!AssetModule.hasDataUrl(sourceFile)) {
+                if (!AssetInline.hasDataUrl(sourceFile)) {
                   const dataUrl = codeGenerationResults.getData(module, chunk.runtime, 'url').toString();
-                  AssetModule.setDataUrlContent(sourceFile, dataUrl);
+                  AssetInline.setDataUrlContent(sourceFile, dataUrl);
                 }
               }
             }
           }
 
+          // normalize moduleCache
+          for (let [sourceFile, item] of ResourceResolver.moduleCache) {
+            // normalize resolved source files
+            if (!item.assetFile) {
+              for (let issuer of item.issuers) {
+                for (let rawRequest of item.rawRequests) {
+                  ResourceResolver.addSourceFile(sourceFile, rawRequest, issuer);
+                }
+              }
+              // skip assets that have not yet been compiled, they will be processed in the next entry point
+              continue;
+            }
+
+            // normalize output asset files
+            for (let issuer of item.issuers) {
+              const issuerAssetFile = Asset.findAssetFile(issuer);
+              const assetOutputFile = Asset.getOutputFile(item.assetFile, issuerAssetFile);
+              ResourceResolver.addToChunkCache(sourceFile, assetOutputFile, issuer);
+            }
+          }
+
           for (let item of sources) {
+            // the source is empty when webpack config contains an error
             if (!item.source) continue;
-            // note: by any error in webpack config the source is empty
+
             let compiledResult = this.compileSource(
               item.source,
               item.sourceFile,
@@ -600,8 +644,8 @@ class PugPlugin {
       // postprocess for assets content
       // only at this stage the js file has the final hashed name
       compilation.hooks.afterProcessAssets.tap(plugin, () => {
-        AssetScript.replaceSourceFilesInCompilation(compilation, webpackPublicPath);
-        AssetModule.insertInlineSvg(compilation);
+        AssetScript.replaceSourceFilesInCompilation(compilation);
+        AssetInline.insertInlineSvg(compilation);
       });
     });
   }
@@ -705,7 +749,7 @@ class PugPlugin {
       `${ansis.black.bgGreen(`[${plugin}]`)} Compile the entry ${ansis.green(entry.name)}\n` +
         ` filename: ${
           isFunction(entry.filenameTemplate)
-            ? ansis.greenBright('[Function: filename]')
+            ? ansis.greenBright`[Function: filename]`
             : ansis.magenta(entry.filenameTemplate.toString())
         }\n` +
         ` source: ${ansis.cyan(entry.importFile)}\n` +
@@ -720,7 +764,7 @@ class PugPlugin {
    */
   verboseExtractModule({ issuerFile, sourceFile, assetFile }) {
     outToConsole(
-      `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite(` Extract Module `)} in ` +
+      `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite` Extract Module `} in ` +
         `${ansis.green(issuerFile)}\n` +
         ` source: ${ansis.cyan(sourceFile)}\n` +
         ` output: ${ansis.cyanBright(assetFile)}\n`
@@ -735,7 +779,7 @@ class PugPlugin {
    */
   verboseExtractResource({ issuerFile, sourceFile, outputPath, assetFile }) {
     outToConsole(
-      `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite(` Extract Resource `)} in ` +
+      `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite` Extract Resource `} in ` +
         `${ansis.green(issuerFile)}\n` +
         `      source: ${ansis.cyan(sourceFile)}\n` +
         ` output path: ${ansis.cyanBright(outputPath)}\n` +

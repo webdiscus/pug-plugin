@@ -4,19 +4,19 @@ html
   body
     -
       const img = {
-        src: require('~Images/delfin.jpg?size=200'),
-        srcSet: require('~Images/delfin.jpg?sizes[]=100,sizes[]=200,sizes[]=300&format=png'),
+        src: require('~Images/image.png?size=200'),
+        srcSet: require('~Images/image.png?sizes[]=100,sizes[]=200,sizes[]=300&format=jpg'),
       }
 
-    p.default= require('~Images/delfin.jpg')
+    p.default= require('~Images/image.png')
     img.responsible(srcset=img.srcSet src=img.src alt="responsive image")
-    img.json(src=require('~Images/delfin.jpg?{size:105, format:"webp"}'))
+    img.json(src=require('~Images/image.png?{size:105, format:"webp"}'))
 
 
-    p src webp: #{require("~Images/delfin.jpg?prop=src&format=webp&size=200")}
-    p srcSet: #{require("~Images/delfin.jpg?prop=srcSet&format=webp&sizes[]=100,sizes[]=200,sizes[]=300&placeholder=true")}
+    p src webp: #{require("~Images/image.png?prop=src&format=webp&size=200")}
+    p srcSet: #{require("~Images/image.png?prop=srcSet&format=webp&sizes[]=100,sizes[]=200,sizes[]=300&placeholder=true")}
 
     p.
-      Site
-      width: #{require("~Images/delfin.jpg?prop=width")}
-      height: #{require("~Images/delfin.jpg?prop=height&sizes[]=100,sizes[]=200")}
+      Image
+      width: #{require("~Images/image.png?prop=width")}
+      height: #{require("~Images/image.png?prop=height&sizes[]=100,sizes[]=200")}

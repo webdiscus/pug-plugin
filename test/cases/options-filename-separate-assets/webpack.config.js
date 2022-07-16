@@ -8,7 +8,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'js/[name].[contenthash:4].js',
+    filename: 'js/[name].[contenthash:8].js',
   },
 
   entry: {
@@ -17,12 +17,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      //verbose: true,
-      modules: [
-        PugPlugin.extractCss({
-          filename: 'css/[name].[contenthash:4].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'css/[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -51,17 +48,5 @@ module.exports = {
         },
       },
     ],
-  },
-};
-
-var qq = {
-  test: /\.(png|jpg|jpeg|ico|svg|woff2)/, // filter for both images and fonts
-  type: 'asset/resource',
-  generator: {
-    filename: (pathData) => {
-      const { dir } = path.parse(pathData.filename); // get relative path started with `src/...`
-      const outputPath = dir.replace('src/', ''); // remove the source dir from path
-      return outputPath + '/[name].[hash:8][ext]'; // return output path with resource filename
-    },
   },
 };

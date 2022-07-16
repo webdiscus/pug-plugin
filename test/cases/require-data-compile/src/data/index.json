@@ -1,0 +1,10 @@
+{
+  "head": {
+    "title": "title - index",
+    "description": "description - index"
+  },
+  "body": {
+    "image": "../images/home.png",
+    "mainText": "main text - index"
+  }
+}

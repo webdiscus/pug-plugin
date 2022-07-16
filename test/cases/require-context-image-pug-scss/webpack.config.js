@@ -1,6 +1,5 @@
 const path = require('path');
 const PugPlugin = require('../../../');
-//const PugPlugin = require('pug-plugin');
 
 const srcPath = path.resolve(__dirname, 'src');
 
@@ -21,7 +20,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    // the output filename for js
     filename: '[name].[contenthash:8].js',
   },
 
@@ -31,11 +29,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 

@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const ansis = require('ansis');
 const { plugin } = require('./config');
+const { outToConsole } = require('./utils');
 
 const ansisPluginName = `\n${ansis.red(`[${plugin}]`)}`;
 let lastError = null;
@@ -39,23 +40,8 @@ const PugPluginError = function (message, error = '') {
  */
 const optionModulesException = (modules) => {
   const message =
-    `${ansisPluginName} The plugin option ${ansis.green('modules')} must be the array of ${ansis.green(
-      'ModuleOptions'
-    )} but given:\n` + ansis.cyanBright(JSON.stringify(modules));
-
-  PugPluginError(message);
-};
-
-/**
- * @throws {Error}
- */
-const publicPathException = () => {
-  const message =
-    `${ansisPluginName} This plugin yet not support 'auto' or undefined ${ansis.yellow('output.publicPath')}.\n` +
-    `Define a publicPath in the webpack configuration, for example: \n` +
-    `${ansis.magenta("output: { publicPath: '/' }")}\n` +
-    `  or as a function (will be called in compilation time)\n` +
-    `${ansis.magenta("output: { publicPath: (obj) => '/' }")}.`;
+    `${ansisPluginName} The plugin option ${ansis.green`modules`} must be the array of ${ansis.green`ModuleOptions`} but given:\n` +
+    ansis.cyanBright(JSON.stringify(modules));
 
   PugPluginError(message);
 };
@@ -69,14 +55,12 @@ const resolveException = (file, issuer) => {
   let message = `${ansisPluginName} Can't resolve the file ${ansis.cyan(file)} in ${ansis.blueBright(issuer)}`;
 
   if (path.isAbsolute(file) && !fs.existsSync(file)) {
-    message += `\n${ansis.yellow('The reason:')} this file not found!`;
+    message += `\n${ansis.yellow`The reason:`} this file not found!`;
   } else if (/\.css$/.test(file) && file.indexOf('??ruleSet')) {
     //message += `\nThe ${ansis.yellow('@import CSS rule')} is not supported. Avoid CSS imports!`;
     message +=
-      `\nThe handling of ${ansis.yellow(
-        '@import at-rules in CSS'
-      )} is not supported. Disable the 'import' option in 'css-loader':\n` +
-      ansis.white(`
+      `\nThe handling of ${ansis.yellow`@import at-rules in CSS`} is not supported. Disable the 'import' option in 'css-loader':\n` +
+      ansis.white`
 {
   test: /\.(css|scss)$/i,
   use: [
@@ -88,7 +72,7 @@ const resolveException = (file, issuer) => {
     },
     'sass-loader',
   ],
-},`);
+},`;
   }
 
   PugPluginError(message);
@@ -120,12 +104,32 @@ const postprocessException = (error, info) => {
   PugPluginError(message, error);
 };
 
+/**
+ * @param {string} file The source file of asset.
+ */
+const webpackEntryWarning = (file) => {
+  const hlAttr = ansis.hex('#c59df0');
+  const hlFn = ansis.hex('#79c0ff');
+  const hlVal = ansis.hex('#a5d6ff');
+  const hlTag = ansis.hex('#7de686');
+
+  outToConsole(
+    `${ansis.black.bgYellow(`[${plugin}] WARNING `)} ` +
+      `${ansis.yellow`DON'T define scripts or styles in Webpack entry, specify them directly in Pug!`}\n` +
+      `The file ${ansis.cyan(file)} must be specified in Pug.\n` +
+      `For example:\n` +
+      `  ${hlTag`link`}(${hlAttr`href`}=${hlFn`require`}(${hlVal`'./styles.scss'`}) ${hlAttr`rel`}=${hlVal`'stylesheet'`})\n` +
+      `  ${hlTag`script`}(${hlAttr`src`}=${hlFn`require`}(${hlVal`'./scripts.js'`}) ${hlAttr`defer`})\n\n` +
+      `For more information, see ${ansis.blueBright`https://github.com/webdiscus/pug-plugin`}.`
+  );
+};
+
 module.exports = {
   PugPluginError,
   PugPluginException,
   optionModulesException,
   resolveException,
-  publicPathException,
   executeTemplateFunctionException,
   postprocessException,
+  webpackEntryWarning,
 };

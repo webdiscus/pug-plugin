@@ -1,7 +1,5 @@
 const path = require('path');
 const PugPlugin = require('../../../');
-const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
 
 module.exports = {
   mode: 'development',
@@ -16,15 +14,7 @@ module.exports = {
     styles: './src/assets/main.scss',
   },
 
-  plugins: [
-    new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: 'assets/[name].min.css',
-        }),
-      ],
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
@@ -33,14 +23,11 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           // Load the CSS, set url = false to prevent following urls to fonts and images.
-          { loader: 'css-loader', options: { url: false, importLoaders: 1, sourceMap: true } },
-          // Add browser prefixes and minify CSS.
           {
-            loader: 'postcss-loader',
+            loader: 'css-loader',
             options: {
-              postcssOptions: {
-                plugins: [autoprefixer(), cssnano()],
-              },
+              url: false,
+              importLoaders: 1,
               sourceMap: true,
             },
           },

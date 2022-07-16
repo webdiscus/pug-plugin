@@ -8,7 +8,6 @@ module.exports = {
   devtool: 'source-map',
 
   resolve: {
-    // aliases used in the pug template
     alias: {
       Images: path.join(__dirname, 'src/assets/images/'),
       Styles: path.join(__dirname, 'src/assets/styles/'),
@@ -18,8 +17,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-
-    // determines the output filename for js
     filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
   },
 
@@ -30,14 +27,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        // add the extractor to handle styles from the entry
-        PugPlugin.extractCss({
-          verbose: true,
-          // the output filename for all styles from the entry
-          filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
-        }),
-      ],
+      extractCss: {
+        filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
+      },
     }),
   ],
 
@@ -50,8 +42,6 @@ module.exports = {
           method: 'render',
         },
       },
-
-      // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
         use: [

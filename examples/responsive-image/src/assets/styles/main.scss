@@ -66,7 +66,7 @@ code a {
   background-size: cover;
   // placeholder of responsive image
   // 2 ways to define placeholder: one is in Pug via style attribute, other is in CSS
-  background-image: url('Images/astronaft.jpg?prop=placeholder&placeholder=true&placeholderSize=100');
+  background-image: url('Images/abstract.webp?prop=placeholder&placeholder=true&placeholderSize=100');
   background-position: 0 35%;
 
   // responsive image
@@ -74,10 +74,7 @@ code a {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 0 35%;
-    //background-color: transparent !important;
-    //background: green;
-    //visibility: hidden;
+    object-position: 50% 40%;
   }
 }
 
@@ -92,14 +89,23 @@ code a {
     margin-right: auto;
     padding-left: $content-padding-x;
     padding-right: $content-padding-x;
+    justify-content: center;
   }
 
   .text {
     position: absolute;
-    left: $content-padding-x;
     width: fit-content;
     font-size: 40px;
+    color: #d6b729;
+    text-transform: uppercase;
     z-index: 10;
+
+    @media (max-width: 760px) {
+      font-size: 30px;
+    }
+    @media (max-width: 360px) {
+      font-size: 24px;
+    }
   }
 }
 
@@ -112,7 +118,7 @@ code a {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%;
+  //width: 100%;
   max-width: $content-max-width;
   margin-left: auto;
   margin-right: auto;
@@ -189,10 +195,10 @@ ul {
 }
 
 // styles for demo on page
-$width: 260;
+$width: 200;
 $height: 145;
 .demo-image {
   width: #{$width}px;
   height: #{$height}px;
-  background-image: url('~Images/gate.jpg?size=#{$width}');
+  background-image: url('~Images/image.webp?size=#{$width}');
 }

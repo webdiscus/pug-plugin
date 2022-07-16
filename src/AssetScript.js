@@ -1,4 +1,5 @@
 const path = require('path');
+const Asset = require('./Asset');
 const AssetEntry = require('./AssetEntry');
 const { isWin } = require('./config');
 const { parseRequest, pathToPosix } = require('./utils');
@@ -8,17 +9,16 @@ const { parseRequest, pathToPosix } = require('./utils');
  * @singleton
  */
 const AssetScript = {
-  files: [],
   index: 1,
+  files: [],
 
   /**
    * Replace all required source filenames with generating asset filenames.
    * Note: this method must be called in the afterProcessAssets compilation hook.
    *
    * @param {Compilation} compilation The instance of the webpack compilation.
-   * @param {string} outputPublicPath The output public path.
    */
-  replaceSourceFilesInCompilation(compilation, outputPublicPath) {
+  replaceSourceFilesInCompilation(compilation) {
     const RawSource = compilation.compiler.webpack.sources.RawSource;
     const usedScripts = new Map();
 
@@ -47,13 +47,13 @@ const AssetScript = {
       let newContent = content;
       let scriptTags = '';
 
-      // filter only scripts w/o hmr
+      // filter only scripts w/o HMR
       chunkFiles = chunkFiles.filter((file) => compilation.assetsInfo.get(file).hotModuleReplacement !== true);
       asset.chunkFiles = chunkFiles;
 
       // replace source filename with asset filename
       if (chunkFiles.length === 1) {
-        const assetFile = path.posix.join(outputPublicPath, chunkFiles.values().next().value);
+        const assetFile = Asset.getOutputFile(chunkFiles.values().next().value, issuerFile);
         newContent = content.replace(request, assetFile);
       } else {
         // extract original script tag with all attributes for usage it as template for chunks
@@ -73,7 +73,7 @@ const AssetScript = {
           // avoid generate a script of the same split chunk used in different js files required in one pug file,
           // happens when used optimisation.splitChunks
           if (chunkScripts.indexOf(file) < 0) {
-            const scriptFile = path.posix.join(outputPublicPath, file);
+            const scriptFile = Asset.getOutputFile(file, issuerFile);
             scriptTags += tmplScriptStart + scriptFile + tmplScriptEnd;
             chunkScripts.push(file);
           }
@@ -123,7 +123,7 @@ const AssetScript = {
     let cachedFile = this.files.find((item) => item.request === request && item.issuer.request === issuer);
     if (cachedFile) {
       // update the name for the script
-      // after rebuild by hmr the same request can be generated with other asset name
+      // after rebuild by HMR the same request can be generated with other asset name
       cachedFile.name = name;
       cachedFile.chunkFiles = [];
       return;
@@ -153,11 +153,20 @@ const AssetScript = {
     }
   },
 
+  /**
+   *
+   * @param {string} request
+   * @return {boolean}
+   */
   has(request) {
     if (isWin) request = pathToPosix(request);
     return this.files.find((item) => item.request === request);
   },
 
+  /**
+   * @param {string} request
+   * @return {string|null}
+   */
   getResource(request) {
     const { resource, query } = parseRequest(request);
 
@@ -165,20 +174,19 @@ const AssetScript = {
   },
 
   /**
-   * Reset cache before new compilation by webpack watch or serve.
+   * Reset before new compilation by webpack watch or serve.
    */
   reset() {
     // don't reset files because this cache is used by webpack watch or serve
-    //this.files = [];
     this.index = 1;
   },
 
   /**
-   * Clear caches before start of this plugin.
+   * Clear cache before start of this plugin.
    */
   clear() {
-    this.files = [];
     this.index = 1;
+    this.files = [];
   },
 };
 

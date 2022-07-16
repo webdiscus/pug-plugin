@@ -2,8 +2,7 @@ const path = require('path');
 const PugPlugin = require('../../../');
 
 module.exports = {
-  mode: 'production',
-  devtool: false,
+  mode: 'development',
 
   resolve: {
     alias: {
@@ -14,7 +13,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: '[name].[contenthash:8].js',
   },
 
   entry: {
@@ -23,12 +21,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          // css output filename
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 

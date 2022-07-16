@@ -1,14 +1,12 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const basePath = path.resolve(__dirname);
-
 module.exports = {
   mode: 'production',
 
   resolve: {
     alias: {
-      Images: path.join(basePath, 'src/assets/images/'),
+      Images: path.join(__dirname, 'src/assets/images/'),
     },
   },
 
@@ -21,10 +19,10 @@ module.exports = {
     // test default value of the option `sourcePath` to resolve the import filename
     index: './src/views/index.pug',
     // test an absolute path for import
-    about: path.join(basePath, 'src/views/about.pug'),
+    about: path.join(__dirname, 'src/views/about.pug'),
     // test default value of the option `outputPath` to resolve the output filename
-    page01: {
-      import: './src/views/pages/page01.pug',
+    home: {
+      import: './src/views/pages/home.pug',
       filename: 'pages/[name].html',
     },
   },

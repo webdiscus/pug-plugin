@@ -6,8 +6,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    // exception: publicPath
-    publicPath: 'auto',
+    publicPath: '/',
   },
 
   entry: {
@@ -17,13 +16,12 @@ module.exports = {
   plugins: [
     new PugPlugin({
       // test: modules must be the array of ModuleOptions, also not any object
-      modules: PugPlugin.extractCss(),
+      modules: {},
     }),
   ],
 
   module: {
     rules: [
-      // Templates
       {
         test: /\.pug$/,
         loader: PugPlugin.loader,

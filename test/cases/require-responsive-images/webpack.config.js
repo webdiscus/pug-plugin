@@ -6,7 +6,6 @@ module.exports = {
   devtool: false,
 
   resolve: {
-    // aliases used in the pug template
     alias: {
       Images: path.join(__dirname, 'src/assets/images/'),
       Styles: path.join(__dirname, 'src/assets/styles/'),
@@ -15,21 +14,15 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '/',
-
-    // the output filename for js
+    //publicPath: '/',
     filename: '[name].[contenthash:8].js',
   },
 
   entry: {
-    index: './src/views/index.pug',
+    'pages/home': './src/views/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      verbose: true,
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
@@ -56,15 +49,6 @@ module.exports = {
           },
         },
       },
-
-      // image resources processing via require() in pug
-      // {
-      //   test: /\.(png|jpg|jpeg|ico)/,
-      //   type: 'asset/resource',
-      //   generator: {
-      //     filename: 'assets/img/[name].[hash:8][ext]',
-      //   },
-      // },
     ],
   },
 };

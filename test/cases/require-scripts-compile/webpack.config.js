@@ -8,7 +8,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'assets/js/[name].[contenthash:4].js',
+    filename: 'assets/js/[name].[contenthash:8].js',
   },
 
   entry: {
@@ -17,7 +17,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      verbose: true,
+      extractCss: {
+        filename: '[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -28,6 +30,17 @@ module.exports = {
         loader: PugPlugin.loader,
         options: {
           method: 'compile',
+        },
+      },
+      {
+        test: /\.(css)$/,
+        loader: 'css-loader',
+      },
+      {
+        test: /\.(png|jpg|jpeg|ico)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/img/[name].[hash:8][ext]',
         },
       },
     ],

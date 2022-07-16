@@ -19,19 +19,14 @@ module.exports = {
 
   entry: {
     index: './src/views/index.pug',
-    about: './src/views/about.pug?title=hello',
+    about: './src/views/about.pug?title=about', // test import file with query
   },
 
   plugins: [
     new PugPlugin({
-      // enable inject inline svg asset
-      //inlineAsset: true,
-      modules: [
-        PugPlugin.extractCss({
-          // css output filename
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 

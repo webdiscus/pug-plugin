@@ -73,6 +73,10 @@ describe('AssetEntry tests', () => {
 });
 
 describe('options', () => {
+  test('output.publicPath = auto', (done) => {
+    compareFileListAndContent(PATHS, 'auto-public-path', done);
+  });
+
   test('options.enabled = false', (done) => {
     compareFileListAndContent(PATHS, 'options-enabled', done);
   });
@@ -110,7 +114,7 @@ describe('options', () => {
   });
 
   test('options.outputPath', (done) => {
-    compareFileListAndContent(PATHS, 'options-outputpath', done);
+    compareFileListAndContent(PATHS, 'options-output-path', done);
   });
 
   test('options.pretty', (done) => {
@@ -158,19 +162,19 @@ describe('integration tests', () => {
   });
 
   test('entry: pug require data, method compile', (done) => {
-    compareFileListAndContent(PATHS, 'require-data-method-compile', done);
+    compareFileListAndContent(PATHS, 'require-data-compile', done);
   });
 
   test('entry: pug require data, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-data-method-render', done);
+    compareFileListAndContent(PATHS, 'require-data-render', done);
   });
 
   test('entry: pug require data, method html', (done) => {
-    compareFileListAndContent(PATHS, 'require-data-method-html', done);
+    compareFileListAndContent(PATHS, 'require-data-html', done);
   });
 
   test('entry: alias resolve.plugins, method compile', (done) => {
-    compareFileListAndContent(PATHS, 'entry-alias-resolve.plugins-compile', done);
+    compareFileListAndContent(PATHS, 'entry-alias-resolve-compile', done);
   });
 });
 
@@ -219,12 +223,16 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-images-render', done);
   });
 
+  test('require images in pug, method html', (done) => {
+    compareFileListAndContent(PATHS, 'require-images-html', done);
+  });
+
   test('require assets in pug, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-assets-method-render', done);
+    compareFileListAndContent(PATHS, 'require-assets-render', done);
   });
 
   test('require assets in pug, method html', (done) => {
-    compareFileListAndContent(PATHS, 'require-assets-method-html', done);
+    compareFileListAndContent(PATHS, 'require-assets-html', done);
   });
 
   test('require styles in pug', (done) => {
@@ -237,6 +245,10 @@ describe('require assets tests', () => {
 
   test('require styles with same name', (done) => {
     compareFileListAndContent(PATHS, 'require-styles-with-same-name', done);
+  });
+
+  test('multiple-chunks-same-filename', (done) => {
+    compareFileListAndContent(PATHS, 'multiple-chunks-same-filename', done);
   });
 
   test('require styles with same name, hash', (done) => {
@@ -270,18 +282,26 @@ describe('require assets tests', () => {
 });
 
 describe('resolve url in style', () => {
-  test('relative path in url', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-url-relative', done);
-  });
-
   test('alias in url', (done) => {
     compareFileListAndContent(PATHS, 'resolve-url-alias', done);
+  });
+
+  test('alias and relative in url', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-url-alias-relative', done);
+  });
+
+  test('relative path in url', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-url-relative', done);
   });
 });
 
 describe('responsive images', () => {
   test('require images in pug', (done) => {
     compareFileListAndContent(PATHS, 'require-responsive-images', done);
+  });
+
+  test('require images in pug and in css', (done) => {
+    compareFileListAndContent(PATHS, 'require-responsive-images-css', done);
   });
 });
 
@@ -353,16 +373,6 @@ describe('exception tests', () => {
     }
   });
 
-  test('exception: publicPath undefined', (done) => {
-    const containString = `This plugin yet not support 'auto' or undefined`;
-    exceptionContain(PATHS, 'exception-public-path-undefined', containString, done);
-  });
-
-  test('exception: publicPath auto', (done) => {
-    const containString = `This plugin yet not support 'auto' or undefined`;
-    exceptionContain(PATHS, 'exception-public-path-auto', containString, done);
-  });
-
   test('exception: execute template function', (done) => {
     const containString = 'Failed to execute template function';
     exceptionContain(PATHS, 'exception-execute-template', containString, done);
@@ -386,5 +396,10 @@ describe('exception tests', () => {
   test('exception: execute postprocess', (done) => {
     const containString = 'Postprocess execution failed';
     exceptionContain(PATHS, 'exception-execute-postprocess', containString, done);
+  });
+
+  test('exception: multiple chunks with same filename', (done) => {
+    const containString = 'Multiple chunks emit assets to the same filename';
+    exceptionContain(PATHS, 'exception-multiple-chunks-same-filename', containString, done);
   });
 });

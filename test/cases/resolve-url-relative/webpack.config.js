@@ -18,14 +18,10 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      verbose: true,
-      modules: [
-        PugPlugin.extractCss({
-          //verbose: true,
-          // test conflict: Multiple chunks emit assets to the same filename
-          filename: 'assets/css/[name].css',
-        }),
-      ],
+      extractCss: {
+        // test conflict: Multiple chunks emit assets to the same filename
+        filename: 'assets/css/[name].css',
+      },
     }),
   ],
 
@@ -41,7 +37,6 @@ module.exports = {
 
       {
         test: /\.(css|sass|scss)$/,
-        //use: ['css-loader', 'sass-loader'],
         use: [
           {
             loader: 'css-loader',

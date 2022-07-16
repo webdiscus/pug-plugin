@@ -21,7 +21,6 @@ module.exports = {
         {
           test: /\.pug$/,
           postprocess: (content) => {
-            //console.log('\n### HTML:\n', content);
             return content;
           },
         },

@@ -28,7 +28,6 @@ module.exports = {
 
   module: {
     rules: [
-      // Templates
       {
         test: /\.pug$/,
         loader: PugPlugin.loader,

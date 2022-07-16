@@ -1,0 +1,4 @@
+mixin menuItem(page)
+  .nav
+    p: a(class=(page === 'home') ? 'active' : '' href=(page === 'home' ? './index.html' : '../index.html') title='home') home
+    p: a(class=(page === 'about') ? 'active' : '' href=(page === 'about' ? './about.html' : './pages/about.html') title='about') about

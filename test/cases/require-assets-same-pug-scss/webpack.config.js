@@ -23,14 +23,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      // enable inject inline svg asset
-      //inlineAsset: true,
-      modules: [
-        PugPlugin.extractCss({
-          // css output filename
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 

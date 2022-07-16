@@ -21,12 +21,7 @@ module.exports = {
     index: './src/views/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      // enable inject inline svg asset
-      inlineAsset: true,
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [

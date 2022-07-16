@@ -8,7 +8,6 @@ module.exports = {
   devtool: isProduction ? false : 'source-map',
 
   resolve: {
-    // aliases used in the pug template
     alias: {
       Images: path.join(__dirname, 'src/assets/images/'),
       Styles: path.join(__dirname, 'src/assets/styles/'),
@@ -18,8 +17,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-
-    // determines the output filename for js
     filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
   },
 
@@ -43,7 +40,6 @@ module.exports = {
         },
       },
 
-      // image resources processing via require() in pug
       {
         test: /\.(png|jpg|jpeg|ico)/,
         type: 'asset/resource',

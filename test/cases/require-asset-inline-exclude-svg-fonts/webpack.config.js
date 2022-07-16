@@ -1,10 +1,6 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isWin = path.sep === '\\';
-const includeImagesRegexp = isWin ? /assets\\images/ : /assets\/images/;
-const includeFontsRegexp = isWin ? /assets\\fonts/ : /assets\/fonts/;
-
 // Free icon fonts
 // - Material icons: https://fonts.google.com/icons
 // - Elusive icons: http://elusiveicons.com
@@ -44,12 +40,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          // css output filename
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -72,7 +65,7 @@ module.exports = {
       {
         test: /\.(woff2?|ttf|otf|eot|svg)$/,
         type: 'asset/resource',
-        include: includeFontsRegexp, // fonts from `assets/fonts` directory
+        include: /assets[\\/]fonts/, // fonts from `assets/fonts` directory
         generator: {
           filename: 'assets/fonts/[name][ext][query]',
         },
@@ -82,7 +75,7 @@ module.exports = {
       {
         test: /\.(png|svg|jpe?g|webp|ico)$/i,
         type: 'asset/resource',
-        include: includeImagesRegexp, // images from `assets/images` directory and > 2 KB
+        include: /assets[\\/]images/, // images from `assets/images` directory and > 2 KB
         generator: {
           filename: 'assets/img/[name].[hash:8][ext]',
         },
@@ -92,7 +85,7 @@ module.exports = {
       {
         test: /\.(png|svg)$/i,
         type: 'asset', //-> asset/inline for images < 2 KB
-        include: includeImagesRegexp,
+        include: /assets[\\/]images/,
         parser: {
           dataUrlCondition: {
             maxSize: 2 * 1024,

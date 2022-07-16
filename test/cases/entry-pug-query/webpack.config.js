@@ -11,7 +11,6 @@ module.exports = {
 
   entry: {
     // pass custom data as JSON string via query
-    //index: './src/index.pug?customData={"options":{"title":"My title"}}',
     index: './src/index.pug?customData=' + JSON.stringify({ options: { title: 'My title' } }),
   },
 

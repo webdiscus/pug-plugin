@@ -1,8 +1,9 @@
 html
   head
+    link(rel='stylesheet' href=require('./styles.css'))
+
     //- stay as is
     script(src='/static/vendor/main.js')
-
     //- extract common code in separate chunk file and inject one before original script
     script(src=require('./module/script-a.js'))
     script(src=require('./module/script-b.js'))
@@ -16,3 +17,4 @@ html
     //- if is same basename then add index to next same filename
     script(src=require('./main.js'))
     script(src=require('./about/main.js'))
+    //- test next not empty line

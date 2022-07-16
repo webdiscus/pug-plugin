@@ -14,9 +14,9 @@ block header
 
     const responsiveImage = {
       // use default image size
-      src: require('~Images/astronaft.jpg?size=1920'),
-      srcSet: require('~Images/astronaft-org.jpg?sizes[]=480,sizes[]=640,sizes[]=800,sizes[]=1024,sizes[]=1450,sizes[]=1920&format=png'),
-      placeholder: require('~Images/astronaft.jpg?prop=placeholder&placeholder=true&placeholderSize=100'),
+      src: require('~Images/abstract.webp'),
+      srcSet: require('~Images/abstract.webp?sizes[]=480,sizes[]=640,sizes[]=800,sizes[]=1024,sizes[]=1450,sizes[]=1920&format=png'),
+      placeholder: require('~Images/abstract.webp?prop=placeholder&placeholder=true&placeholderSize=100')
     }
 
   //-.header-container(style=`background-image: url(${responsiveImage.placeholder})`)
@@ -84,14 +84,14 @@ block body
 
     table.image-preview
       tr
-        td: img(src=require('~Images/gate.jpg?size=100') alt="fix image")
-        td: +code: :highlight(pug) img(src=require('./image.jpg?size=100'))
+        td: img(src=require('~Images/image.webp?size=100') alt="fix image")
+        td: +code: :highlight(pug) img(src=require('./image.webp?size=100'))
       tr
-        td: img(src=require('~Images/gate.jpg?size=120&format=png') alt="fix image")
-        td: +code: :highlight(pug) img(src=require('./image.jpg?size=120&format=png'))
+        td: img(src=require('~Images/image.webp?size=120&format=png') alt="fix image")
+        td: +code: :highlight(pug) img(src=require('./image.webp?size=120&format=png'))
       tr
-        td: img(src=require('~Images/gate.jpg?size=140&format=webp') alt="fix image")
-        td: +code: :highlight(pug) img(src=require('./image.jpg?size=140&format=webp'))
+        td: img(src=require('~Images/image.webp?size=140&format=jpg') alt="fix image")
+        td: +code: :highlight(pug) img(src=require('./image.webp?size=140&format=jpg'))
 
       tr
         //- see the styles for this demo in `main.scss`
@@ -99,7 +99,7 @@ block body
         td
           +code: :highlight(scss)
             // scss
-            $width: 260;
+            $width: 200;
             $height: 145;
             .demo-image {
               width: #{$width}px;
@@ -206,9 +206,9 @@ block body
 
     p
     div What you see in the browser:
-    - const placeholder = require("~Images/gate.jpg?prop=placeholder&emitFile=false&placeholder=true&placeholderSize=35")
+    - const placeholder = require("~Images/image.webp?prop=placeholder&emitFile=false&placeholder=true&placeholderSize=50")
     - const width = 200
-    - const height = require("~Images/gate.jpg?prop=height&emitFile=false&size=" + width)
+    - const height = require("~Images/image.webp?prop=height&emitFile=false&size=" + width)
     .box(style=`background-image: url(${placeholder}); width:${width}px; height:${height}px; background-size:cover;`)
 
     h3 Extract property

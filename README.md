@@ -10,7 +10,7 @@
         Pug Plugin
         </a>
     </h1>
-  <div>Pug plugin for webpack compiles Pug files into HTML and extract CSS, JS from theirs sources used in Pug</div>
+  <div>Pug plugin for webpack compiles Pug files to HTML, extracts CSS and JS from the sources specified in Pug</div>
 </div>
 
 ---
@@ -21,7 +21,7 @@
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
 
-Pug Plugin enable to specify Pug files in webpack entry and generates HTML file that includes the hashed output JS and CSS filenames whose source files are used in the Pug template.
+Pug Plugin enable to use Pug files in webpack entry and generates HTML file that includes the hashed output JS and CSS filenames whose source files are specified in the Pug template.
 
 💡 **Highlights**:
 
@@ -30,8 +30,6 @@ Pug Plugin enable to specify Pug files in webpack entry and generates HTML file 
 - All JS and CSS files will be extracted from their sources specified in Pug.
 - No longer need to define scripts and styles in the webpack entry.
 - No longer need to import styles in JavaScript to inject them into HTML via additional plugins such as `html-webpack-plugin` and `mini-css-extract-plugin`.
-
-> See the demo site [Hello World](https://webdiscus.github.io/pug-plugin/hello-world/) and its [sources](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world).
 
 Specify the Pug files in the webpack entry:
 
@@ -43,7 +41,7 @@ module.exports = {
     about: './src/views/about/index.pug', // output dist/about.html
   },
   plugins: [
-    new PugPlugin({/* options */}), // enable to specify Pug files in webpack entry
+    new PugPlugin(), // enable processing of Pug files specified in webpack entry
   ],
 };
 ```
@@ -72,17 +70,18 @@ Just one Pug plugin replaces the functionality of many plugins and loaders:
 | [posthtml-inline-svg](https://github.com/andrey-hohlov/posthtml-inline-svg)               | inline SVG icons in HTML                                         |
 | [pug-loader](https://github.com/webdiscus/pug-loader)                                     | the Pug loader is already included in the Pug plugin             |
 
-> ⚠️ **Not recommended** to use the `pug-plugin` together with `html-webpack-plugin` and `mini-css-extract-plugin`.
+> **Warning** 
 > 
-> The `pug-plugin` is designed to replace these plugins.\
-> The `pug-plugin` does the same, but much easier and faster.
-> 
+> Don't use the `pug-plugin` together with `html-webpack-plugin` and `mini-css-extract-plugin`.\
+> The `pug-plugin` is designed to replace these plugins to make Pug easier to use and faster to compile.
 
-
-The fundamental difference between `PugPlugin.extractCss` and `mini-css-extract-plugin`:
-- `mini-css-extract-plugin` extracts CSS from source styles imported in JS and inject `<style>` tag somewhere in HTML
-- `PugPlugin.extractCss` extracts CSS from source styles used in Pug and replaces the source filename with the hashed output name
-
+The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
+- `mini-css-extract-plugin` extracts CSS from styles imported in JavaScript 
+   and require additional `html-webpack-plugin` to inject `<link>` tag somewhere in any HTML file.
+- `pug-plugin` extracts CSS from styles specified directly in Pug and save into separate file under hashed output filename.
+   The `<link>` tag stays in place and `href` will contain output hashed filename.
+   You can specify `<link>` tag exactly where you want in HTML.
+   The Pug plugin extracts CSS much faster because it is optimized to perform the same works in one step.
 
 ## Contents
 
@@ -91,19 +90,24 @@ The fundamental difference between `PugPlugin.extractCss` and `mini-css-extract-
 2. [Features](#features)
 3. [Plugin options](#plugin-options)
 4. [Usage examples](#usage-examples)
-6. [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
-7. [How to config `splitChunks`](#recipe-split-chunks)
-5. [How to use HMR live reload](#recipe-hmr)
-8. [How to use responsive images with Pug](https://webdiscus.github.io/pug-plugin/responsive-image/)
+5. [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
+6. [How to config `splitChunks`](#recipe-split-chunks)
+7. [How to use HMR live reload](#recipe-hmr)
+8. Demo sites
+   - [Hello World!](https://webdiscus.github.io/pug-plugin/hello-world/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world))
+   - [Responsive images](https://webdiscus.github.io/pug-plugin/responsive-image/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/responsive-image))
+   - [Usage `:highlight` filter](https://webdiscus.github.io/pug-loader/pug-filters/highlight.html) ([source](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters))
+   - [Usage `:markdown` filter](https://webdiscus.github.io/pug-loader/pug-filters/markdown.html) ([source](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters))
 
 ## Features
 <a id="features" name="features" href="#features"></a>
 
-- you can define Pug files in webpack entry
-- you can use source files of scripts and styles directly in Pug
+- define Pug files in webpack entry
+- specify source scripts and styles directly in Pug
 - generated HTML contains already hashed CSS and JS output filenames
 - resolves URL in CSS for relative and module path, extract resolved resource to output path\
   not need more additional plugin such as [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
+- support the `auto` publicPath
 - support the `pretty` formatting  of generated HTML
 - support the module type `asset/resource`
 - support the module type `asset/inline`
@@ -142,14 +146,14 @@ const PugPlugin = require('pug-plugin');
 module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
-    publicPath: '/', // must be defined any path, `auto` is not supported
-    // output filename for JS files
+    publicPath: '/',
+    // output filename of JS files
     filename: 'assets/js/[name].[contenthash:8].js'
   },
 
   entry: {
-    // all scripts and styles can be used in Pug,
-    // do not need to define JS and SCSS in the webpack entry
+    // don't define scripts and styles in the webpack entry,
+    // all scripts and styles must be specified in Pug
 
     // define Pug files in entry:
     index: './src/views/index.pug',      // output index.html
@@ -158,15 +162,13 @@ module.exports = {
   },
 
   plugins: [
-    // enable using Pug files in entry
+    // enable using Pug files as entry point
     new PugPlugin({
-      modules: [
-        // module extracts CSS from style source files required in Pug
-        PugPlugin.extractCss({
-          // output filename of CSS files
-          filename: 'assets/css/[name].[contenthash:8].css'
-        })
-      ]
+      pretty: true, // formatting HTML, should be used in development mode only
+      extractCss: {
+        // output filename of CSS files
+        filename: 'assets/css/[name].[contenthash:8].css'
+      },
     })
   ],
 
@@ -187,6 +189,10 @@ module.exports = {
   },
 };
 ```
+
+> **Note** 
+> 
+> The automatic public path is supported, but for faster compilation is recommended to use a fixed `publicPath` (e.g. `'/'`&nbsp;or `''`).
 
 Pug template `src/views/index.pug`:
 ```pug
@@ -214,7 +220,7 @@ Generated HTML:
 </html>
 ```
 
-> ⚠️ **Attention**
+> **Warning**
 > 
 > - Don't define styles and JS files in entry. You can use `require()` for source files of JS and SCSS in Pug.
 > - Don't import styles in JS. Use `require()` for style files in Pug.
@@ -223,9 +229,6 @@ Generated HTML:
 
 <a id="plugin-options" name="plugin-options" href="#plugin-options"></a>
 ## Plugin options
-
-The plugin options are default options for self plugin and all plugin `modules`. 
-In a defined `module` any option can be overridden.
 
 ### `enabled`
 Type: `boolean` Default: `true`<br>
@@ -239,26 +242,19 @@ Show the file information at processing of entry.
 Type: `boolean` Default: `false`<br>
 Pretty formatting the resulting HTML. Use this option for debugging only. For production build should be disabled.
 This option only works for Pug files defined in the webpack entry.
-> ⚠️ The `pretty` option of the `pug-loader` is deprecated, therefore use this `pretty` option in `pug-plugin`.
+
+> **Warning**️ 
+> 
+> The `pretty` option of the `pug-loader` is deprecated, therefore use the `pretty` option in `pug-plugin`.
+
 ```js
 const PugPlugin = require('pug-plugin');
 module.exports = {
   plugins: [
     new PugPlugin({
-      pretty: true, // formatting of HTML
+      pretty: true, // enable formatting of HTML
     }),
   ],
-  module: {
-    rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          pretty: false, // deprecated, is always false, don't use it
-        }
-      },
-    ],
-  },
 };
 ```
 
@@ -303,6 +299,74 @@ The name of output file.
   - `@param {webpack AssetInfo} assetInfo`
   - `@return {string}` The name or template string of output file.
 
+### `modules`
+Type: `ModuleOptions[]` Default: `[]`<br>
+The array of objects of type `ModuleOptions` to separately handles of different file types.\
+The description of `@property` see by Pug plugin options.
+```js
+/**
+ * @typedef {Object} ModuleOptions
+ * @property {boolean} enabled
+ * @property {boolean} verbose
+ * @property {RegExp} test
+ * @property {string} sourcePath
+ * @property {string} outputPath
+ * @property {string | function(PathData, AssetInfo): string} filename
+ * @property {function(string, ResourceInfo, Compilation): string | null} postprocess
+ */
+```
+
+### `extractCss`
+Type: `ModuleOptions`\
+Default module options:
+```js
+{
+  test: /\.(css|scss|sass|less|styl)$/,
+  enabled: true,
+  verbose: false,
+  filename: '[name].css',
+  sourcePath: null,
+  outputPath: null,
+}
+```
+
+The options for embedded `extractCss` module. This module extracts CSS from style sources specified in Pug using `require()`, e.g.:
+```pug
+link(href=require('./styles.scss') rel='stylesheet')
+```
+
+> **Warning**
+>
+> Don't import source styles in JavaScript! Styles must be specified directly in Pug.
+
+The default CSS output filename is `[name].css`. You can specify your own filename using [webpack filename substitutions](https://webpack.js.org/configuration/output/#outputfilename):
+
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  plugins: [
+    new PugPlugin({
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
+    }),
+  ],
+};
+```
+
+The `name` is the filename of required style source.
+For example, if source file is `styles.scss`, then output filename will be `assets/css/styles.1234abcd.css`.\n
+If you want to have a different output filename, you can use the `filename` options as the [function](https://webpack.js.org/configuration/output/#outputfilename). 
+
+> **Note** 
+> 
+> Since version `3.0.0` the module `extractCss` is enabled by default.
+
+> **Warning**
+> 
+> Don't use `mini-css-extract-plugin` or `style-loader`, they are not required more.\
+> The `extractCss` module extracts CSS much faster than other plugins and resolves all asset URLs in CSS, therefore the `resolve-url-loader` is redundant too.
+
 ### `postprocess`
 Type: `Function` Default: `null`<br>
 The post process for extracted content from compiled entry.
@@ -326,23 +390,6 @@ The following parameters are available in the function:
  */
 ```
 
-### `modules`
-Type: `PluginOptions[]` Default: `[]`<br>
-The array of objects of type `PluginOptions` to separately handles of files of different types.\
-The description of `@property` of the type `PluginOptions` see above, by Plugin options.
-```js
-/**
- * @typedef {Object} PluginOptions
- * @property {boolean} enabled
- * @property {boolean} verbose
- * @property {RegExp} test
- * @property {string} sourcePath
- * @property {string} outputPath
- * @property {string | function(PathData, AssetInfo): string} filename
- * @property {function(string, ResourceInfo, Compilation): string | null} postprocess
- */
-```
-
 <a id="usage-examples" name="usage-examples" href="#usage-examples"></a>
 ## Usage examples
 
@@ -361,7 +408,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    // output filename for JS files
+    // output filename of JS files
     filename: 'assets/js/[name].[contenthash:8].js'
   },
   
@@ -375,13 +422,11 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          // output filename for CSS files
-          filename: 'assets/css/[name].[contenthash:8].css'
-        })
-      ]
-    })
+      extractCss: {
+        // output filename of CSS files
+        filename: 'assets/css/[name].[contenthash:8].css'
+      },
+    }),
   ],
 
   module: {
@@ -401,7 +446,7 @@ module.exports = {
         test: /\.(png|jpg|jpeg|ico)/,
         type: 'asset/resource',
         generator: {
-          // output filename for images
+          // output filename of images
           filename: 'assets/img/[name].[hash:8][ext]',
         },
       },
@@ -409,7 +454,7 @@ module.exports = {
         test: /\.(woff|woff2|eot|ttf|otf|svg)$/i,
         type: 'asset/resource',
         generator: {
-          // output filename for fonts
+          // output filename of fonts
           filename: 'assets/fonts/[name][ext][query]',
         },
       },
@@ -459,7 +504,9 @@ body {
 }
 ```
 
->💡The Pug plugin can resolve an url (as relative path, with alias, from node_modules) without requiring `source-maps`. Do not need additional loader such as `resolve-url-loader`.
+> **Note**
+> 
+> The Pug plugin can resolve an url (as relative path, with alias, from node_modules) without requiring `source-maps`. Do not need additional loader such as `resolve-url-loader`.
 
 The generated CSS `dist/assets/css/styles.f57966f4.css`:
 ```css
@@ -498,7 +545,9 @@ body {
 }
 ```
 
->💡All resolved files will be coped to the output directory, so no additional plugin is required, such as `copy-webpack-plugin`.
+> **Note**
+> 
+> All resolved files will be coped to the output directory, so no additional plugin is required, such as `copy-webpack-plugin`.
 
 The generated HTML `dist/index.html` contains the hashed output filenames of the required assets:
 ```html
@@ -519,53 +568,6 @@ All this is done by one Pug plugin, without additional plugins and loaders. To s
 
 ---
 
-### Save the `.html` file in separate file 
-
-Dependency: `html-loader`  This loader is need to handle the `.html` file type.\
-Install: `npm install html-loader --save-dev`
-
-webpack.config.js
-```js
-const path = require('path');
-const PugPlugin = require('pug-plugin');
-module.exports = {
-  output: {
-    path: path.join(__dirname, 'public/'),
-    publicPath: '/',
-  },
-  entry: {
-    'example': './vendor/pages/example.html', // output to /static/example.html
-  },
-  plugins: [
-    new PugPlugin({
-      modules: [
-        // add the module to match `.html` files in webpack entry
-        {
-          test: /\.html$/,
-          filename: '[name].html', // output filename
-          outputPath: 'static/', // output path for all .html files defined in entry
-        },
-      ],
-    }),
-  ],
-  module: {
-    rules: [
-      // add the loader to handle `.html` files
-      {
-        test: /\.html$/,
-        loader: 'html-loader',
-        options: {
-          sources: false, // disable processing of resources in static HTML, leave as is
-          esModule: false, // webpack use CommonJS module
-        },
-      },
-    ],
-  },
-};
-```
-
----
-
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes
 
@@ -574,7 +576,9 @@ module.exports = {
 
 Pug plugin can resolve styles in `node_modules`.
 
-> 💡 Pug plugin resolves styles much fasted than the [resolve-url-loader](https://github.com/bholloway/resolve-url-loader) 
+> **Note**
+> 
+> Pug plugin resolves styles much fasted than the [resolve-url-loader](https://github.com/bholloway/resolve-url-loader) 
 > and don't require to use the source map in `sass-loader`.
 
 
@@ -609,7 +613,9 @@ Example how to import the style theme `tomorrow` of the [prismjs](https://github
 @use 'prismjs/themes/prism-tomorrow.min';
 ```
 
-> **Note:** use the `@use` instead of `@import`, because it is [deprecated](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
+> **Note**
+>
+> use the `@use` instead of `@import`, because it is [deprecated](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
 
 <a id="recipe-split-chunks" name="recipe-split-chunks" href="#recipe-split-chunks"></a>
 ### Configuration of `splitChunks`
@@ -636,7 +642,9 @@ module.exports = {
 };
 ```
 
-> **Note:** in the `test` option must be specified all extensions of scripts which should be split.
+> **Note**
+>
+> In the `test` option must be specified all extensions of scripts which should be split.
 
 See details by [splitChunks.cacheGroups](https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups).
 
@@ -658,7 +666,10 @@ devServer: {
   },
 },
 ```
-> **Note:** Live reload works only if in Pug used a JS file.
+
+> **Note**
+>
+> Live reload works only if in Pug used a JS file.
 > If your Pug template has not a JS, then create one empty JS file and add it in Pug:
 > ```js
 > script(src=require('./dummy.js'))

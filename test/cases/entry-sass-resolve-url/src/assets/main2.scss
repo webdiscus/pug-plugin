@@ -1,8 +1,0 @@
-// test relative import
-@use 'scss/fonts';
-
-$color: blue;
-
-h2 {
-  color: $color;
-}

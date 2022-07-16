@@ -20,12 +20,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          verbose: true,
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -56,7 +53,6 @@ module.exports = {
       {
         test: /\.(woff|woff2|eot|ttf|otf|svg)$/i,
         type: 'asset/resource',
-        //include: path.resolve(__dirname, './src/assets/fonts'),
         generator: {
           filename: 'assets/fonts/[name].[hash:8][ext][query]',
         },

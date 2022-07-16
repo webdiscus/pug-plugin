@@ -32,7 +32,11 @@ module.exports = {
 
   plugins: [
     // extract pug/html only
-    new PugPlugin(),
+    new PugPlugin({
+      extractCss: {
+        enabled: false, // disable embedded extractCss module to bypass extracting via external plugin
+      },
+    }),
     // extract css with separate plugin
     new MiniCssExtractPlugin(),
   ],
@@ -50,17 +54,8 @@ module.exports = {
       // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {},
-          },
-          {
-            loader: 'sass-loader',
-            options: {},
-          },
-        ],
+        // TODO: test possible breaking change in v2.10.0
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
     ],
   },

@@ -8,18 +8,14 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'assets/js/[name].[contenthash:4].js',
+    filename: 'assets/js/[name].[contenthash:8].js',
   },
 
   entry: {
     index: './src/views/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      verbose: true,
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
@@ -28,6 +24,17 @@ module.exports = {
         loader: PugPlugin.loader,
         options: {
           method: 'render',
+        },
+      },
+      {
+        test: /\.(css)$/,
+        loader: 'css-loader',
+      },
+      {
+        test: /\.(png|jpg|jpeg|ico)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/img/[name].[hash:8][ext]',
         },
       },
     ],

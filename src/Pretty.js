@@ -16,6 +16,7 @@ const Pretty = {
       max_preserve_newlines: 0,
       wrap_line_length: 120,
       extra_liners: [],
+      space_before_conditional: true,
       js: {
         end_with_newline: false,
         preserve_newlines: true,

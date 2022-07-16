@@ -3,7 +3,6 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
-  //devtool: 'source-map',
 
   output: {
     path: path.join(__dirname, 'public/'),
@@ -18,14 +17,11 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      verbose: true,
-      modules: [
-        PugPlugin.extractCss({
-          verbose: true,
-          // test conflict: Multiple chunks emit assets to the same filename
-          filename: 'assets/css/[name].css',
-        }),
-      ],
+      pretty: true,
+      extractCss: {
+        // test conflict: Multiple chunks emit assets to the same filename
+        filename: 'assets/css/[name].css',
+      },
     }),
   ],
 
@@ -39,14 +35,9 @@ module.exports = {
         },
       },
 
-      // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
-        use: [
-          {
-            loader: 'css-loader',
-          },
-        ],
+        use: ['css-loader'],
       },
     ],
   },

@@ -1,15 +1,13 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = false;
-
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
-  devtool: 'source-map',
+  mode: 'development',
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '/',
+    // test auto publicPath
+    //publicPath: '/',
   },
 
   resolve: {
@@ -19,21 +17,16 @@ module.exports = {
   },
 
   entry: {
-    // test import scss via entry-point
-    styles: './src/assets/scss/main.scss',
-    styles2: './src/assets/main2.scss',
+    // test import scss via entry point
+    vendor: './src/vendor/styles.scss',
     index: './src/views/index.pug',
   },
 
   plugins: [
     new PugPlugin({
-      verbose: true,
-      modules: [
-        PugPlugin.extractCss({
-          verbose: true,
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -45,7 +38,7 @@ module.exports = {
           {
             loader: PugPlugin.loader,
             options: {
-              //method: 'render',
+              method: 'render',
             },
           },
         ],
@@ -58,7 +51,6 @@ module.exports = {
             loader: 'css-loader',
             options: {
               //esModule: false, // jest error
-              //sourceMap: false,
             },
           },
           // resolve resources in included npm package, e.g. @import 'material-icons';
@@ -74,7 +66,7 @@ module.exports = {
         test: /\.(png|svg|jpg|jpeg|gif|ico)$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/images/[name].[hash:4][ext]',
+          filename: 'assets/images/[name].[hash:8][ext]',
         },
       },
 

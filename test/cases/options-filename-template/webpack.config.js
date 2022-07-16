@@ -14,9 +14,9 @@ module.exports = {
       import: './src/views/index.pug',
       filename: '[name].html',
     },
-    page01: {
-      import: './src/views/page01.pug',
-      filename: '../build/[name].html', // output __dirname/build/page01.html
+    home: {
+      import: './src/views/home.pug',
+      filename: './pages/[name].html', // output __dirname/public/pages/home.html
     },
     about: './src/views/about.pug',
   },

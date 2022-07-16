@@ -6,15 +6,17 @@ html
   body
     //- require file as string
     //- Limitation for `compile` method:
-      the file in current directory must begin with `./`,
-    img.s1(src=require('image.jpeg'))
-    img.s2(src=require('../../src/assets/images/image.jpeg'))
-    img.s3(src=require('./image.jpeg'))
-    img.s4(src=require('../assets/images/image.jpeg'))
-    img.s5(src=require('~Images/image.jpeg'))
+        the file in current directory must begin with `./`,
+
+    img.s1(src=require('image.png'))
+    img.s2(src=require('../../src/assets/images/image.png'))
+    img.s3(src=require('./image.png'))
+    img.s4(src=require('../assets/images/image.png'))
+    img.s5(src=require('~Images/image.png'))
 
     //- require file as variable
-    - var file = 'image.jpeg'
+
+    - var file = 'image.png'
     img.v1(src=require(file))
     img.v2(src=require(`${file}`))
     img.v3(src=require('./' + file))

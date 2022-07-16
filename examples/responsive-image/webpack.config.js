@@ -1,9 +1,9 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
+//const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
-  const isDocs = env.type === 'docs';
 
   return {
     mode: isProd ? 'production' : 'development',
@@ -17,7 +17,7 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, 'dist'),
       // build for GitHub Page: https://webdiscus.github.io/pug-plugin/responsive-image/
-      publicPath: isDocs ? '/pug-plugin/responsive-image/' : '/',
+      publicPath: 'auto',
       // output filename of scripts
       filename: 'assets/js/[name].[contenthash:8].js',
       clean: true,
@@ -36,18 +36,15 @@ module.exports = (env, argv) => {
     plugins: [
       new PugPlugin({
         verbose: !isProd,
-        modules: [
-          PugPlugin.extractCss({
-            // output filename of styles
-            filename: 'assets/css/[name].[contenthash:8].css',
-          }),
-        ],
+        extractCss: {
+          // output filename of styles
+          filename: 'assets/css/[name].[contenthash:8].css',
+        },
       }),
     ],
 
     module: {
       rules: [
-        // pug
         {
           test: /\.(pug)$/,
           loader: PugPlugin.loader,
@@ -70,13 +67,11 @@ module.exports = (env, argv) => {
           },
         },
 
-        // styles
         {
           test: /\.(css|sass|scss)$/,
           use: ['css-loader', 'sass-loader'],
         },
 
-        // images
         {
           test: /\.(gif|png|jpe?g|ico|svg|webp)$/i,
           type: 'asset/resource',
@@ -100,7 +95,7 @@ module.exports = (env, argv) => {
         directory: path.join(__dirname, 'dist'),
       },
       compress: true,
-      open: true, // open in default browser
+      //open: true, // open in default browser
       watchFiles: {
         paths: ['src/**/*.*'],
         options: {

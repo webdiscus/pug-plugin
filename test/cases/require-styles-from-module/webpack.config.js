@@ -16,8 +16,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-
-    // determines the output filename for js
     filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
   },
 
@@ -27,14 +25,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      //verbose: true,
-      //pretty: true,
-      modules: [
-        PugPlugin.extractCss({
-          //verbose: true,
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -48,7 +41,6 @@ module.exports = {
         },
       },
 
-      // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
         use: ['css-loader', 'sass-loader'],

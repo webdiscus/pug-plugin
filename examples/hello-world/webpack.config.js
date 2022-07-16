@@ -1,9 +1,9 @@
 const path = require('path');
-const PugPlugin = require('pug-plugin');
+//const PugPlugin = require('pug-plugin');
+const PugPlugin = require('../../');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
-  const isDocs = env.type === 'docs';
 
   return {
     mode: isProd ? 'production' : 'development',
@@ -36,7 +36,7 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, 'dist'),
       // build for GitHub Page: https://webdiscus.github.io/pug-plugin/hello-world/
-      publicPath: isDocs ? '/pug-plugin/hello-world/' : '/',
+      publicPath: 'auto',
       // output filename of scripts
       filename: 'assets/js/[name].[contenthash:8].js',
       chunkFilename: 'assets/js/[name].[id].js',
@@ -56,15 +56,12 @@ module.exports = (env, argv) => {
     plugins: [
       // enable processing of Pug files from entry
       new PugPlugin({
-        verbose: !isProd, // output information about the process to console
+        //verbose: !isProd, // output information about the process to console
         pretty: !isProd, // formatting of HTML
-        modules: [
-          // module extracts CSS from style source files required directly in Pug
-          PugPlugin.extractCss({
-            // output filename of styles
-            filename: 'assets/css/[name].[contenthash:8].css',
-          }),
-        ],
+        extractCss: {
+          // output filename of styles
+          filename: 'assets/css/[name].[contenthash:8].css',
+        },
       }),
     ],
 
@@ -155,7 +152,7 @@ module.exports = (env, argv) => {
         directory: path.join(__dirname, 'dist'),
       },
       compress: true,
-      open: true, // open in default browser
+      //open: true, // open in default browser
       watchFiles: {
         paths: ['src/**/*.*'],
         options: {

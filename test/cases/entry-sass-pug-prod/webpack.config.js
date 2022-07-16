@@ -19,11 +19,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
-        }),
-      ],
+      extractCss: {
+        filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
+      },
     }),
   ],
 
@@ -44,10 +42,7 @@ module.exports = {
             // test ESM
             options: { esModule: true },
           },
-          {
-            loader: 'sass-loader',
-            options: {},
-          },
+          'sass-loader',
         ],
       },
     ],

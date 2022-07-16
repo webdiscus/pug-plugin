@@ -1,17 +1,14 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = true;
-//const isProduction = false;
-
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
+  mode: 'production',
   devtool: false,
 
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'assets/js/[name].[contenthash:4].js',
+    filename: 'assets/js/[name].[contenthash:8].js',
   },
 
   entry: {
@@ -20,15 +17,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      verbose: true,
-      modules: [
-        // add the extractor to handle styles from the entry
-        PugPlugin.extractCss({
-          verbose: true,
-          // the output filename for all styles from the entry
-          filename: 'assets/css/[name].[contenthash:4].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -55,10 +46,10 @@ module.exports = {
         loader: 'css-loader',
       },
       {
-        test: /\.(png|jpg|jpeg|ico)/,
+        test: /\.(png|jpg|jpeg|ico)$/,
         type: 'asset/resource',
         generator: {
-          filename: 'assets/img/[name].[hash:4][ext]',
+          filename: 'assets/img/[name].[hash:8][ext]',
         },
       },
     ],

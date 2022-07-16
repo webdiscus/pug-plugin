@@ -1,10 +1,8 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = true;
-
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
+  mode: 'production',
   devtool: 'source-map',
 
   output: {
@@ -18,11 +16,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: 'assets/css/[name].[contenthash:8].css',
-        }),
-      ],
+      extractCss: {
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
     }),
   ],
 
@@ -30,18 +26,8 @@ module.exports = {
     rules: [
       {
         test: /\.(css|sass|scss)$/,
-        use: [
-          {
-            loader: 'css-loader',
-            options: {},
-          },
-          {
-            loader: 'sass-loader',
-            options: {},
-          },
-        ],
+        use: ['css-loader', 'sass-loader'],
       },
-
       {
         test: /\.(woff|woff2|eot|ttf|otf|svg)$/i,
         type: 'asset/resource',

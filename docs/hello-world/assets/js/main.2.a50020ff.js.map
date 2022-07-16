@@ -1,1 +1,0 @@
-{"version":3,"file":"assets/js/main.2.a50020ff.js","mappings":"AAAAA,QAAQC,IAAI","sources":["webpack://hello-world/./src/views/pages/home/main.js"],"sourcesContent":["console.log('\\n>> Home page');\n"],"names":["console","log"],"sourceRoot":""}

@@ -1,11 +1,9 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = false;
-
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
-  devtool: isProduction ? false : 'source-map',
+  mode: 'development',
+  devtool: 'source-map',
 
   output: {
     path: path.join(__dirname, 'public/'),
@@ -19,11 +17,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      modules: [
-        PugPlugin.extractCss({
-          filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
-        }),
-      ],
+      extractCss: {
+        filename: '[name].css',
+      },
     }),
   ],
 
@@ -44,10 +40,7 @@ module.exports = {
             // test ESM
             options: { esModule: true },
           },
-          {
-            loader: 'sass-loader',
-            options: {},
-          },
+          'sass-loader',
         ],
       },
     ],

@@ -1,0 +1,26 @@
+img.a1(src=require('../assets/images/image.png'))
+img.a2(src=require('AliasImages/image.png'))
+img.a3(src=require('@images/image.png'))
+
+- var file = 'image.png'
+img.b1(src=require('../assets/images/' + file))
+img.b2(src=require('AliasImages/' + file))
+//-TODO: fix for compile is ultra complex
+//-img.b3(src=require('@images/' + file))
+
+- var file = './image.png'
+img.c1(src=require('../assets/images/' + file))
+img.c2(src=require('AliasImages/' + file))
+//-TODO: fix for compile is ultra complex
+//-img.c3(src=require('@images/' + file))
+
+- var file = '../images/image.png'
+img.d1(src=require('../assets/images/' + file))
+img.d2(src=require('AliasImages/' + file))
+//-TODO: fix for compile is ultra complex
+//-img.d3(src=require('@images/' + file))
+
+- var colors = require('@data/colors.json')
+.colors
+  each color in colors
+    div(style=`color:${color.hex};`)= color.name

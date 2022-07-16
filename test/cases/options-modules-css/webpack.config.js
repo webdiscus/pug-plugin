@@ -19,51 +19,35 @@ module.exports = {
   },
 
   entry: {
-    //
     index: './src/views/index.pug',
     'assets/css/styles': './src/views/index.css',
-    //
-    about: './src/views/about/template.pug',
+
+    about: './src/views/about/index.pug',
     'assets/css/about': './src/views/about/styles.css',
-    //
-    'pages/page01': './src/views/page01/template.pug',
-    'assets/css/page01': './src/views/page01/styles.css',
+
+    'pages/home': './src/views/home/index.pug',
+    'assets/css/home': './src/views/home/styles.css',
   },
 
   plugins: [
     new PugPlugin({
-      // for test coverage
-      verbose: true,
-      modules: [
-        // test plugin module to extract css
-        PugPlugin.extractCss({
-          // for test coverage
-          verbose: true,
-        }),
-      ],
+      // test defaults options of extractCss, it is equivalent to:
+      // extractCss: {
+      //   filename: '[name].css',
+      // },
     }),
   ],
 
   module: {
     rules: [
-      // Templates
       {
         test: /\.pug$/,
         loader: PugPlugin.loader,
       },
-      // Styles
       {
         test: /\.(css)$/,
-        use: [
-          {
-            loader: 'css-loader',
-            options: {
-              //sourceMap: true,
-            },
-          },
-        ],
+        use: ['css-loader'],
       },
-      // Images
       {
         test: /\.(png|jpg|jpeg)$/,
         type: 'asset/resource',

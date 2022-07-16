@@ -1,5 +1,75 @@
 # Change log
 
+## 3.0.0 (2022-07-17)
+
+### ⚠ BREAKING CHANGE
+
+defaults, the embedded extractCss module is now enabled,\
+**for compatibility** with external extractor, you can disable extractCss module:
+```js
+new PugPlugin({
+  extractCss: {
+    enabled: false, // disable embedded extractCss module to bypass extracting via external plugin
+  },
+}),
+  ```
+
+### ⚠ DEPRECATION
+
+definition of extractCss as plugin module is deprecated:
+```js
+new PugPlugin({
+  modules: [
+    PugPlugin.extractCss({
+      filename: 'assets/css/[name].[contenthash].css',
+    })
+  ],
+}),
+```
+now use the new `extractCss` option:
+```js
+new PugPlugin({
+  extractCss: {
+    filename: 'assets/css/[name].[contenthash].css',
+  },
+}),
+```
+> Note: you can still use the `modules: []` option for custom settings.
+
+### Features
+
+- feat: add support auto `publicPath`
+- feat: add `extractCss` option for embedded CSS extract module
+- feat: defaults, the `extractCss` module is enabled with default options
+- feat: improved resolving of assets
+- feat: add supports for zero config,\
+  it means, that w/o any plugin options the pug, scss and js module will be processed with default options.\
+  Zero config `new PugPlugin()` is equivalent to:
+  ```js
+  new PugPlugin({
+    test: /\.(pug)$/,
+    enabled: true,
+    verbose: false,
+    pretty: false,
+    sourcePath: null,
+    outputPath: null,
+    filename: '[name].html',
+    extractCss: {
+      test: /\.(css|scss|sass|less|styl)$/,
+      enabled: true,
+      verbose: false,
+      filename: '[name].css',
+      sourcePath: null,
+      outputPath: null,
+    },
+    modules: [],
+  }),
+  ```
+
+### Bug Fixes
+
+- fix: assets resolving using auto `publicPath`
+
 ## 2.9.3 (2022-07-05)
 - fix: remove wrong runtime files split when using splitChunks
 - docs: update readme with info how to use split chunk for JS only
