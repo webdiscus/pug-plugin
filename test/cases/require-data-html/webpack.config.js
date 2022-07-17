@@ -23,11 +23,7 @@ module.exports = {
     'pages/about': './src/views/about.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      pretty: true,
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [

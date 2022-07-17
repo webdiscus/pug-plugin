@@ -1,4 +1,6 @@
 const path = require('path');
+const { isWin } = require('./config');
+const { pathToPosix } = require('./utils');
 
 const Asset = {
   publicPath: '',
@@ -28,8 +30,9 @@ const Asset = {
 
       const issuerFullFilename = path.resolve(this.outputPath, issuer);
       const context = path.dirname(issuerFullFilename);
+      const publicPath = path.relative(context, this.outputPath) + '/';
 
-      return path.relative(context, this.outputPath) + '/';
+      return isWin ? pathToPosix(publicPath) : publicPath;
     }
 
     return this.isFunctionPublicPath ? this.publicPath.call(null, {}) : this.publicPath;
@@ -49,8 +52,9 @@ const Asset = {
       const issuerFullFilename = path.resolve(this.outputPath, issuer);
       const context = path.dirname(issuerFullFilename);
       const file = path.posix.join(this.outputPath, assetFile);
+      const outputFilename = path.relative(context, file);
 
-      return path.relative(context, file);
+      return isWin ? pathToPosix(outputFilename) : outputFilename;
     }
 
     const publicPath = this.isFunctionPublicPath ? this.publicPath.call(null, {}) : this.publicPath;

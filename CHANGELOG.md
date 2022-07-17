@@ -1,5 +1,8 @@
 # Change log
 
+## 3.0.1 (2022-07-17)
+- fix: auto public path for windows
+
 ## 3.0.0 (2022-07-17)
 
 ### ⚠ BREAKING CHANGE

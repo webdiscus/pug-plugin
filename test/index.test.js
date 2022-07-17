@@ -247,10 +247,6 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-styles-with-same-name', done);
   });
 
-  test('multiple-chunks-same-filename', (done) => {
-    compareFileListAndContent(PATHS, 'multiple-chunks-same-filename', done);
-  });
-
   test('require styles with same name, hash', (done) => {
     compareFileListAndContent(PATHS, 'require-styles-with-same-name-hash', done);
   });
@@ -269,6 +265,10 @@ describe('require assets tests', () => {
 
   test('require same image in pug and scss in context', (done) => {
     compareFileListAndContent(PATHS, 'require-context-image-pug-scss', done);
+  });
+
+  test('multiple-chunks-same-filename', (done) => {
+    compareFileListAndContent(PATHS, 'multiple-chunks-same-filename', done);
   });
 
   test('resolve assets when used split chunk', (done) => {

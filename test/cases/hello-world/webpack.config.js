@@ -25,7 +25,6 @@ module.exports = {
         loader: PugPlugin.loader,
         options: {
           method: 'render',
-          pretty: true,
         },
       },
     ],
