@@ -6,8 +6,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    //publicPath: 'auto',
-    //publicPath: '/',
+    //publicPath: 'auto', // undefined publicPath is auto publicPath
     filename: 'assets/js/[name].js',
   },
 

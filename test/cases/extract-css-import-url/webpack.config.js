@@ -9,7 +9,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '/',
+    publicPath: 'auto',
   },
 
   entry: {
@@ -32,7 +32,7 @@ module.exports = {
           {
             loader: PugPlugin.loader,
             options: {
-              //method: 'render',
+              method: 'render',
             },
           },
         ],

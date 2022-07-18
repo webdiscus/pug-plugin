@@ -9,7 +9,8 @@ const { parseRequest, pathToPosix } = require('./utils');
  * @singleton
  */
 const AssetScript = {
-  index: 1,
+  //index: 1,
+  index: {},
   files: [],
 
   /**
@@ -105,7 +106,10 @@ const AssetScript = {
       if (entry.importFile === request) {
         result = false;
       } else {
-        uniqueName = name + '.' + this.index++;
+        if (!this.index[name]) {
+          this.index[name] = 1;
+        }
+        uniqueName = name + '.' + this.index[name]++;
         result = uniqueName;
       }
     }
@@ -167,25 +171,28 @@ const AssetScript = {
    * @param {string} request
    * @return {string|null}
    */
-  getResource(request) {
+  resolveFile(request) {
     const { resource, query } = parseRequest(request);
 
-    return query === 'isScript' ? resource : null;
+    // try to resolve resource w/o extension, e.g.:
+    // when in Pug used script w/o `.js`, like `script(src=require('Scripts/common.min'))`,
+    // then resolve filename `common.min` to `common.min.js`
+    return query === 'isScript' ? require.resolve(resource) : null;
   },
 
   /**
    * Reset before new compilation by webpack watch or serve.
    */
   reset() {
+    this.index = {};
     // don't reset files because this cache is used by webpack watch or serve
-    this.index = 1;
   },
 
   /**
    * Clear cache before start of this plugin.
    */
   clear() {
-    this.index = 1;
+    this.index = {};
     this.files = [];
   },
 };

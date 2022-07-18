@@ -18,6 +18,7 @@ const Asset = require('./Asset');
 const AssetEntry = require('./AssetEntry');
 const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
+const AssetTrash = require('./AssetTrash');
 
 // supports for responsive-loader
 const ResponsiveLoader = require('./extras/ResponsiveLoader');
@@ -49,6 +50,10 @@ const {
  * @property {function(string, ResourceInfo, Compilation): string | null} postprocess The post process for extracted content from entry.
  * @property {ModuleOptions[]} [modules = []]
  * @property {ModuleOptions} extractCss The options for embedded plugin module to extract CSS.
+ * @property {boolean} [`extractComments` = false] Whether comments shall be extracted to a separate file.
+ *   If the original filename is foo.js, then the comments will be stored to foo.js.LICENSE.txt.
+ *   This option enable/disable storing of *.LICENSE.txt file.
+ *   For more flexibility use terser-webpack-plugin https://webpack.js.org/plugins/terser-webpack-plugin/#extractcomments.
  */
 
 /**
@@ -107,45 +112,9 @@ const defaultOptions = {
   outputPath: null,
   filename: '[name].html',
   postprocess: null,
-
-  // each entry has its own local options that override global options
   modules: [],
   extractCss: {},
-};
-
-/**
- * AssetTrash singleton.
- * Accumulate and remove junk assets from compilation.
- */
-const AssetTrash = {
-  trash: [],
-  /**
-   * Add a junk js file to trash.
-   *
-   * @param {string} file
-   */
-  toTrash(file) {
-    this.trash.push(file);
-  },
-
-  /**
-   * Remove all js trash files from compilation.
-   *
-   * @param {Compilation} compilation The instance of the webpack compilation.
-   */
-  clearCompilation(compilation) {
-    this.trash.forEach((file) => {
-      compilation.deleteAsset(file);
-    });
-    this.reset();
-  },
-
-  /**
-   * Clear caches before start of this plugin.
-   */
-  reset() {
-    this.trash = [];
-  },
+  extractComments: false,
 };
 
 /**
@@ -291,7 +260,7 @@ class PugPlugin {
         // ignore data-URL
         if (request.startsWith('data:')) return;
 
-        const importFile = AssetScript.getResource(request);
+        const importFile = AssetScript.resolveFile(request);
 
         if (importFile) {
           const { issuer } = resolveData.contextInfo;
@@ -314,12 +283,13 @@ class PugPlugin {
 
       // after create module
       normalModuleFactory.hooks.module.tap(plugin, (module, createData, resolveData) => {
-        const { context, rawRequest, resource } = createData;
+        const { rawRequest, resource } = createData;
         const issuer = resolveData.contextInfo.issuer;
+        const { type, loaders } = module;
 
-        if (AssetInline.isDataUrl(rawRequest)) return;
+        if (!issuer || AssetInline.isDataUrl(rawRequest)) return;
 
-        if (module.type === 'asset/inline' || module.type === 'asset') {
+        if (type === 'asset/inline' || type === 'asset') {
           if (AssetInline.hasExt(resource, 'svg') && AssetInline.hasExt(issuer, 'pug')) {
             AssetInline.addInlineSvg(resource, issuer);
           } else {
@@ -329,12 +299,16 @@ class PugPlugin {
 
         if (resolveData.dependencyType === 'url') {
           module.isDependencyTypeUrl = true;
-          if (issuer) {
-            ResourceResolver.addToModuleCache(resource, rawRequest, issuer);
-          }
+          ResourceResolver.addToModuleCache(resource, rawRequest, issuer);
         }
 
-        ResourceResolver.addSourceFile(resource, rawRequest, issuer || context);
+        // add resolved sources in use cases:
+        // - if used url() in SCSS for source assets
+        // - if used import url() in CSS, like `@import url('./styles.css');`
+        // - if used webpack context
+        if (module.isDependencyTypeUrl || loaders.length > 0 || type === 'asset/resource') {
+          ResourceResolver.addSourceFile(resource, rawRequest, issuer);
+        }
       });
 
       // build module
@@ -619,14 +593,16 @@ class PugPlugin {
           const modules = compilation.chunkGraph.getChunkModules(chunk);
 
           if (modules.length > 0) {
-            const module = modules[0];
-            const { managedFiles } = module.buildInfo.snapshot;
+            const { rawRequest, request, buildInfo } = modules[0];
+            if (!rawRequest || !buildInfo) return;
+
+            const { managedFiles } = buildInfo.snapshot;
             // note: rawRequest of module, e.g. require('lodash'), cannot contain `node_modules`
             // if rawRequest contains the `node_modules`, then this file must be removed from assets
             const excludeRegexp = /\/node_modules\//;
 
             // note: on Windows only rawRequest has posix slashes in path
-            if (managedFiles && managedFiles.has(module.request) && excludeRegexp.test(module.rawRequest)) {
+            if (managedFiles && managedFiles.has(request) && excludeRegexp.test(rawRequest)) {
               AssetTrash.toTrash(file);
             }
           }
@@ -644,6 +620,10 @@ class PugPlugin {
       // postprocess for assets content
       // only at this stage the js file has the final hashed name
       compilation.hooks.afterProcessAssets.tap(plugin, () => {
+        if (this.options.extractComments !== true) {
+          AssetTrash.removeComments(compilation);
+        }
+
         AssetScript.replaceSourceFilesInCompilation(compilation);
         AssetInline.insertInlineSvg(compilation);
       });

@@ -33,7 +33,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  jest.setTimeout(5000);
+  jest.setTimeout(25000);
 });
 
 describe('utils tests', () => {
@@ -120,6 +120,14 @@ describe('options', () => {
   test('options.pretty', (done) => {
     compareFileListAndContent(PATHS, 'options-pretty', done);
   });
+
+  test('options.extractComments = true', (done) => {
+    compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
+  });
+
+  test('options.extractComments = false', (done) => {
+    compareFileListAndContent(PATHS, 'option-extract-comments-false', done);
+  });
 });
 
 describe('source map', () => {
@@ -205,7 +213,6 @@ describe('extract css', () => {
   });
 
   test('@import url()', (done) => {
-    // tested for: compile, render
     compareFileListAndContent(PATHS, 'extract-css-import-url', done);
   });
 });
@@ -271,14 +278,28 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'multiple-chunks-same-filename', done);
   });
 
-  test('resolve assets when used split chunk', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-assets-split-chunk', done);
-  });
-
   // TODO: fix the issue
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
   // });
+});
+
+describe('split chunks', () => {
+  test('resolve assets when used split chunk, production', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-resolve-assets', done);
+  });
+
+  test('resolve assets when used split chunk, development', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-dev', done);
+  });
+
+  test('import min styles and scripts from node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-node-module-min', done);
+  });
+
+  test('import source scripts and styles from node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
+  });
 });
 
 describe('resolve url in style', () => {

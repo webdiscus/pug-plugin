@@ -2,6 +2,7 @@ const path = require('path');
 const { resolveException } = require('./exceptions');
 const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
+const AssetEntry = require('./AssetEntry');
 
 /**
  * Resource resolver.
@@ -170,6 +171,10 @@ const ResourceResolver = {
     // @import CSS rule is not supported
     if (rawRequest.indexOf('??ruleSet') > 0) resolveException(rawRequest, issuer);
 
+    // require script in tag <script src=require('./main.js')>, asset filename set via replaceSourceFilesInCompilation()
+    const scriptFile = AssetScript.resolveFile(rawRequest);
+    if (scriptFile != null) return scriptFile;
+
     // bypass the asset contained data-URL
     if (AssetInline.isDataUrl(rawRequest)) return rawRequest;
 
@@ -187,10 +192,6 @@ const ResourceResolver = {
       const dataUrl = AssetInline.getDataUrl(sourceFile, issuer);
       if (dataUrl != null) return dataUrl;
     }
-
-    // require script in tag <script src=require('./main.js')>
-    const script = AssetScript.getResource(rawRequest);
-    if (script != null) return script;
 
     // require only js code or json data
     if (/\.js[a-z0-9]*$/i.test(rawRequest)) return require(request);

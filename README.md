@@ -118,6 +118,7 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
   ```scss
   background: url('./icons/iphone.svg') // CSS: url("data:image/svg+xml,<svg>...</svg>")
   ```
+- enable/disable extraction of comments to `*.LICENSE.txt` file
 - support the plugin modules to define a separate source / output path and filename for each file type
 - support the `post process` for modules to handle the extracted content
 - pug-plugin already contains the [pug-loader](https://github.com/webdiscus/pug-loader)
@@ -366,6 +367,26 @@ If you want to have a different output filename, you can use the `filename` opti
 > 
 > Don't use `mini-css-extract-plugin` or `style-loader`, they are not required more.\
 > The `extractCss` module extracts CSS much faster than other plugins and resolves all asset URLs in CSS, therefore the `resolve-url-loader` is redundant too.
+
+### `extractComments`
+Type: `boolean` Default: `false`<br>
+Enable / disable extraction of comments to `*.LICENSE.txt` file.
+
+When used `splitChunks` optimization for node modules that contains comments, 
+then Webpack will extract this comments in separate text file. 
+Defaults, Pug plugin prevent to create such needless files.
+But if you want to extract files like `*.LICENSE.txt` then set this option to `true`:
+
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  plugins: [
+    new PugPlugin({
+      extractComments: true,
+    }),
+  ],
+};
+```
 
 ### `postprocess`
 Type: `Function` Default: `null`<br>
@@ -632,7 +653,7 @@ module.exports = {
     splitChunks: {
       cacheGroups: {
         scripts: {
-          test: /\\.(js|ts)$/,
+          test: /\.(js|ts)$/,
           chunks: 'all',
         },
       },
@@ -648,6 +669,39 @@ module.exports = {
 
 See details by [splitChunks.cacheGroups](https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups).
 
+When used splitChunks optimization for script and style node modules specified in Pug, for example:
+```pug
+html
+  head
+    link(href=require('bootstrap/dist/css/bootstrap.min.css') rel='stylesheet')
+    script(src=require('bootstrap/dist/js/bootstrap.min.js') defer)
+  body
+    h1 Hello Pug!
+    script(src=require('./main.js'))
+```
+
+In this use case the `optimization.cacheGroups.{cacheGroup}.test` option must match exactly only js files from `node_modules`:
+```js
+module.exports = {
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // use exactly this Regexp
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+  // ...
+};
+```
+> **Warning**
+>
+> If you will to use the `test` as `/[\\/]node_modules[\\/]`, without extension specification, 
+> then Webpack merge JS source together with CSS source in one file. It is BUG/Feature of `SplitChunksPlugin`.
 
 <a id="recipe-hmr" name="recipe-hmr" href="#recipe-hmr"></a>
 ### HMR live reload

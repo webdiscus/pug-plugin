@@ -1,14 +1,23 @@
 # Change log
 
+## 3.1.0 (2022-07-19)
+- feat: add `extractComments` option to enable/disable saving comments in *.LICENSE.txt file
+- fix: split chunks for some node modules causes error
+- fix: resolving of unique script filename when file required w/o extension
+
 ## 3.0.1 (2022-07-17)
 - fix: auto public path for windows
 
 ## 3.0.0 (2022-07-17)
 
-### ⚠ BREAKING CHANGE
+### ⚠ BREAKING CHANGES
 
-defaults, the embedded extractCss module is now enabled,\
-**for compatibility** with external extractor, you can disable extractCss module:
+- Drop support for `Node 12`, minimum supported version is `14.18`
+  - Node 12 is End-of-Life.
+  - Actual version of `sass-loader` 13.x requires Node 14.
+
+- Defaults the embedded CSS extractor module is now enabled.
+  For compatibility with external extractor, you can disable extractCss module:
 ```js
 new PugPlugin({
   extractCss: {
@@ -57,6 +66,7 @@ new PugPlugin({
     sourcePath: null,
     outputPath: null,
     filename: '[name].html',
+    extractComments: false,
     extractCss: {
       test: /\.(css|scss|sass|less|styl)$/,
       enabled: true,
