@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Pug plugin for webpack compiles Pug files to HTML, extracts CSS and JS from the sources specified in Pug.",
   "keywords": [
     "pug",
@@ -70,7 +70,7 @@
     "@babel/preset-env": "^7.18.9",
     "@popperjs/core": "2.11.5",
     "@types/jest": "^28.1.6",
-    "bootstrap": "5.2.0-beta1",
+    "bootstrap": "5.2.0",
     "css-loader": "^6.7.1",
     "html-loader": "^4.1.0",
     "jest": "^28.1.3",

@@ -2,7 +2,6 @@ const path = require('path');
 const { resolveException } = require('./exceptions');
 const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
-const AssetEntry = require('./AssetEntry');
 
 /**
  * Resource resolver.

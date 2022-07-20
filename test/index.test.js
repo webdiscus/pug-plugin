@@ -270,10 +270,6 @@ describe('require assets tests', () => {
     compareFileListAndContent(PATHS, 'require-assets-same-pug-scss', done);
   });
 
-  test('require same image in pug and scss in context', (done) => {
-    compareFileListAndContent(PATHS, 'require-context-image-pug-scss', done);
-  });
-
   test('multiple-chunks-same-filename', (done) => {
     compareFileListAndContent(PATHS, 'multiple-chunks-same-filename', done);
   });
@@ -282,6 +278,20 @@ describe('require assets tests', () => {
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
   // });
+});
+
+describe('resolve paths in root context', () => {
+  test('require same image in pug and scss', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-context-image-pug-scss', done);
+  });
+
+  test('resolve script with auto publicPath', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-context-script', done);
+  });
+
+  test('resolve script with and w/o extension', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-context-script-ext', done);
+  });
 });
 
 describe('split chunks', () => {
@@ -299,6 +309,10 @@ describe('split chunks', () => {
 
   test('import source scripts and styles from node module', (done) => {
     compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
+  });
+
+  test('import source scripts and styles from many node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
   });
 });
 

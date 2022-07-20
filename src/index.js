@@ -164,11 +164,15 @@ class PugPlugin {
       publicPath: webpackPublicPath,
     });
 
+    AssetScript.init({
+      rootContext: webpackOptions.context,
+    });
+
     // clear caches by tests, webpack watch or serve
-    ResourceResolver.clear();
     AssetEntry.clear();
     AssetScript.clear();
     AssetTrash.reset();
+    ResourceResolver.clear();
 
     // initialize responsible-loader module
     ResponsiveLoader.init(compiler);
@@ -248,6 +252,7 @@ class PugPlugin {
         fs: normalModuleFactory.fs.fileSystem,
         moduleGraph: compilation.moduleGraph,
       });
+
       AssetEntry.init(compilation);
       Asset.reset();
       AssetScript.reset();

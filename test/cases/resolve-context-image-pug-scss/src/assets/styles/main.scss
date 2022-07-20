@@ -1,0 +1,7 @@
+.image {
+  color: indianred;
+  height: 200px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url('~Images/image.png?format=jpg'); // test same file with same query in both Pug and SCSS
+}

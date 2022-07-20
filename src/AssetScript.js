@@ -9,9 +9,16 @@ const { parseRequest, pathToPosix } = require('./utils');
  * @singleton
  */
 const AssetScript = {
-  //index: 1,
   index: {},
   files: [],
+  cache: new Map(),
+
+  /**
+   * @param {rootContext: string} rootContext The webpack root context path.
+   */
+  init({ rootContext }) {
+    this.rootContext = rootContext;
+  },
 
   /**
    * Replace all required source filenames with generating asset filenames.
@@ -168,16 +175,31 @@ const AssetScript = {
   },
 
   /**
-   * @param {string} request
-   * @return {string|null}
+   * Resolve script file from request.
+   *
+   * @param {string} request The asset request.
+   * @return {string|null} Return null if the request is not a script required in Pug.
    */
   resolveFile(request) {
     const { resource, query } = parseRequest(request);
 
-    // try to resolve resource w/o extension, e.g.:
-    // when in Pug used script w/o `.js`, like `script(src=require('Scripts/common.min'))`,
-    // then resolve filename `common.min` to `common.min.js`
-    return query === 'isScript' ? require.resolve(resource) : null;
+    if (query !== 'isScript') return null;
+
+    if (this.cache.has(resource)) {
+      return this.cache.get(resource);
+    }
+
+    // resolve full path of required script as relative path by root context, like `script(src=require('/src/scripts/vendor.min.js'))`
+    const file =
+      resource.startsWith(this.rootContext) || /[\\/]node_modules[\\/]/.test(resource)
+        ? resource
+        : path.join(this.rootContext, resource);
+    // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
+    const resolvedFile = require.resolve(file);
+
+    this.cache.set(resource, resolvedFile);
+
+    return resolvedFile;
   },
 
   /**
@@ -185,7 +207,6 @@ const AssetScript = {
    */
   reset() {
     this.index = {};
-    // don't reset files because this cache is used by webpack watch or serve
   },
 
   /**
@@ -194,6 +215,7 @@ const AssetScript = {
   clear() {
     this.index = {};
     this.files = [];
+    this.cache.clear();
   },
 };
 
