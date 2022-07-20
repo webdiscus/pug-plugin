@@ -12,7 +12,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public'),
-    publicPath: '/',
     filename: 'assets/js/[name].[contenthash:8].js',
     //chunkFilename: 'assets/js/[id].js',
   },

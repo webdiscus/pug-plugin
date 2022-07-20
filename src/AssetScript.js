@@ -9,9 +9,16 @@ const { parseRequest, pathToPosix } = require('./utils');
  * @singleton
  */
 const AssetScript = {
-  //index: 1,
   index: {},
   files: [],
+  cache: new Map(),
+
+  /**
+   * @param {rootContext: string} rootContext The webpack root context path.
+   */
+  init({ rootContext }) {
+    this.rootContext = isWin ? pathToPosix(rootContext) : rootContext;
+  },
 
   /**
    * Replace all required source filenames with generating asset filenames.
@@ -22,6 +29,15 @@ const AssetScript = {
   replaceSourceFilesInCompilation(compilation) {
     const RawSource = compilation.compiler.webpack.sources.RawSource;
     const usedScripts = new Map();
+
+    const realSplitFiles = new Set();
+    const allSplitFiles = new Set();
+
+    for (let chunk of compilation.chunks) {
+      if (chunk.chunkReason && chunk.chunkReason.startsWith('split chunk')) {
+        allSplitFiles.add(...chunk.files);
+      }
+    }
 
     // in the content, replace the source script file with the output filename
     for (let asset of this.files) {
@@ -43,19 +59,21 @@ const AssetScript = {
         // prevent error when in HMR mode after removing a script in pug
         continue;
       }
-      let chunkFiles = chunkGroup.getFiles();
+
       const content = compilation.assets[issuerFile].source();
       let newContent = content;
+      let chunkFiles = chunkGroup.getFiles();
       let scriptTags = '';
 
-      // filter only scripts w/o HMR
       chunkFiles = chunkFiles.filter((file) => compilation.assetsInfo.get(file).hotModuleReplacement !== true);
       asset.chunkFiles = chunkFiles;
 
       // replace source filename with asset filename
       if (chunkFiles.length === 1) {
-        const assetFile = Asset.getOutputFile(chunkFiles.values().next().value, issuerFile);
+        const file = chunkFiles.values().next().value;
+        const assetFile = Asset.getOutputFile(file, issuerFile);
         newContent = content.replace(request, assetFile);
+        realSplitFiles.add(file);
       } else {
         // extract original script tag with all attributes for usage it as template for chunks
         let srcStartPos = content.indexOf(request);
@@ -74,9 +92,10 @@ const AssetScript = {
           // avoid generate a script of the same split chunk used in different js files required in one pug file,
           // happens when used optimisation.splitChunks
           if (chunkScripts.indexOf(file) < 0) {
-            const scriptFile = Asset.getOutputFile(file, issuerFile);
-            scriptTags += tmplScriptStart + scriptFile + tmplScriptEnd;
+            const assetFile = Asset.getOutputFile(file, issuerFile);
+            scriptTags += tmplScriptStart + assetFile + tmplScriptEnd;
             chunkScripts.push(file);
+            realSplitFiles.add(file);
           }
         }
 
@@ -87,6 +106,13 @@ const AssetScript = {
       }
 
       compilation.assets[issuerFile] = new RawSource(newContent);
+    }
+
+    // remove generated unused split files
+    for (let file of allSplitFiles) {
+      if (!realSplitFiles.has(file)) {
+        compilation.deleteAsset(file);
+      }
     }
   },
 
@@ -163,21 +189,36 @@ const AssetScript = {
    * @return {boolean}
    */
   has(request) {
-    if (isWin) request = pathToPosix(request);
     return this.files.find((item) => item.request === request);
   },
 
   /**
-   * @param {string} request
-   * @return {string|null}
+   * Resolve script file from request.
+   *
+   * @param {string} request The asset request.
+   * @return {string|null} Return null if the request is not a script required in Pug.
    */
   resolveFile(request) {
     const { resource, query } = parseRequest(request);
 
-    // try to resolve resource w/o extension, e.g.:
-    // when in Pug used script w/o `.js`, like `script(src=require('Scripts/common.min'))`,
-    // then resolve filename `common.min` to `common.min.js`
-    return query === 'isScript' ? require.resolve(resource) : null;
+    if (query !== 'isScript') return null;
+
+    if (this.cache.has(resource)) {
+      return this.cache.get(resource);
+    }
+
+    // resolve full path of required script as relative path by root context, like `script(src=require('/src/scripts/vendor.min.js'))`
+    const file =
+      resource.startsWith(this.rootContext) || /[\\/]node_modules[\\/]/.test(resource)
+        ? resource
+        : path.join(this.rootContext, resource);
+
+    // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
+    const resolvedFile = require.resolve(file);
+
+    this.cache.set(resource, resolvedFile);
+
+    return resolvedFile;
   },
 
   /**
@@ -185,7 +226,6 @@ const AssetScript = {
    */
   reset() {
     this.index = {};
-    // don't reset files because this cache is used by webpack watch or serve
   },
 
   /**
@@ -194,6 +234,7 @@ const AssetScript = {
   clear() {
     this.index = {};
     this.files = [];
+    this.cache.clear();
   },
 };
 

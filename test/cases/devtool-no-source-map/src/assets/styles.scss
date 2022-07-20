@@ -1,0 +1,42 @@
+@use 'home';
+
+// test UTF-8 chars
+.test::before {
+  content: "Schöne Grüße";
+}
+
+.test-2::before {
+  content: "✓";
+}
+
+.test-3::before {
+  content: "\2660";
+}
+
+@supports not (display: grid) {
+  div {
+    float: right;
+  }
+}
+
+@supports (display: flex) {
+  @media screen and (min-width: 900px) {
+    article {
+      display: flex;
+    }
+  }
+}
+
+@layer base, special;
+
+@layer special {
+  .item {
+    color: rebeccapurple;
+  }
+}
+
+@layer base {
+  .item {
+    color: green;
+  }
+}

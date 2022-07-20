@@ -92,6 +92,7 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
 4. [Usage examples](#usage-examples)
 5. [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
 6. [How to config `splitChunks`](#recipe-split-chunks)
+6. [How to split multiple node modules under their own names](#recipe-split-many-modules)
 7. [How to use HMR live reload](#recipe-hmr)
 8. Demo sites
    - [Hello World!](https://webdiscus.github.io/pug-plugin/hello-world/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world))
@@ -689,7 +690,7 @@ module.exports = {
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // use exactly this Regexp
-          name: 'vendors',
+          name: 'vendor',
           chunks: 'all',
         },
       },
@@ -698,10 +699,91 @@ module.exports = {
   // ...
 };
 ```
+
+> **Warning**
+> 
+> Splitting CSS to many chunk is principal impossible. Splitting works only for JS files.
+> If you use vendor styles in your style file, e.g.: 
+> 
+> _styles.scss_
+> ```scss
+> @use "~bootstrap/scss/bootstrap";
+> body {
+>   color: bootstrap.$primary;
+> }
+> ```
+> 
+> Then vendor styles will not be saved to a separate file, because `sass-loader` generates one CSS bundle code.
+> Therefore vendor styles should be loaded in Pug separately.
+
 > **Warning**
 >
 > If you will to use the `test` as `/[\\/]node_modules[\\/]`, without extension specification, 
-> then Webpack merge JS source together with CSS source in one file. It is BUG/Feature of `SplitChunksPlugin`.
+> then Webpack concatenates JS code together with CSS in one file, 
+> because Webpack can't differentiate CSS module from JS module, therefore you MUST match only JS files.
+>
+> If you want save module styles separate from your styles, then load them in Pug separately:
+> ```Pug
+> html
+>   head
+>     //- require module styles separately:
+>     link(href=require('bootstrap/dist/css/bootstrap.min.css') rel='stylesheet')
+>     //- require your styles separately:
+>     link(href=require('./styles.scss') rel='stylesheet')
+>   body
+>     h1 Hello Pug!
+>     script(src=require('./main.js'))
+> ```
+
+<a id="recipe-split-many-modules" name="recipe-split-many-modules" href="#recipe-split-many-modules"></a>
+### Split multiple node modules under their own names
+
+If you use many node modules and want save each module to separate file then use `optimization.cacheGroups.{cacheGroup}.name` as function.
+
+For example, you imports many node modules in the `script.js`:
+```js
+import { Button } from 'bootstrap';
+import _, { map } from 'underscore';
+// ..
+```
+
+Then, use the `name` as following function:
+```js
+module.exports = {
+  output: {
+    path: path.join(__dirname, 'dist/'),
+    filename: 'js/[name].[contenthash:8].js', // output filename of js files
+  },
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      minSize: 10000, // extract modules bigger than ~10KB, defaults is 30KB
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // split JS only, ignore CSS modules
+          // save node module under own name
+          name(module) {
+            const name = module.resourceResolveData.descriptionFileData.name.replace('@', '');
+            return `npm.${name}`;
+          },
+        },
+      },
+    },
+  },
+  // ...
+};
+```
+
+The split files will be saved like this:
+```
+dist/js/npm.popperjs/core.f96a1152.js <- the `popperjs/core` used in bootstrap will be extracted too
+dist/js/npm.bootstrap.f69a4e44.js
+dist/js/npm.underscore.4e44f69a.js
+dist/js/runtime.9cd0e0f9.js <- common runtime code
+dist/js/script.3010da09.js
+```
+
 
 <a id="recipe-hmr" name="recipe-hmr" href="#recipe-hmr"></a>
 ### HMR live reload

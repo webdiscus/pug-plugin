@@ -1,5 +1,11 @@
 # Change log
 
+## 3.1.1 (2022-07-21)
+- fix: resolving issues on Windows
+- fix: resolving issues by assets with root path using context
+- fix: issue by split chunks from some node modules
+- docs: update readme for correct usage of split chunks configuration
+
 ## 3.1.0 (2022-07-19)
 - feat: add `extractComments` option to enable/disable saving comments in *.LICENSE.txt file
 - fix: split chunks for some node modules causes error

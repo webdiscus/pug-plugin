@@ -3,30 +3,29 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
-  // test no source map
   devtool: false,
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '/',
   },
 
   entry: {
-    styles: './src/assets/main.scss',
+    index: './src/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      extractCss: {
-        filename: 'assets/[name].css',
-      },
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
       {
-        test: /\.scss$/,
+        test: /\.pug$/,
+        loader: PugPlugin.loader,
+        options: {
+          method: 'render',
+        },
+      },
+      {
+        test: /\.(css|scss)$/,
         use: ['css-loader', 'sass-loader'],
       },
     ],

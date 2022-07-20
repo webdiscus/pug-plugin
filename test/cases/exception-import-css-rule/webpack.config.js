@@ -1,35 +1,36 @@
 const PugPlugin = require('../../../');
+const path = require('path');
 
 module.exports = {
   mode: 'development',
-  devtool: 'inline-source-map',
 
   output: {
+    path: path.join(__dirname, 'public/'),
     publicPath: '/',
   },
 
   entry: {
-    styles: './src/assets/main.css',
+    index: './src/index.pug',
   },
 
-  plugins: [
-    // Extract css to .css file
-    new PugPlugin({
-      extractCss: {
-        filename: '[name].[contenthash:8].css',
-      },
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
+      {
+        test: /\.pug$/,
+        loader: PugPlugin.loader,
+        options: {
+          method: 'render',
+        },
+      },
       {
         test: /\.css$/,
         use: [
           {
             loader: 'css-loader',
             options: {
-              // node: to allow using @import in CSS file disable the `import` option
+              // to enable using @import in CSS file disable the `import` option
               import: true,
             },
           },

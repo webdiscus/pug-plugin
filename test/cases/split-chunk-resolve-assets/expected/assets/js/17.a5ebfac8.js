@@ -1,1 +1,0 @@
-(self.webpackChunk=self.webpackChunk||[]).push([[17,870],{870:(o,e,l)=>{const s=l(691),c=l(703);console.log("modB: ",s),console.log("modC: ",c)}}]);
