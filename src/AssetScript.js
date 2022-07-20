@@ -17,7 +17,7 @@ const AssetScript = {
    * @param {rootContext: string} rootContext The webpack root context path.
    */
   init({ rootContext }) {
-    this.rootContext = rootContext;
+    this.rootContext = isWin ? pathToPosix(rootContext) : rootContext;
   },
 
   /**
@@ -170,7 +170,8 @@ const AssetScript = {
    * @return {boolean}
    */
   has(request) {
-    if (isWin) request = pathToPosix(request);
+    //if (isWin) request = pathToPosix(request);
+    //console.log('\n *** AssetScript has: ',request,'\n',this.files);
     return this.files.find((item) => item.request === request);
   },
 
@@ -194,8 +195,13 @@ const AssetScript = {
       resource.startsWith(this.rootContext) || /[\\/]node_modules[\\/]/.test(resource)
         ? resource
         : path.join(this.rootContext, resource);
+
+     //console.log('\n *** resolveFile: ', request, '\n rootContext: ',this.rootContext, '\n file: ', file, '\n resource: ', resource);
+
     // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
     const resolvedFile = require.resolve(file);
+
+
 
     this.cache.set(resource, resolvedFile);
 

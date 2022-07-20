@@ -340,6 +340,8 @@ class PugPlugin {
           // process only entries supported by this plugin
           if (!entry) return;
 
+
+
           const sources = new Set();
           const contentHashType = 'javascript';
           const chunkModules = chunkGraph.getChunkModulesIterable(chunk);
