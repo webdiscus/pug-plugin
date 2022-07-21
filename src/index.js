@@ -340,8 +340,6 @@ class PugPlugin {
           // process only entries supported by this plugin
           if (!entry) return;
 
-
-
           const sources = new Set();
           const contentHashType = 'javascript';
           const chunkModules = chunkGraph.getChunkModulesIterable(chunk);
@@ -590,31 +588,6 @@ class PugPlugin {
           }
         }
       );
-
-      // direct after renderManifest
-      compilation.hooks.chunkAsset.tap(plugin, (chunk, file) => {
-        // avoid saving runtime js files from node_modules as assets by usage of the splitChunks optimization,
-        // because it is never used in assets, it's wrong extracted files by webpack
-
-        if (chunk.chunkReason && chunk.chunkReason.startsWith('split chunk')) {
-          const modules = compilation.chunkGraph.getChunkModules(chunk);
-
-          if (modules.length > 0) {
-            const { rawRequest, request, buildInfo } = modules[0];
-            if (!rawRequest || !buildInfo) return;
-
-            const { managedFiles } = buildInfo.snapshot;
-            // note: rawRequest of module, e.g. require('lodash'), cannot contain `node_modules`
-            // if rawRequest contains the `node_modules`, then this file must be removed from assets
-            const excludeRegexp = /\/node_modules\//;
-
-            // note: on Windows only rawRequest has posix slashes in path
-            if (managedFiles && managedFiles.has(request) && excludeRegexp.test(rawRequest)) {
-              AssetTrash.toTrash(file);
-            }
-          }
-        }
-      });
 
       // only here can be an asset deleted or emitted
       compilation.hooks.processAssets.tap(

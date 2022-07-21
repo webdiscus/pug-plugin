@@ -30,6 +30,15 @@ const AssetScript = {
     const RawSource = compilation.compiler.webpack.sources.RawSource;
     const usedScripts = new Map();
 
+    const realSplitFiles = new Set();
+    const allSplitFiles = new Set();
+
+    for (let chunk of compilation.chunks) {
+      if (chunk.chunkReason && chunk.chunkReason.startsWith('split chunk')) {
+        allSplitFiles.add(...chunk.files);
+      }
+    }
+
     // in the content, replace the source script file with the output filename
     for (let asset of this.files) {
       const issuerFile = asset.issuer.filename;
@@ -50,19 +59,21 @@ const AssetScript = {
         // prevent error when in HMR mode after removing a script in pug
         continue;
       }
-      let chunkFiles = chunkGroup.getFiles();
+
       const content = compilation.assets[issuerFile].source();
       let newContent = content;
+      let chunkFiles = chunkGroup.getFiles();
       let scriptTags = '';
 
-      // filter only scripts w/o HMR
       chunkFiles = chunkFiles.filter((file) => compilation.assetsInfo.get(file).hotModuleReplacement !== true);
       asset.chunkFiles = chunkFiles;
 
       // replace source filename with asset filename
       if (chunkFiles.length === 1) {
-        const assetFile = Asset.getOutputFile(chunkFiles.values().next().value, issuerFile);
+        const file = chunkFiles.values().next().value;
+        const assetFile = Asset.getOutputFile(file, issuerFile);
         newContent = content.replace(request, assetFile);
+        realSplitFiles.add(file);
       } else {
         // extract original script tag with all attributes for usage it as template for chunks
         let srcStartPos = content.indexOf(request);
@@ -81,9 +92,10 @@ const AssetScript = {
           // avoid generate a script of the same split chunk used in different js files required in one pug file,
           // happens when used optimisation.splitChunks
           if (chunkScripts.indexOf(file) < 0) {
-            const scriptFile = Asset.getOutputFile(file, issuerFile);
-            scriptTags += tmplScriptStart + scriptFile + tmplScriptEnd;
+            const assetFile = Asset.getOutputFile(file, issuerFile);
+            scriptTags += tmplScriptStart + assetFile + tmplScriptEnd;
             chunkScripts.push(file);
+            realSplitFiles.add(file);
           }
         }
 
@@ -94,6 +106,13 @@ const AssetScript = {
       }
 
       compilation.assets[issuerFile] = new RawSource(newContent);
+    }
+
+    // remove generated unused split files
+    for (let file of allSplitFiles) {
+      if (!realSplitFiles.has(file)) {
+        compilation.deleteAsset(file);
+      }
     }
   },
 
@@ -170,8 +189,6 @@ const AssetScript = {
    * @return {boolean}
    */
   has(request) {
-    //if (isWin) request = pathToPosix(request);
-    //console.log('\n *** AssetScript has: ',request,'\n',this.files);
     return this.files.find((item) => item.request === request);
   },
 
@@ -196,12 +213,8 @@ const AssetScript = {
         ? resource
         : path.join(this.rootContext, resource);
 
-     //console.log('\n *** resolveFile: ', request, '\n rootContext: ',this.rootContext, '\n file: ', file, '\n resource: ', resource);
-
     // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
     const resolvedFile = require.resolve(file);
-
-
 
     this.cache.set(resource, resolvedFile);
 

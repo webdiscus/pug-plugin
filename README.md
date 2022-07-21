@@ -690,7 +690,7 @@ module.exports = {
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // use exactly this Regexp
-          name: 'vendors',
+          name: 'vendor',
           chunks: 'all',
         },
       },
@@ -756,9 +756,9 @@ module.exports = {
   },
   optimization: {
     runtimeChunk: 'single',
-    chunks: 'all',
-    minSize: 10000, // extract modules bigger than ~10KB, defaults is 30KB
     splitChunks: {
+      chunks: 'all',
+      minSize: 10000, // extract modules bigger than ~10KB, defaults is 30KB
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // split JS only, ignore CSS modules

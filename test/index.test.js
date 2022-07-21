@@ -25,6 +25,8 @@ const PATHS = {
   assets: '/public/assets/',
 };
 
+const testTimeout = 20000;
+
 beforeAll(() => {
   // delete all files from path
   rimraf.sync(PATHS.testOutput);
@@ -33,7 +35,9 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  jest.setTimeout(25000);
+  // Note: on linux/macOS not work.
+  // Use the testTimeout constant as argument in test(description, fn, testTimeout).
+  jest.setTimeout(testTimeout);
 });
 
 describe('utils tests', () => {
@@ -121,13 +125,21 @@ describe('options', () => {
     compareFileListAndContent(PATHS, 'options-pretty', done);
   });
 
-  test('options.extractComments = true', (done) => {
-    compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
-  });
+  test(
+    'options.extractComments = true',
+    (done) => {
+      compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
+    },
+    testTimeout
+  );
 
-  test('options.extractComments = false', (done) => {
-    compareFileListAndContent(PATHS, 'option-extract-comments-false', done);
-  });
+  test(
+    'options.extractComments = false',
+    (done) => {
+      compareFileListAndContent(PATHS, 'option-extract-comments-false', done);
+    },
+    testTimeout
+  );
 });
 
 describe('source map', () => {
@@ -295,25 +307,45 @@ describe('resolve paths in root context', () => {
 });
 
 describe('split chunks', () => {
-  test('resolve assets when used split chunk, production', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-resolve-assets', done);
-  });
-
   test('resolve assets when used split chunk, development', (done) => {
     compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-dev', done);
   });
 
-  test('import min styles and scripts from node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-node-module-min', done);
+  test('resolve assets when used split chunk, production', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-prod', done);
   });
 
-  test('import source scripts and styles from node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
-  });
+  test(
+    'load min styles and scripts from node module',
+    (done) => {
+      compareFileListAndContent(PATHS, 'split-chunk-node-module-min', done);
+    },
+    testTimeout
+  );
 
-  test('import source scripts and styles from many node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
-  });
+  test(
+    'import source scripts and styles from node module',
+    (done) => {
+      compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
+    },
+    testTimeout
+  );
+
+  test(
+    'import source scripts and styles from many node module',
+    (done) => {
+      compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
+    },
+    testTimeout
+  );
+
+  test(
+    'load vendor scripts from node module',
+    (done) => {
+      compareFileListAndContent(PATHS, 'split-chunk-vendor', done);
+    },
+    testTimeout
+  );
 });
 
 describe('resolve url in style', () => {
