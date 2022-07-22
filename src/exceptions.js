@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const ansis = require('ansis');
 const { plugin } = require('./config');
-const { outToConsole } = require('./utils');
+const { outToConsole, parseRequest } = require('./utils');
 
 const ansisPluginName = `\n${ansis.red(`[${plugin}]`)}`;
 let lastError = null;
@@ -124,6 +124,25 @@ const webpackEntryWarning = (file) => {
   );
 };
 
+const duplicateScriptWarning = (request, issuer) => {
+  const { resource } = parseRequest(request);
+  outToConsole(
+    `${ansis.black.bgYellow(`[${plugin}] WARNING `)} ` +
+      `${ansis.yellow`DON'T use duplicate scripts in same Pug!`}\n` +
+      `The file ${ansis.cyan(resource)} is already used in ${ansis.magenta(issuer)}.\n` +
+      `Note: only first script will be resolved, all duplicates will be ignored.`
+  );
+};
+
+const duplicateStyleWarning = (request, issuer) => {
+  const { resource } = parseRequest(request);
+  outToConsole(
+    `${ansis.black.bgYellow(`[${plugin}] WARNING `)} ` +
+      `${ansis.yellow`DON'T use duplicate styles in same Pug!`}\n` +
+      `The file ${ansis.cyan(resource)} is already used in ${ansis.magenta(issuer)}.\n`
+  );
+};
+
 module.exports = {
   PugPluginError,
   PugPluginException,
@@ -132,4 +151,6 @@ module.exports = {
   executeTemplateFunctionException,
   postprocessException,
   webpackEntryWarning,
+  duplicateScriptWarning,
+  duplicateStyleWarning,
 };

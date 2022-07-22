@@ -29,7 +29,6 @@ const AssetScript = {
   replaceSourceFilesInCompilation(compilation) {
     const RawSource = compilation.compiler.webpack.sources.RawSource;
     const usedScripts = new Map();
-
     const realSplitFiles = new Set();
     const allSplitFiles = new Set();
 
@@ -50,7 +49,7 @@ const AssetScript = {
 
       // init script cache by current issuer
       if (!usedScripts.has(issuerFile)) {
-        usedScripts.set(issuerFile, []);
+        usedScripts.set(issuerFile, new Set());
       }
 
       const { name, request } = asset;
@@ -91,10 +90,10 @@ const AssetScript = {
         for (let file of chunkFiles) {
           // avoid generate a script of the same split chunk used in different js files required in one pug file,
           // happens when used optimisation.splitChunks
-          if (chunkScripts.indexOf(file) < 0) {
+          if (!chunkScripts.has(file)) {
             const assetFile = Asset.getOutputFile(file, issuerFile);
             scriptTags += tmplScriptStart + assetFile + tmplScriptEnd;
-            chunkScripts.push(file);
+            chunkScripts.add(file);
             realSplitFiles.add(file);
           }
         }
@@ -215,7 +214,6 @@ const AssetScript = {
 
     // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
     const resolvedFile = require.resolve(file);
-
     this.cache.set(resource, resolvedFile);
 
     return resolvedFile;

@@ -1,11 +1,10 @@
 const vm = require('vm');
 const path = require('path');
-const ansis = require('ansis');
 const { merge } = require('webpack-merge');
 const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator');
 
 const { plugin } = require('./config');
-const { isFunction, parseRequest, outToConsole } = require('./utils');
+const { isFunction, parseRequest } = require('./utils');
 
 const extractCss = require('./modules/extractCss');
 const extractHtml = require('./modules/extractHtml');
@@ -23,6 +22,7 @@ const AssetTrash = require('./AssetTrash');
 // supports for responsive-loader
 const ResponsiveLoader = require('./extras/ResponsiveLoader');
 
+const { verboseEntry, verboseExtractModule, verboseExtractResource } = require('./verbose');
 const {
   optionModulesException,
   executeTemplateFunctionException,
@@ -247,6 +247,7 @@ class PugPlugin {
 
       ResourceResolver.init({
         fs: normalModuleFactory.fs.fileSystem,
+        rootContext: webpackOptions.context,
       });
       UrlDependencyResolver.init({
         fs: normalModuleFactory.fs.fileSystem,
@@ -347,7 +348,7 @@ class PugPlugin {
           entry.filename = compilation.getPath(chunk.filenameTemplate, { contentHashType, chunk });
           AssetScript.setIssuerFilename(entry.importFile, entry.filename);
 
-          if (verbose) this.verboseEntry(entry);
+          if (verbose) verboseEntry(entry);
 
           for (const module of chunkModules) {
             const { buildInfo, resource: sourceFile } = module;
@@ -479,7 +480,7 @@ class PugPlugin {
               });
 
               if (verbose) {
-                this.verboseExtractModule({
+                verboseExtractModule({
                   issuerFile,
                   sourceFile,
                   assetFile: path.join(webpackOutputPath, assetFile),
@@ -488,37 +489,40 @@ class PugPlugin {
             } else if (module.type === 'asset/resource') {
               // require a resource in pug or in css via url()
               const assetFile = buildInfo.filename;
+              // try to get asset file processed via responsive-loader
+              const asset = ResponsiveLoader.getAsset(module, issuerFile);
 
-              // supports for resources processed via responsive-loader
-              if (ResponsiveLoader.isUsed()) {
-                const asset = ResponsiveLoader.getAsset(module, issuerFile);
+              if (asset != null) {
+                // save a module and handler for asset that may be used in many styles
+                ResourceResolver.setExtrasInModuleCache(sourceFile, {
+                  module,
+                  handler: ResponsiveLoader.getAsset,
+                });
+                ResourceResolver.addToChunkCache(sourceFile, asset, issuerFile);
+                AssetTrash.toTrash(assetFile);
 
-                if (asset != null) {
-                  ResourceResolver.addToChunkCache(sourceFile, asset, issuerFile);
-                  AssetTrash.toTrash(assetFile);
-
-                  if (verbose) {
-                    this.verboseExtractResource({
-                      issuerFile,
-                      sourceFile,
-                      outputPath: webpackOutputPath,
-                      assetFile: asset,
-                    });
-                  }
-                  continue;
+                if (verbose) {
+                  verboseExtractResource({
+                    issuerFile,
+                    sourceFile,
+                    outputPath: webpackOutputPath,
+                    assetFile: asset,
+                  });
                 }
+                continue;
               }
+
+              // save an asset file that may be used in many styles
+              ResourceResolver.setAssetFileInModuleCache(sourceFile, assetFile);
 
               if (module.isDependencyTypeUrl !== true) {
                 const issuerAssetFile = Asset.findAssetFile(issuerFile);
                 const outputAssetFile = Asset.getOutputFile(assetFile, issuerAssetFile);
                 ResourceResolver.addToChunkCache(sourceFile, outputAssetFile, issuerFile);
               }
-              // try to find same resource that possible is used in styles
-              ResourceResolver.setAssetFileInModuleCache(sourceFile, assetFile);
 
               if (verbose) {
-                this.verboseExtractResource({
+                verboseExtractResource({
                   issuerFile,
                   sourceFile,
                   outputPath: webpackOutputPath,
@@ -545,22 +549,27 @@ class PugPlugin {
 
           // normalize moduleCache
           for (let [sourceFile, item] of ResourceResolver.moduleCache) {
-            // normalize resolved source files
-            if (!item.assetFile) {
-              for (let issuer of item.issuers) {
-                for (let rawRequest of item.rawRequests) {
+            const { assetFile, issuers, rawRequests, extras } = item;
+
+            for (let issuer of issuers) {
+              if (assetFile != null) {
+                // normalize output asset files
+                const issuerAssetFile = Asset.findAssetFile(issuer);
+                const assetOutputFile = AssetInline.isDataUrl(assetFile)
+                  ? assetFile
+                  : Asset.getOutputFile(assetFile, issuerAssetFile);
+
+                ResourceResolver.addToChunkCache(sourceFile, assetOutputFile, issuer);
+              } else if (extras != null) {
+                // normalize output asset files processed via external loader, e.g. `responsive-loader`
+                const assetOutputFile = extras.handler(extras.module, issuer);
+                ResourceResolver.addToChunkCache(sourceFile, assetOutputFile, issuer);
+              } else {
+                // normalize resolved source files
+                for (let rawRequest of rawRequests) {
                   ResourceResolver.addSourceFile(sourceFile, rawRequest, issuer);
                 }
               }
-              // skip assets that have not yet been compiled, they will be processed in the next entry point
-              continue;
-            }
-
-            // normalize output asset files
-            for (let issuer of item.issuers) {
-              const issuerAssetFile = Asset.findAssetFile(issuer);
-              const assetOutputFile = Asset.getOutputFile(item.assetFile, issuerAssetFile);
-              ResourceResolver.addToChunkCache(sourceFile, assetOutputFile, issuer);
             }
           }
 
@@ -698,53 +707,6 @@ class PugPlugin {
   getModule(request) {
     const { resource } = parseRequest(request);
     return this.options.modules.find((module) => module.enabled !== false && module.test.test(resource));
-  }
-
-  /**
-   * @param {AssetEntryOptions} entry
-   */
-  verboseEntry(entry) {
-    if (!entry) return;
-    outToConsole(
-      `${ansis.black.bgGreen(`[${plugin}]`)} Compile the entry ${ansis.green(entry.name)}\n` +
-        ` filename: ${
-          isFunction(entry.filenameTemplate)
-            ? ansis.greenBright`[Function: filename]`
-            : ansis.magenta(entry.filenameTemplate.toString())
-        }\n` +
-        ` source: ${ansis.cyan(entry.importFile)}\n` +
-        ` output: ${ansis.cyanBright(entry.file)}\n`
-    );
-  }
-
-  /**
-   * @param {string} issuerFile
-   * @param {string} sourceFile
-   * @param {string} assetFile
-   */
-  verboseExtractModule({ issuerFile, sourceFile, assetFile }) {
-    outToConsole(
-      `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite` Extract Module `} in ` +
-        `${ansis.green(issuerFile)}\n` +
-        ` source: ${ansis.cyan(sourceFile)}\n` +
-        ` output: ${ansis.cyanBright(assetFile)}\n`
-    );
-  }
-
-  /**
-   * @param {string} issuerFile
-   * @param {string} sourceFile
-   * @param {string} outputPath
-   * @param {string} assetFile
-   */
-  verboseExtractResource({ issuerFile, sourceFile, outputPath, assetFile }) {
-    outToConsole(
-      `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite` Extract Resource `} in ` +
-        `${ansis.green(issuerFile)}\n` +
-        `      source: ${ansis.cyan(sourceFile)}\n` +
-        ` output path: ${ansis.cyanBright(outputPath)}\n` +
-        `       asset: ${ansis.cyanBright(assetFile)}\n`
-    );
   }
 }
 

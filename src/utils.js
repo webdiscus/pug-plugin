@@ -18,26 +18,6 @@ const isFunction = (value) => typeof value === 'function';
 const outToConsole = (...args) => process.stdout.write(args.join(' ') + '\n');
 
 /**
- * Simple equal of two objects.
- *
- * @param {{}} obj1
- * @param {{}} obj2
- * @return {boolean}
- */
-const shallowEqual = function (obj1, obj2) {
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-
-  if (keys1.length !== keys2.length) return false;
-
-  for (let key of keys1) {
-    if (obj1[key] !== obj2[key]) return false;
-  }
-
-  return true;
-};
-
-/**
  * Parse resource path and raw query from request.
  *
  * @param {string} request
@@ -102,6 +82,5 @@ module.exports = {
   pathToPosix,
   parseRequest,
   isFunction,
-  shallowEqual,
   outToConsole,
 };

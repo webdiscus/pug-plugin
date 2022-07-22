@@ -4,30 +4,51 @@ const { parseQuery } = require('../utils');
 const { isWin } = require('../config');
 
 const ResponsiveLoader = {
+  isUsed: false,
+  options: null,
+  loaderOptions: new Map(),
+  searchModuleString: '/node_modules/responsive-loader/',
+
   /**
    * Initialize.
    *
    * @param {{}} compiler The webpack compiler object.
    */
   init(compiler) {
-    this.used = null;
-    this.compiler = compiler;
+    const { rules } = compiler.options.module || {};
+
+    this.loaderOptions.clear();
+    this.isUsed = false;
+
+    if (rules) this.isUsed = JSON.stringify(rules).indexOf('"responsive-loader"') > 0;
+    if (isWin) this.searchModuleString = '\\node_modules\\responsive-loader\\';
   },
 
   /**
-   * @return {boolean}
+   * Find loader option used in the module.
+   * Note: different modules may have their own loader options.
+   *
+   * @param {NormaModule} module The Webpack module of asset.
+   * @return {null|{}} Return loader options if module found otherwise null.
    */
-  isUsed() {
-    if (this.used == null) {
-      const { rules } = this.compiler.options.module || {};
-      this.used = false;
+  findModuleLoaderOptions(module) {
+    const { rawRequest, loaders } = module;
 
-      if (rules) {
-        this.used = JSON.stringify(rules).indexOf('"responsive-loader"') > 0;
+    if (!this.loaderOptions.has(rawRequest)) {
+      const loader = loaders.find((item) => item.loader.indexOf(this.searchModuleString) > 0);
+
+      if (!loader) {
+        this.loaderOptions.set(rawRequest, null);
+        return null;
       }
+
+      const options = loader.options ? loader.options : {};
+      this.loaderOptions.set(rawRequest, options);
+
+      return options;
     }
 
-    return this.used === true;
+    return this.loaderOptions.get(rawRequest);
   },
 
   /**
@@ -36,28 +57,23 @@ const ResponsiveLoader = {
    * Note: in Pug is impossible use `responsive-loader` as object,
    * because a processing happen in a later stage then used result in Pug template.
    *
-   * @param {{loaders: []}} module The webpack module of resource.
+   * @param {NormaModule} module The Webpack module of asset.
    * @param {string} issuerFile The source file of issuer,
    * @returns {null | string} The compiled result as string to replace required resource with this result.
    */
   getAsset(module, issuerFile) {
-    const searchString = isWin ? '\\node_modules\\responsive-loader\\' : '/node_modules/responsive-loader/';
-    const loader = module.loaders.find((item) => item.loader.indexOf(searchString) > 0);
+    const self = ResponsiveLoader;
+    if (self.isUsed !== true) return null;
 
-    if (!loader) return null;
+    const loaderOptions = self.findModuleLoaderOptions(module);
+    if (loaderOptions == null) return null;
 
     const { resource: sourceFile, rawRequest, buildInfo } = module;
-    const query = parseQuery(rawRequest);
     const issuerAssetFile = Asset.findAssetFile(issuerFile);
-    let sizes = [];
+    const query = parseQuery(rawRequest);
     let asset = null;
-
-    // sizes from query has prio over options
-    if (query.sizes && query.sizes.length > 0) {
-      sizes = query.sizes;
-    } else if (loader.options && loader.options.sizes) {
-      sizes = loader.options.sizes;
-    }
+    // the query `sizes` parameter has prio over options
+    let sizes = query.sizes && query.sizes.length > 0 ? query.sizes : loaderOptions.sizes || [];
 
     // return one of image object properties: src, srcSet, width, height
     // but in reality is the `srcSet` property useful
@@ -87,13 +103,11 @@ const ResponsiveLoader = {
     // fallback: retrieve all generated assets as coma-separated list
     // get the real filename of the asset by usage a loader for the resource, e.g. `responsive-loader`
     // and add the original asset file to trash to remove it from compilation
-    if (buildInfo.assetsInfo != null) {
-      const assets = Array.from(buildInfo.assetsInfo.keys());
-      if (assets.length === 1) {
-        asset = Asset.getOutputFile(assets[0], issuerAssetFile);
-      } else if (assets.length > 1 && sizes.length > 1) {
-        asset = assets.map((item, index) => Asset.getOutputFile(item, issuerAssetFile) + ` ${sizes[index]}w`).join(',');
-      }
+    const assets = buildInfo.assetsInfo != null ? Array.from(buildInfo.assetsInfo.keys()) : [];
+    if (assets.length === 1) {
+      asset = Asset.getOutputFile(assets[0], issuerAssetFile);
+    } else if (assets.length > 1 && sizes.length > 1) {
+      asset = assets.map((item, index) => Asset.getOutputFile(item, issuerAssetFile) + ` ${sizes[index]}w`).join(',');
     }
 
     return asset;

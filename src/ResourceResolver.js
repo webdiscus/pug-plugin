@@ -1,7 +1,8 @@
 const path = require('path');
-const { resolveException } = require('./exceptions');
 const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
+const { parseRequest, pathToPosix } = require('./utils');
+const { resolveException, duplicateScriptWarning, duplicateStyleWarning } = require('./exceptions');
 
 /**
  * Resource resolver.
@@ -32,11 +33,16 @@ const ResourceResolver = {
    */
   moduleCache: new Map(),
 
+  duplicates: new Map(),
+
   /**
-   * @param {fs: FileSystem} fs
+   *
+   * @param {FileSystem} fs
+   * @param {string} rootContext The Webpack root context path.
    */
-  init({ fs }) {
+  init({ fs, rootContext }) {
     this.fs = fs;
+    this.rootContext = rootContext;
   },
 
   /**
@@ -50,6 +56,7 @@ const ResourceResolver = {
     this.chunkCache.clear();
     this.moduleCache.clear();
     this.sourceFiles.clear();
+    this.duplicates.clear();
   },
 
   /**
@@ -118,6 +125,40 @@ const ResourceResolver = {
   },
 
   /**
+   * @param {string} sourceFile The full path of source asset file.
+   * @param {{}} extras Extra option external loader which handeln the asset.
+   */
+  setExtrasInModuleCache(sourceFile, extras = null) {
+    if (!this.moduleCache.has(sourceFile)) {
+      // skip if module is not url() in CSS
+      return;
+    }
+
+    this.moduleCache.get(sourceFile).extras = extras;
+  },
+
+  /**
+   * Whether in issuer used duplicate script or style.
+   * Note: using duplicate scripts in the same Pug file doesn't make sense, must be used only one file.
+   *
+   * @param file
+   * @param issuer
+   * @return {boolean}
+   */
+  isDuplicate(file, issuer) {
+    if (!this.duplicates.has(issuer)) {
+      this.duplicates.set(issuer, new Set([file]));
+      return false;
+    }
+
+    const duplicate = this.duplicates.get(issuer);
+    if (duplicate.has(file)) return true;
+
+    duplicate.add(file);
+    return false;
+  },
+
+  /**
    * Try to resolve full path of asset source file by raw request and issuer.
    *
    * @param {string} request The request of resource.
@@ -172,7 +213,17 @@ const ResourceResolver = {
 
     // require script in tag <script src=require('./main.js')>, asset filename set via replaceSourceFilesInCompilation()
     const scriptFile = AssetScript.resolveFile(rawRequest);
-    if (scriptFile != null) return scriptFile;
+    if (scriptFile != null) {
+      if (self.isDuplicate(scriptFile, issuer)) {
+        const filePath = path.relative(self.rootContext, scriptFile);
+        const issuerPath = path.relative(self.rootContext, issuer);
+
+        duplicateScriptWarning(filePath, issuerPath);
+
+        return pathToPosix(filePath);
+      }
+      return scriptFile;
+    }
 
     // bypass the asset contained data-URL
     if (AssetInline.isDataUrl(rawRequest)) return rawRequest;
@@ -185,7 +236,15 @@ const ResourceResolver = {
     if (sourceFile != null) {
       const assetId = self.getId(sourceFile, issuer);
       const assetFile = self.chunkCache.get(assetId);
-      if (assetFile != null) return assetFile;
+      if (assetFile != null) {
+        if (assetFile.endsWith('.css') && self.isDuplicate(assetFile, issuer)) {
+          const filePath = path.relative(self.rootContext, sourceFile);
+          const issuerPath = path.relative(self.rootContext, issuer);
+
+          duplicateStyleWarning(filePath, issuerPath);
+        }
+        return assetFile;
+      }
 
       // try to resolve inline data url
       const dataUrl = AssetInline.getDataUrl(sourceFile, issuer);

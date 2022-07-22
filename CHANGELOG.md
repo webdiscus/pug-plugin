@@ -1,12 +1,17 @@
 # Change log
 
+## 3.1.2 (2022-07-23)
+- feat(experimental): display a warning when used duplicate scripts or styles in same Pug file
+- fix: resolving of duplicate assets in difference style files processed via responsive-loader
+- fix: auto publicPath for assets processed via responsive-loader
+
 ## 3.1.1 (2022-07-21)
 - fix: resolving issues on Windows
 - fix: resolving issues by assets with root path using context
 - fix: issue by split chunks from some node modules
 - docs: update readme for correct usage of split chunks configuration
 
-## 3.1.0 (2022-07-19)
+## 3.1.0 (2022-07-19) DEPRECATED, use v3.1.1
 - feat: add `extractComments` option to enable/disable saving comments in *.LICENSE.txt file
 - fix: split chunks for some node modules causes error
 - fix: resolving of unique script filename when file required w/o extension

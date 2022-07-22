@@ -1,7 +1,6 @@
 const path = require('path');
 const rimraf = require('rimraf');
 
-import { shallowEqual } from '../src/utils';
 import { copyRecursiveSync } from './utils/file';
 import { compareFileListAndContent, exceptionContain } from './utils/helpers';
 import { PugPluginError, PugPluginException } from '../src/exceptions';
@@ -38,26 +37,6 @@ beforeEach(() => {
   // Note: on linux/macOS not work.
   // Use the testTimeout constant as argument in test(description, fn, testTimeout).
   jest.setTimeout(testTimeout);
-});
-
-describe('utils tests', () => {
-  test('shallowEqual same', (done) => {
-    const received = shallowEqual({ a: 123, b: 'abc' }, { b: 'abc', a: 123 });
-    expect(received).toBeTruthy();
-    done();
-  });
-
-  test('shallowEqual different size', (done) => {
-    const received = shallowEqual({ a: 123 }, { b: 'abc', a: 123 });
-    expect(received).toBeFalsy();
-    done();
-  });
-
-  test('shallowEqual different value', (done) => {
-    const received = shallowEqual({ a: 123, b: 'abc' }, { b: 'cba', a: 123 });
-    expect(received).toBeFalsy();
-    done();
-  });
 });
 
 describe('AssetEntry tests', () => {
@@ -115,6 +94,10 @@ describe('options', () => {
 
   test('options.modules.postprocess', (done) => {
     compareFileListAndContent(PATHS, 'options-modules-postprocess', done);
+  });
+
+  test('options.postprocess', (done) => {
+    compareFileListAndContent(PATHS, 'options-postprocess', done);
   });
 
   test('options.outputPath', (done) => {
@@ -364,11 +347,15 @@ describe('resolve url in style', () => {
 
 describe('responsive images', () => {
   test('require images in pug', (done) => {
-    compareFileListAndContent(PATHS, 'require-responsive-images', done);
+    compareFileListAndContent(PATHS, 'responsive-images', done);
   });
 
-  test('require images in pug and in css', (done) => {
-    compareFileListAndContent(PATHS, 'require-responsive-images-css', done);
+  test('require many duplicate images in pug and styles', (done) => {
+    compareFileListAndContent(PATHS, 'responsive-images-many-duplicates', done);
+  });
+
+  test('require images in pug and in style', (done) => {
+    compareFileListAndContent(PATHS, 'responsive-images-pug-scss', done);
   });
 });
 
@@ -405,6 +392,16 @@ describe('require in script tag', () => {
 
   test('require scripts with same name', (done) => {
     compareFileListAndContent(PATHS, 'require-scripts-same-src', done);
+  });
+});
+
+describe('warning tests', () => {
+  test('duplicate scripts', (done) => {
+    compareFileListAndContent(PATHS, 'warning-duplicate-scripts', done);
+  });
+
+  test('duplicate styles', (done) => {
+    compareFileListAndContent(PATHS, 'warning-duplicate-styles', done);
   });
 });
 
