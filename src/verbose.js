@@ -1,12 +1,11 @@
-const { outToConsole, isFunction } = require('./utils');
 const ansis = require('ansis');
 const { plugin } = require('./config');
+const { outToConsole, isFunction } = require('./utils');
 
 /**
  * @param {AssetEntryOptions} entry
  */
 const verboseEntry = (entry) => {
-  if (!entry) return;
   outToConsole(
     `${ansis.black.bgGreen(`[${plugin}]`)} Compile the entry ${ansis.green(entry.name)}\n` +
       ` filename: ${
@@ -40,12 +39,17 @@ const verboseExtractModule = ({ issuerFile, sourceFile, assetFile }) => {
  * @param {string} assetFile
  */
 const verboseExtractResource = ({ issuerFile, sourceFile, outputPath, assetFile }) => {
+  let isInline = false;
+  if (assetFile.startsWith('data:')) {
+    isInline = true;
+    assetFile = assetFile.slice(0, assetFile.indexOf(',')) + ',...';
+  }
   outToConsole(
     `${ansis.black.bgGreen(`[${plugin}]`) + ansis.black.bgWhite` Extract Resource `} in ` +
       `${ansis.green(issuerFile)}\n` +
       `      source: ${ansis.cyan(sourceFile)}\n` +
-      ` output path: ${ansis.cyanBright(outputPath)}\n` +
-      `       asset: ${ansis.cyanBright(assetFile)}\n`
+      (isInline ? '' : ` output path: ${ansis.cyanBright(outputPath)}\n`) +
+      `${isInline ? 'inline ' : '       '}asset: ${ansis.cyanBright(assetFile)}\n`
   );
 };
 

@@ -25,6 +25,15 @@ const AssetEntry = {
   },
 
   /**
+   * Clear caches.
+   * This method is called only once, when the plugin is applied.
+   */
+  clear() {
+    this.entries = [];
+    this.addedToCompilationEntryNames = [];
+  },
+
+  /**
    * @param {{}} entry The webpack entry object.
    * @param {AssetEntryOptions} assetEntryOptions
    * @param {string} webpackOutputPath
@@ -141,11 +150,6 @@ const AssetEntry = {
       const index = this.entries.findIndex((entry) => entry.name === entryName);
       this.entries.splice(index, 1);
     }
-    this.addedToCompilationEntryNames = [];
-  },
-
-  clear() {
-    this.entries = [];
     this.addedToCompilationEntryNames = [];
   },
 };

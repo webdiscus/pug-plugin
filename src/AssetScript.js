@@ -13,11 +13,135 @@ const AssetScript = {
   files: [],
   cache: new Map(),
 
+  modulePathRegexp: /\/node_modules\//,
+
   /**
    * @param {rootContext: string} rootContext The webpack root context path.
    */
   init({ rootContext }) {
     this.rootContext = isWin ? pathToPosix(rootContext) : rootContext;
+  },
+
+  /**
+   * Reset settings.
+   * This method is called before each compilation after changes by `webpack serv/watch`.
+   */
+  reset() {
+    this.index = {};
+  },
+
+  /**
+   * Clear cache.
+   * This method is called only once, when the plugin is applied.
+   */
+  clear() {
+    this.index = {};
+    this.files = [];
+    this.cache.clear();
+  },
+
+  /**
+   *
+   * @param {string} request
+   * @return {boolean}
+   */
+  has(request) {
+    return this.files.find((item) => item.request === request);
+  },
+
+  /**
+   * @param {string} request The source file of asset.
+   * @param  {string} issuer The issuer of the asset.
+   * @return {string | false} return false if the file was already processed else return unique assetFile
+   */
+  getUniqueName(request, issuer) {
+    let { name } = path.parse(request);
+    const entry = AssetEntry.findByName(name);
+    let uniqueName = name;
+    let result = name;
+
+    // the entrypoint name must be unique, if already exists then add index: `main` => `main.1`, etc
+    if (entry) {
+      if (entry.importFile === request) {
+        result = false;
+      } else {
+        if (!this.index[name]) {
+          this.index[name] = 1;
+        }
+        uniqueName = name + '.' + this.index[name]++;
+        result = uniqueName;
+      }
+    }
+    this.add(uniqueName, request, issuer);
+
+    return result;
+  },
+
+  /**
+   * @param {string} name The unique name of entry point.
+   * @param {string} request The required resource file.
+   * @param {string} issuer The source file of issuer of the required file.
+   */
+  add(name, request, issuer) {
+    let cachedFile = this.files.find((item) => item.request === request && item.issuer.request === issuer);
+    if (cachedFile) {
+      // update the name for the script
+      // after rebuild by HMR the same request can be generated with other asset name
+      cachedFile.name = name;
+      cachedFile.chunkFiles = [];
+      return;
+    }
+
+    this.files.push({
+      name,
+      request,
+      chunkFiles: [],
+      issuer: {
+        filename: undefined,
+        request: issuer,
+      },
+    });
+  },
+
+  /**
+   *
+   * @param {string} issuer The source file of issuer of the required file.
+   * @param {string} filename The asset filename of issuer.
+   */
+  setIssuerFilename(issuer, filename) {
+    for (let item of this.files) {
+      if (item.issuer.request === issuer) {
+        item.issuer.filename = filename;
+      }
+    }
+  },
+
+  /**
+   * Resolve script file from request.
+   *
+   * @param {string} request The asset request.
+   * @return {string|null} Return null if the request is not a script required in Pug.
+   */
+  resolveFile(request) {
+    const { resource, query } = parseRequest(request);
+
+    if (query !== 'isScript') return null;
+
+    if (this.cache.has(resource)) {
+      return this.cache.get(resource);
+    }
+
+    // resolve full path of required script as relative path by root context, like `script(src=require('/src/scripts/vendor.min.js'))`
+    const file =
+      resource.startsWith(this.rootContext) || this.modulePathRegexp.test(resource)
+        ? resource
+        : path.join(this.rootContext, resource);
+
+    // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
+    const resolvedFile = require.resolve(file);
+    this.cache.set(resource, resolvedFile);
+
+    return resolvedFile;
   },
 
   /**
@@ -113,126 +237,6 @@ const AssetScript = {
         compilation.deleteAsset(file);
       }
     }
-  },
-
-  /**
-   * @param {string} request The source file of asset.
-   * @param  {string} issuer The issuer of the asset.
-   * @return {string | false} return false if the file was already processed else return unique assetFile
-   */
-  getUniqueName(request, issuer) {
-    let { name } = path.parse(request);
-    const entry = AssetEntry.findByName(name);
-    let uniqueName = name;
-    let result = name;
-
-    // the entrypoint name must be unique, if already exists then add index: `main` => `main.1`, etc
-    if (entry) {
-      if (entry.importFile === request) {
-        result = false;
-      } else {
-        if (!this.index[name]) {
-          this.index[name] = 1;
-        }
-        uniqueName = name + '.' + this.index[name]++;
-        result = uniqueName;
-      }
-    }
-    this.add(uniqueName, request, issuer);
-
-    return result;
-  },
-
-  /**
-   * @param {string} name The unique name of entry point.
-   * @param {string} request The required resource file.
-   * @param {string} issuer The source file of issuer of the required file.
-   */
-  add(name, request, issuer) {
-    let cachedFile = this.files.find((item) => item.request === request && item.issuer.request === issuer);
-    if (cachedFile) {
-      // update the name for the script
-      // after rebuild by HMR the same request can be generated with other asset name
-      cachedFile.name = name;
-      cachedFile.chunkFiles = [];
-      return;
-    }
-
-    this.files.push({
-      name,
-      request,
-      chunkFiles: [],
-      issuer: {
-        filename: undefined,
-        request: issuer,
-      },
-    });
-  },
-
-  /**
-   *
-   * @param {string} issuer The source file of issuer of the required file.
-   * @param {string} filename The asset filename of issuer.
-   */
-  setIssuerFilename(issuer, filename) {
-    for (let item of this.files) {
-      if (item.issuer.request === issuer) {
-        item.issuer.filename = filename;
-      }
-    }
-  },
-
-  /**
-   *
-   * @param {string} request
-   * @return {boolean}
-   */
-  has(request) {
-    return this.files.find((item) => item.request === request);
-  },
-
-  /**
-   * Resolve script file from request.
-   *
-   * @param {string} request The asset request.
-   * @return {string|null} Return null if the request is not a script required in Pug.
-   */
-  resolveFile(request) {
-    const { resource, query } = parseRequest(request);
-
-    if (query !== 'isScript') return null;
-
-    if (this.cache.has(resource)) {
-      return this.cache.get(resource);
-    }
-
-    // resolve full path of required script as relative path by root context, like `script(src=require('/src/scripts/vendor.min.js'))`
-    const file =
-      resource.startsWith(this.rootContext) || /[\\/]node_modules[\\/]/.test(resource)
-        ? resource
-        : path.join(this.rootContext, resource);
-
-    // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
-    const resolvedFile = require.resolve(file);
-    this.cache.set(resource, resolvedFile);
-
-    return resolvedFile;
-  },
-
-  /**
-   * Reset before new compilation by webpack watch or serve.
-   */
-  reset() {
-    this.index = {};
-  },
-
-  /**
-   * Clear cache before start of this plugin.
-   */
-  clear() {
-    this.index = {};
-    this.files = [];
-    this.cache.clear();
   },
 };
 

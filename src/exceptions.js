@@ -115,11 +115,11 @@ const webpackEntryWarning = (file) => {
 
   outToConsole(
     `${ansis.black.bgYellow(`[${plugin}] WARNING `)} ` +
-      `${ansis.yellow`DON'T define scripts or styles in Webpack entry, specify them directly in Pug!`}\n` +
+      `${ansis.yellow`Scripts and styles are not allowed in Webpack entry, they must be specified directly in Pug!`}\n` +
       `The file ${ansis.cyan(file)} must be specified in Pug.\n` +
       `For example:\n` +
       `  ${hlTag`link`}(${hlAttr`href`}=${hlFn`require`}(${hlVal`'./styles.scss'`}) ${hlAttr`rel`}=${hlVal`'stylesheet'`})\n` +
-      `  ${hlTag`script`}(${hlAttr`src`}=${hlFn`require`}(${hlVal`'./scripts.js'`}) ${hlAttr`defer`})\n\n` +
+      `  ${hlTag`script`}(${hlAttr`src`}=${hlFn`require`}(${hlVal`'./scripts.js'`}) ${hlAttr`defer`})\n` +
       `For more information, see ${ansis.blueBright`https://github.com/webdiscus/pug-plugin`}.`
   );
 };
@@ -128,9 +128,9 @@ const duplicateScriptWarning = (request, issuer) => {
   const { resource } = parseRequest(request);
   outToConsole(
     `${ansis.black.bgYellow(`[${plugin}] WARNING `)} ` +
-      `${ansis.yellow`DON'T use duplicate scripts in same Pug!`}\n` +
+      `${ansis.yellow`Duplicate scripts are not allowed in same Pug file!`}\n` +
       `The file ${ansis.cyan(resource)} is already used in ${ansis.magenta(issuer)}.\n` +
-      `Note: only first script will be resolved, all duplicates will be ignored.`
+      `Note: only first script will be resolved, all duplicates will be ignored.\n`
   );
 };
 
@@ -138,7 +138,7 @@ const duplicateStyleWarning = (request, issuer) => {
   const { resource } = parseRequest(request);
   outToConsole(
     `${ansis.black.bgYellow(`[${plugin}] WARNING `)} ` +
-      `${ansis.yellow`DON'T use duplicate styles in same Pug!`}\n` +
+      `${ansis.yellow`Duplicate styles are not allowed in same Pug file!`}\n` +
       `The file ${ansis.cyan(resource)} is already used in ${ansis.magenta(issuer)}.\n`
   );
 };

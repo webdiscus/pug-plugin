@@ -2,10 +2,11 @@ const path = require('path');
 const rimraf = require('rimraf');
 
 import { copyRecursiveSync } from './utils/file';
-import { compareFileListAndContent, exceptionContain } from './utils/helpers';
+import { compareFileListAndContent, exceptionContain, stdoutContain } from './utils/helpers';
 import { PugPluginError, PugPluginException } from '../src/exceptions';
 
 const AssetEntry = require('../src/AssetEntry');
+const { parseQuery } = require('../src/utils');
 
 // The base path of test directory.
 const basePath = path.resolve(__dirname, './');
@@ -39,6 +40,18 @@ beforeEach(() => {
   jest.setTimeout(testTimeout);
 });
 
+describe('unit tests', () => {
+  test('parseQuery', (done) => {
+    const received = parseQuery('file.pug?key=val&arr[]=a&arr[]=1');
+    const expected = {
+      key: 'val',
+      arr: ['a', '1'],
+    };
+    expect(received).toEqual(expected);
+    done();
+  });
+});
+
 describe('AssetEntry tests', () => {
   test('isEntryModule', (done) => {
     const received = AssetEntry.isEntryModule({});
@@ -57,7 +70,11 @@ describe('AssetEntry tests', () => {
 
 describe('options', () => {
   test('output.publicPath = auto', (done) => {
-    compareFileListAndContent(PATHS, 'auto-public-path', done);
+    compareFileListAndContent(PATHS, 'options-output-public-path-auto', done);
+  });
+
+  test('output.publicPath = function', (done) => {
+    compareFileListAndContent(PATHS, 'options-output-public-path-function', done);
   });
 
   test('options.enabled = false', (done) => {
@@ -106,6 +123,10 @@ describe('options', () => {
 
   test('options.pretty', (done) => {
     compareFileListAndContent(PATHS, 'options-pretty', done);
+  });
+
+  test('options.verbose', (done) => {
+    compareFileListAndContent(PATHS, 'options-verbose', done);
   });
 
   test(
@@ -396,12 +417,24 @@ describe('require in script tag', () => {
 });
 
 describe('warning tests', () => {
+  test('scripts are not allowed in entry', (done) => {
+    const containString = 'Scripts and styles are not allowed in Webpack entry';
+    stdoutContain(PATHS, 'warning-entry-scripts', containString, done);
+  });
+
+  test('styles are not allowed in entry', (done) => {
+    const containString = 'Scripts and styles are not allowed in Webpack entry';
+    stdoutContain(PATHS, 'warning-entry-styles', containString, done);
+  });
+
   test('duplicate scripts', (done) => {
-    compareFileListAndContent(PATHS, 'warning-duplicate-scripts', done);
+    const containString = 'Duplicate scripts are not allowed';
+    stdoutContain(PATHS, 'warning-duplicate-scripts', containString, done);
   });
 
   test('duplicate styles', (done) => {
-    compareFileListAndContent(PATHS, 'warning-duplicate-styles', done);
+    const containString = 'Duplicate styles are not allowed';
+    stdoutContain(PATHS, 'warning-duplicate-styles', containString, done);
   });
 });
 

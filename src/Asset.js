@@ -19,6 +19,15 @@ const Asset = {
   },
 
   /**
+   * Reset settings.
+   * This method is called before each compilation after changes by `webpack serv/watch`.
+   */
+  reset() {
+    this.files.clear();
+    this.fileCounter.clear();
+  },
+
+  /**
    * Get the publicPath.
    *
    * @param issuer
@@ -113,11 +122,6 @@ const Asset = {
       isCached: false,
       filename: uniqueFilename,
     };
-  },
-
-  reset() {
-    this.files.clear();
-    this.fileCounter.clear();
   },
 };
 

@@ -1,8 +1,8 @@
 const path = require('path');
 const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
-const { parseRequest, pathToPosix } = require('./utils');
 const { resolveException, duplicateScriptWarning, duplicateStyleWarning } = require('./exceptions');
+const { pathToPosix } = require('./utils');
 
 /**
  * Resource resolver.
@@ -33,6 +33,9 @@ const ResourceResolver = {
    */
   moduleCache: new Map(),
 
+  /**
+   * The cache of duplicate scripts and styles.
+   */
   duplicates: new Map(),
 
   /**
@@ -46,16 +49,20 @@ const ResourceResolver = {
   },
 
   /**
-   * Clear cache of assets used in a chunk.
-   * Before processing each chunk, needed to clear the cache
-   * to avoid resolving collision and speed up lookups only in the directories of the current chunk.
-   *
-   * Note: used by calling webpack.run() multiple times, e.g. by tests, webpack watch or webpack serve.
+   * Clear caches.
+   * This method is called only once, when the plugin is applied.
    */
   clear() {
     this.chunkCache.clear();
     this.moduleCache.clear();
     this.sourceFiles.clear();
+  },
+
+  /**
+   * Reset settings.
+   * This method is called before each compilation after changes by `webpack serv/watch`.
+   */
+  reset() {
     this.duplicates.clear();
   },
 
@@ -219,8 +226,6 @@ const ResourceResolver = {
         const issuerPath = path.relative(self.rootContext, issuer);
 
         duplicateScriptWarning(filePath, issuerPath);
-
-        return pathToPosix(filePath);
       }
       return scriptFile;
     }

@@ -171,7 +171,7 @@ class PugPlugin {
     // clear caches by tests, webpack watch or serve
     AssetEntry.clear();
     AssetScript.clear();
-    AssetTrash.reset();
+    //AssetTrash.reset(); TODO: test
     ResourceResolver.clear();
 
     // initialize responsible-loader module
@@ -187,6 +187,9 @@ class PugPlugin {
       if (!this.options.sourcePath) this.options.sourcePath = webpackOptions.context;
       if (!this.options.outputPath) this.options.outputPath = webpackOutputPath;
 
+      const scriptExtensionRegexp = /\.(js|ts|cjs|mjs|tsx)$/;
+      const styleExtensionRegexp = /\.(css|scss|sass|less|styl)$/;
+
       for (let name in entries) {
         const entry = entries[name];
         let {
@@ -201,6 +204,12 @@ class PugPlugin {
         const importFile = entry.import[0];
         let { resource: sourceFile } = parseRequest(importFile);
         const module = this.getModule(sourceFile);
+
+        // scripts and styles are not allowed in the entry, they must be specified directly in Pug
+        if (scriptExtensionRegexp.test(sourceFile) || styleExtensionRegexp.test(sourceFile)) {
+          const relativeSourceFile = path.relative(webpackOptions.context, sourceFile);
+          webpackEntryWarning(relativeSourceFile);
+        }
 
         if (!extensionRegexp.test(sourceFile) && !module) continue;
         if (!entry.library) entry.library = this.entryLibrary;
@@ -258,6 +267,7 @@ class PugPlugin {
       Asset.reset();
       AssetScript.reset();
       AssetTrash.reset();
+      ResourceResolver.reset();
 
       // before resolve
       normalModuleFactory.hooks.beforeResolve.tap(plugin, (resolveData) => {
@@ -381,13 +391,6 @@ class PugPlugin {
               const sourceFile = entry.importFile;
               const pluginModule = this.getModule(sourceFile) || entry;
               const { filename: assetFile } = entry;
-
-              const isScript = assetFile.endsWith('.js');
-              const isStyle = assetFile.endsWith('.css');
-              if (isScript || isStyle) {
-                const relativeSourceFile = path.relative(webpackOptions.context, sourceFile);
-                webpackEntryWarning(relativeSourceFile);
-              }
 
               const postprocessInfo = {
                 isEntry: true,
@@ -531,6 +534,7 @@ class PugPlugin {
               }
             } else if (module.type === 'asset/inline') {
               const assetFile = entry.filename;
+              let verboseAsset = '';
 
               if (AssetInline.hasExt(sourceFile, 'svg')) {
                 // reserved: extract SVG from processed source of module
@@ -538,11 +542,22 @@ class PugPlugin {
                 // const encodedData = dataUrl.slice(dataUrl.indexOf('base64,') + 7);
                 // const svg = Buffer.from(encodedData, 'base64').toString();
                 AssetInline.setInlineSvg(assetFile, module);
+                verboseAsset = 'data:image/svg+xml,';
               } else {
                 if (!AssetInline.hasDataUrl(sourceFile)) {
                   const dataUrl = codeGenerationResults.getData(module, chunk.runtime, 'url').toString();
                   AssetInline.setDataUrlContent(sourceFile, dataUrl);
+                  verboseAsset = dataUrl;
                 }
+              }
+
+              if (verbose) {
+                verboseExtractResource({
+                  issuerFile,
+                  sourceFile,
+                  outputPath: webpackOutputPath,
+                  assetFile: verboseAsset,
+                });
               }
             }
           }

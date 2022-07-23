@@ -20,10 +20,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      // test verbose of extracted assets from entry
-      verbose: true,
       extractCss: {
-        verbose: true,
         // Note:
         //   - the [name] for a style in entry is the complete entry name, e.g.:
         //     for `'assets/css/about' : './src/views/about/styles.scss'` the filename is `/somepath/assets/css/about.1234abcd.css`

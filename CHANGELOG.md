@@ -1,5 +1,10 @@
 # Change log
 
+## 3.1.3 (2022-07-23)
+- fix: issue by webpack serv/watch when Pug contains duplicate scripts
+- fix: display warning when Pug contains duplicate scripts
+- fix: verbose outputs data when asset is data URL
+
 ## 3.1.2 (2022-07-23)
 - feat(experimental): display a warning when used duplicate scripts or styles in same Pug file
 - fix: resolving of duplicate assets in difference style files processed via responsive-loader

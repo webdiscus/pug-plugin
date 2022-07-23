@@ -3,22 +3,25 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
+  devtool: false,
 
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
   },
 
-  entry: {
-    index: './src/index.pug',
+  resolve: {
+    alias: {
+      Styles: path.join(__dirname, 'src/assets/styles/'),
+    },
   },
 
-  plugins: [
-    new PugPlugin({
-      // test pretty option
-      pretty: true,
-    }),
-  ],
+  entry: {
+    index: './src/views/index.pug',
+    main: './src/assets/styles/file2.scss', // test warning: style is not allowed in entry
+  },
+
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
@@ -27,8 +30,11 @@ module.exports = {
         loader: PugPlugin.loader,
         options: {
           method: 'render',
-          pretty: false, // not works, is deprecated
         },
+      },
+      {
+        test: /\.(css|sass|scss)$/,
+        use: ['css-loader', 'sass-loader'],
       },
     ],
   },

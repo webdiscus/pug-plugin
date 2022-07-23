@@ -14,13 +14,7 @@ module.exports = {
     styles: './src/assets/scss/main.scss',
   },
 
-  plugins: [
-    new PugPlugin({
-      extractCss: {
-        filename: '[name].css',
-      },
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [

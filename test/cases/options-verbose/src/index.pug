@@ -1,0 +1,13 @@
+//- test verbose output
+html
+  head
+    link(rel='stylesheet' href=require('./styles.scss'))
+    script(src=require('./main.js'))
+  body
+    //- test asset inline
+    img.inline(src=require('./images/imac.svg'))
+    img.inline(src=require('./images/iphone.png'))
+    //- test asset resource
+    img.file(src=require('./images/image.png'))
+    //- test responsive loader
+    img.file(src=require('./images/image.webp'))

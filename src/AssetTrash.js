@@ -4,9 +4,12 @@
  */
 const AssetTrash = {
   trash: [],
+  commentRegexp: /^\/\*\!.+\.LICENSE\.txt\s*\*\/\s*/,
+  commentFileSuffix: '.LICENSE.txt',
 
   /**
-   * Clear caches before start of this plugin.
+   * Reset settings.
+   * This method is called before each compilation after changes by `webpack serv/watch`.
    */
   reset() {
     this.trash = [];
@@ -38,8 +41,7 @@ const AssetTrash = {
    */
   removeComments(compilation) {
     if (compilation.assets) {
-      const commentRegex = /^\/\*\!.+\.LICENSE\.txt\s*\*\/\s*/;
-      const suffix = '.LICENSE.txt';
+      const { commentRegexp, commentFileSuffix: suffix } = this;
       const { RawSource } = compilation.compiler.webpack.sources;
       const assets = Object.keys(compilation.assets);
       const licenseFiles = assets.filter((file) => file.endsWith(suffix));
@@ -47,7 +49,7 @@ const AssetTrash = {
       for (let filename of licenseFiles) {
         const sourceFilename = filename.replace(suffix, '');
         const source = compilation.assets[sourceFilename].source();
-        compilation.updateAsset(sourceFilename, new RawSource(source.replace(commentRegex, '')));
+        compilation.updateAsset(sourceFilename, new RawSource(source.replace(commentRegexp, '')));
         compilation.deleteAsset(filename);
       }
     }

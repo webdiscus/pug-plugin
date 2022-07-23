@@ -6,29 +6,27 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '/',
+    publicPath: () => {
+      return '/';
+    },
   },
 
   entry: {
     index: './src/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      // test pretty option
-      pretty: true,
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
       {
         test: /\.pug$/,
         loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-          pretty: false, // not works, is deprecated
-        },
+      },
+
+      {
+        test: /\.(css|sass|scss)$/,
+        use: ['css-loader', 'sass-loader'],
       },
     ],
   },

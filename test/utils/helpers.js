@@ -53,3 +53,18 @@ export const exceptionContain = function (PATHS, relTestCasePath, containString,
       done();
     });
 };
+
+export const stdoutContain = function (PATHS, relTestCasePath, containString, done) {
+  const stdout = jest.spyOn(console._stdout, 'write').mockImplementation(() => {});
+
+  compile(PATHS, relTestCasePath, {}).then(() => {
+    const { calls } = stdout.mock;
+    const output = calls.length > 0 ? calls[0][0] : '';
+
+    stdout.mockClear();
+    stdout.mockRestore();
+
+    expect(output).toContain(containString);
+    done();
+  });
+};

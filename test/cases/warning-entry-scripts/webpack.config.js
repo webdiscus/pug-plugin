@@ -3,22 +3,25 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
+  devtool: false,
 
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
   },
 
-  entry: {
-    index: './src/index.pug',
+  resolve: {
+    alias: {
+      Scripts: path.join(__dirname, 'src/assets/scripts/'),
+    },
   },
 
-  plugins: [
-    new PugPlugin({
-      // test pretty option
-      pretty: true,
-    }),
-  ],
+  entry: {
+    main: './src/assets/scripts/file2.js', // test warning: script is not allowed in entry
+    index: './src/views/index.pug',
+  },
+
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
@@ -27,7 +30,6 @@ module.exports = {
         loader: PugPlugin.loader,
         options: {
           method: 'render',
-          pretty: false, // not works, is deprecated
         },
       },
     ],
