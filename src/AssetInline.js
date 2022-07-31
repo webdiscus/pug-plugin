@@ -1,5 +1,5 @@
 const path = require('path');
-const { isWin } = require('./config');
+const { isWin } = require('./Utils');
 
 /**
  * Parse tag attributes in a string.
@@ -41,14 +41,13 @@ const parseAttributes = (string, exclude = []) => {
 };
 
 /**
- * AssetInline.
  * @singleton
  */
-const AssetInline = {
-  dataUrlAssets: new Map(),
-  inlineSvgCache: new Map(),
-  inlineSvgAssets: new Map(),
-  inlineSvgAssetsSet: new Set(),
+class AssetInline {
+  dataUrlAssets = new Map();
+  inlineSvgCache = new Map();
+  inlineSvgAssets = new Map();
+  inlineSvgAssetsSet = new Set();
 
   /**
    * @param {string} file
@@ -57,7 +56,7 @@ const AssetInline = {
    */
   hasExt(file, ext) {
     return path.extname(file).indexOf(ext) >= 0;
-  },
+  }
 
   /**
    * Whether the request is data-URL.
@@ -67,7 +66,7 @@ const AssetInline = {
    */
   isDataUrl(request) {
     return request.startsWith('data:');
-  },
+  }
 
   /**
    * @param {Module} module The webpack chunk module.
@@ -75,7 +74,7 @@ const AssetInline = {
    */
   isCssModule(module) {
     return module.loaders.find((item) => item.loader.indexOf('css-loader') > 0) != null;
-  },
+  }
 
   /**
    * @param {string} sourceFile
@@ -84,7 +83,7 @@ const AssetInline = {
   hasDataUrl(sourceFile) {
     const item = this.dataUrlAssets.get(sourceFile);
     return item != null && item.cache != null;
-  },
+  }
 
   /**
    * @param {string} sourceFile
@@ -96,7 +95,7 @@ const AssetInline = {
     const res = this.dataUrlAssets.get(sourceFile);
 
     return res != null && res.cache != null && res.issuers.has(issuer) ? res.cache.dataUrl : null;
-  },
+  }
 
   /**
    * @param {string} sourceFile The source filename of asset.
@@ -112,7 +111,7 @@ const AssetInline = {
 
     const item = this.dataUrlAssets.get(sourceFile);
     item.issuers.add(issuer);
-  },
+  }
 
   /**
    * @param {string} sourceFile The source filename of asset.
@@ -123,7 +122,7 @@ const AssetInline = {
     if (item) {
       item.cache = { dataUrl: content };
     }
-  },
+  }
 
   /**
    * @param {string} sourceFile The source filename of asset.
@@ -134,7 +133,7 @@ const AssetInline = {
     if (item) {
       item.cache = cache;
     }
-  },
+  }
 
   /**
    * @param {string} sourceFile
@@ -144,7 +143,7 @@ const AssetInline = {
   isInlineSvg(sourceFile, issuer) {
     const item = this.inlineSvgAssets.get(sourceFile);
     return item != null && item.cache != null && item.issuers.has(issuer);
-  },
+  }
 
   /**
    * @param {string} sourceFile The source filename of asset.
@@ -161,7 +160,7 @@ const AssetInline = {
 
     const item = this.inlineSvgAssets.get(sourceFile);
     item.issuers.add(issuer);
-  },
+  }
 
   /**
    * @param {string} assetFile The output filename of issuer.
@@ -232,7 +231,7 @@ const AssetInline = {
     }
 
     this.setDataUrlCache(sourceFile, cache);
-  },
+  }
 
   /**
    * Insert inline SVG in HTML.
@@ -301,7 +300,7 @@ const AssetInline = {
 
       compilation.assets[assetFile] = new RawSource(html);
     }
-  },
-};
+  }
+}
 
-module.exports = AssetInline;
+module.exports = new AssetInline();

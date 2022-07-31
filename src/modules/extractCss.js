@@ -1,7 +1,7 @@
 const path = require('path');
 const ansis = require('ansis');
-const { plugin } = require('../config');
-const { outToConsole } = require('../utils');
+const { pluginName } = require('../config');
+const { outToConsole } = require('../Utils');
 
 /**
  * The plugin module to extract the CSS and source map from asset.
@@ -102,7 +102,7 @@ const extractCss = function (options = {}) {
 
       if (this.verbose) {
         let verbose =
-          ansis.black.bgGreen(`[${plugin}]`) +
+          ansis.black.bgGreen(`[${pluginName}]`) +
           ansis.black.bgWhite(` Extract CSS `) +
           ' in ' +
           ansis.cyan(file) +

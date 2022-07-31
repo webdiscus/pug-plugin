@@ -9,12 +9,10 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '/',
+    publicPath: 'auto',
   },
 
   entry: {
-    //styles: './src/assets/scss/main.scss',
-    //font: './src/assets/scss/abstract/_variables.scss',
     index: './src/views/index.pug',
   },
 
@@ -38,16 +36,7 @@ module.exports = {
 
       {
         test: /\.(css|sass|scss)$/,
-        use: [
-          {
-            loader: 'css-loader',
-            options: {},
-          },
-          {
-            loader: 'sass-loader',
-            options: {},
-          },
-        ],
+        use: ['css-loader', 'sass-loader'],
       },
 
       {

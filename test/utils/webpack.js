@@ -4,9 +4,7 @@ const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
 const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
-  const testPath = path.join(PATHS.testOutput, relTestCasePath),
-    webRootPath = path.join(testPath, PATHS.webRoot),
-    outputPath = path.join(webRootPath, PATHS.output),
+  const testPath = path.join(PATHS.testSource, relTestCasePath),
     configFile = path.join(testPath, 'webpack.config.js'),
     commonConfigFile = path.join(PATHS.base, 'webpack.common.js');
 
@@ -18,7 +16,8 @@ const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
       // the home directory for webpack should be the same where the tested webpack.config.js located
       context: testPath,
       output: {
-        path: outputPath,
+        // clean the output directory before emit
+        clean: true,
       },
     },
     testConfig = require(configFile),

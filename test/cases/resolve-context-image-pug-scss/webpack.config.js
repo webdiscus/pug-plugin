@@ -19,8 +19,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    // TODO: fix auto publicPath using context
-    publicPath: '/',
     filename: '[name].[contenthash:8].js',
   },
 

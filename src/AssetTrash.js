@@ -1,11 +1,13 @@
 /**
  * AssetTrash singleton.
  * Accumulate and remove junk assets from compilation.
+ *
+ * @singleton
  */
-const AssetTrash = {
-  trash: [],
-  commentRegexp: /^\/\*\!.+\.LICENSE\.txt\s*\*\/\s*/,
-  commentFileSuffix: '.LICENSE.txt',
+class AssetTrash {
+  trash = [];
+  commentRegexp = /^\/\*\!.+\.LICENSE\.txt\s*\*\/\s*/;
+  commentFileSuffix = '.LICENSE.txt';
 
   /**
    * Reset settings.
@@ -13,7 +15,7 @@ const AssetTrash = {
    */
   reset() {
     this.trash = [];
-  },
+  }
 
   /**
    * Add a junk js file to trash.
@@ -22,7 +24,7 @@ const AssetTrash = {
    */
   toTrash(file) {
     this.trash.push(file);
-  },
+  }
 
   /**
    * Remove all js trash files from compilation.
@@ -34,7 +36,7 @@ const AssetTrash = {
       compilation.deleteAsset(file);
     });
     this.reset();
-  },
+  }
 
   /**
    * @param {Compilation} compilation The instance of the webpack compilation.
@@ -53,7 +55,7 @@ const AssetTrash = {
         compilation.deleteAsset(filename);
       }
     }
-  },
-};
+  }
+}
 
-module.exports = AssetTrash;
+module.exports = new AssetTrash();

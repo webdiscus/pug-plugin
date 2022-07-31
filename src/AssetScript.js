@@ -1,34 +1,15 @@
 const path = require('path');
 const Asset = require('./Asset');
 const AssetEntry = require('./AssetEntry');
-const { isWin } = require('./config');
-const { parseRequest, pathToPosix } = require('./utils');
+const { scriptStore } = require('./ModuleProxy');
+
+/** @typedef {Parameters<import("webpack").Chunk["isInGroup"]>[0]} ChunkGroup */
 
 /**
- * AssetScript.
  * @singleton
  */
-const AssetScript = {
-  index: {},
-  files: [],
-  cache: new Map(),
-
-  modulePathRegexp: /\/node_modules\//,
-
-  /**
-   * @param {rootContext: string} rootContext The webpack root context path.
-   */
-  init({ rootContext }) {
-    this.rootContext = isWin ? pathToPosix(rootContext) : rootContext;
-  },
-
-  /**
-   * Reset settings.
-   * This method is called before each compilation after changes by `webpack serv/watch`.
-   */
-  reset() {
-    this.index = {};
-  },
+class AssetScript {
+  index = {};
 
   /**
    * Clear cache.
@@ -36,9 +17,16 @@ const AssetScript = {
    */
   clear() {
     this.index = {};
-    this.files = [];
-    this.cache.clear();
-  },
+    scriptStore.clear();
+  }
+
+  /**
+   * Reset settings.
+   * This method is called before each compilation after changes by `webpack serv/watch`.
+   */
+  reset() {
+    this.index = {};
+  }
 
   /**
    *
@@ -46,75 +34,39 @@ const AssetScript = {
    * @return {boolean}
    */
   has(request) {
-    return this.files.find((item) => item.request === request);
-  },
+    return scriptStore.has(request);
+  }
 
   /**
-   * @param {string} request The source file of asset.
+   * @param {string} file The source file of script.
    * @param  {string} issuer The issuer of the asset.
-   * @return {string | false} return false if the file was already processed else return unique assetFile
+   * @return {string } Return unique assetFile
    */
-  getUniqueName(request, issuer) {
-    let { name } = path.parse(request);
-    const entry = AssetEntry.findByName(name);
+  getUniqueName(file, issuer) {
+    const { name } = path.parse(file);
     let uniqueName = name;
     let result = name;
 
-    // the entrypoint name must be unique, if already exists then add index: `main` => `main.1`, etc
-    if (entry) {
-      if (entry.importFile === request) {
-        result = false;
-      } else {
-        if (!this.index[name]) {
-          this.index[name] = 1;
-        }
-        uniqueName = name + '.' + this.index[name]++;
-        result = uniqueName;
+    // the entrypoint name must be unique, if already exists then add an index: `main` => `main.1`, etc.
+    if (AssetEntry.isNotUnique(name, file)) {
+      if (!this.index[name]) {
+        this.index[name] = 1;
       }
+      uniqueName = name + '.' + this.index[name]++;
+      result = uniqueName;
     }
-    this.add(uniqueName, request, issuer);
+    scriptStore.setName(uniqueName, file, issuer);
 
     return result;
-  },
+  }
 
   /**
-   * @param {string} name The unique name of entry point.
-   * @param {string} request The required resource file.
-   * @param {string} issuer The source file of issuer of the required file.
-   */
-  add(name, request, issuer) {
-    let cachedFile = this.files.find((item) => item.request === request && item.issuer.request === issuer);
-    if (cachedFile) {
-      // update the name for the script
-      // after rebuild by HMR the same request can be generated with other asset name
-      cachedFile.name = name;
-      cachedFile.chunkFiles = [];
-      return;
-    }
-
-    this.files.push({
-      name,
-      request,
-      chunkFiles: [],
-      issuer: {
-        filename: undefined,
-        request: issuer,
-      },
-    });
-  },
-
-  /**
-   *
    * @param {string} issuer The source file of issuer of the required file.
    * @param {string} filename The asset filename of issuer.
    */
   setIssuerFilename(issuer, filename) {
-    for (let item of this.files) {
-      if (item.issuer.request === issuer) {
-        item.issuer.filename = filename;
-      }
-    }
-  },
+    scriptStore.setIssuerFilename(issuer, filename);
+  }
 
   /**
    * Resolve script file from request.
@@ -123,26 +75,9 @@ const AssetScript = {
    * @return {string|null} Return null if the request is not a script required in Pug.
    */
   resolveFile(request) {
-    const { resource, query } = parseRequest(request);
-
-    if (query !== 'isScript') return null;
-
-    if (this.cache.has(resource)) {
-      return this.cache.get(resource);
-    }
-
-    // resolve full path of required script as relative path by root context, like `script(src=require('/src/scripts/vendor.min.js'))`
-    const file =
-      resource.startsWith(this.rootContext) || this.modulePathRegexp.test(resource)
-        ? resource
-        : path.join(this.rootContext, resource);
-
-    // resolve script w/o extension, like `script(src=require('/src/scripts/vendor.min'))`
-    const resolvedFile = require.resolve(file);
-    this.cache.set(resource, resolvedFile);
-
-    return resolvedFile;
-  },
+    const [resource] = request.split('?', 1);
+    return scriptStore.has(resource) ? resource : null;
+  }
 
   /**
    * Replace all required source filenames with generating asset filenames.
@@ -163,7 +98,7 @@ const AssetScript = {
     }
 
     // in the content, replace the source script file with the output filename
-    for (let asset of this.files) {
+    for (let asset of scriptStore.getAll()) {
       const issuerFile = asset.issuer.filename;
 
       if (!compilation.assets.hasOwnProperty(issuerFile)) {
@@ -176,7 +111,7 @@ const AssetScript = {
         usedScripts.set(issuerFile, new Set());
       }
 
-      const { name, request } = asset;
+      const { name, file: sourceFile } = asset;
       const chunkGroup = compilation.namedChunkGroups.get(name);
       if (!chunkGroup) {
         // prevent error when in HMR mode after removing a script in pug
@@ -189,18 +124,18 @@ const AssetScript = {
       let scriptTags = '';
 
       chunkFiles = chunkFiles.filter((file) => compilation.assetsInfo.get(file).hotModuleReplacement !== true);
-      asset.chunkFiles = chunkFiles;
 
       // replace source filename with asset filename
       if (chunkFiles.length === 1) {
-        const file = chunkFiles.values().next().value;
-        const assetFile = Asset.getOutputFile(file, issuerFile);
-        newContent = content.replace(request, assetFile);
-        realSplitFiles.add(file);
+        const chunkFile = chunkFiles.values().next().value;
+        const assetFile = Asset.getOutputFile(chunkFile, issuerFile);
+
+        newContent = content.replace(sourceFile, assetFile);
+        realSplitFiles.add(chunkFile);
       } else {
         // extract original script tag with all attributes for usage it as template for chunks
-        let srcStartPos = content.indexOf(request);
-        let srcEndPos = srcStartPos + request.length;
+        let srcStartPos = content.indexOf(sourceFile);
+        let srcEndPos = srcStartPos + sourceFile.length;
         let tagStartPos = srcStartPos;
         let tagEndPos = srcEndPos;
         while (tagStartPos >= 0 && content.charAt(--tagStartPos) !== '<') {}
@@ -211,14 +146,14 @@ const AssetScript = {
 
         // generate additional scripts of chunks
         const chunkScripts = usedScripts.get(issuerFile);
-        for (let file of chunkFiles) {
+        for (let chunkFile of chunkFiles) {
           // avoid generate a script of the same split chunk used in different js files required in one pug file,
           // happens when used optimisation.splitChunks
-          if (!chunkScripts.has(file)) {
-            const assetFile = Asset.getOutputFile(file, issuerFile);
+          if (!chunkScripts.has(chunkFile)) {
+            const assetFile = Asset.getOutputFile(chunkFile, issuerFile);
             scriptTags += tmplScriptStart + assetFile + tmplScriptEnd;
-            chunkScripts.add(file);
-            realSplitFiles.add(file);
+            chunkScripts.add(chunkFile);
+            realSplitFiles.add(chunkFile);
           }
         }
 
@@ -237,7 +172,7 @@ const AssetScript = {
         compilation.deleteAsset(file);
       }
     }
-  },
-};
+  }
+}
 
-module.exports = AssetScript;
+module.exports = new AssetScript();

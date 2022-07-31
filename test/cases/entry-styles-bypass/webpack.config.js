@@ -54,7 +54,6 @@ module.exports = {
       // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,
-        // TODO: test possible breaking change in v2.10.0
         use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
     ],

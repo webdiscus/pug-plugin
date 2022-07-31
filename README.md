@@ -10,7 +10,7 @@
         Pug Plugin
         </a>
     </h1>
-  <div>Pug plugin for webpack compiles Pug files to HTML, extracts CSS and JS from the sources specified in Pug</div>
+  <div>Pug plugin for webpack compiles Pug files to HTML, extracts CSS and JS from their sources specified in Pug</div>
 </div>
 
 ---
@@ -21,7 +21,8 @@
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
 
-Pug Plugin enable to use Pug files in webpack entry and generates HTML file that includes the hashed output JS and CSS filenames whose source files are specified in the Pug template.
+Pug Plugin enable to use Pug files in webpack entry and generates HTML files that contain the hashed
+output JS and CSS filenames whose source files are specified in the Pug template.
 
 💡 **Highlights**:
 
@@ -29,7 +30,8 @@ Pug Plugin enable to use Pug files in webpack entry and generates HTML file that
 - Source scripts and styles should be specified directly in Pug.
 - All JS and CSS files will be extracted from their sources specified in Pug.
 - No longer need to define scripts and styles in the webpack entry.
-- No longer need to import styles in JavaScript to inject them into HTML via additional plugins such as `html-webpack-plugin` and `mini-css-extract-plugin`.
+- No longer need to import styles in JavaScript to inject them into HTML via additional plugins.
+- Pug loader has built-in filters: `:highlight` `:markdown`.
 
 Specify the Pug files in the webpack entry:
 
@@ -43,6 +45,14 @@ module.exports = {
   plugins: [
     new PugPlugin(), // enable processing of Pug files specified in webpack entry
   ],
+  module: {
+    rules: [
+      {
+        test: /.pug$/,
+        loader: PugPlugin.loader, // pug-plugin already contain the pug-loader
+      },
+    ],
+  },
 };
 ```
 
@@ -58,7 +68,7 @@ Generated HTML contains hashed CSS and JS output filenames:
 <script src="/assets/js/main.f4b855d8.js"></script>
 ```
 
-Just one Pug plugin replaces the functionality of many plugins and loaders:
+Just one Pug plugin replaces the functionality of many plugins and loaders used with Pug:
 
 | Package                                                                                   | Features                                                         | 
 |-------------------------------------------------------------------------------------------|------------------------------------------------------------------|
@@ -89,11 +99,18 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
 1. [Install and Quick start](#install)
 2. [Features](#features)
 3. [Plugin options](#plugin-options)
+3. [Loader options](#loader-options)
+   - [Method `render`](#method-render) 
+   - [Method `compile`](#method-compile) 
 4. [Usage examples](#usage-examples)
-5. [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
-6. [How to config `splitChunks`](#recipe-split-chunks)
-6. [How to split multiple node modules under their own names](#recipe-split-many-modules)
-7. [How to use HMR live reload](#recipe-hmr)
+   - [Using JS, SCSS, images and fonts with Pug](#example-pug-js-scss-img-font)
+   - [Using Pug in JavaScript with `render` method](#example-pug-in-js-render)
+   - [Using Pug in JavaScript with `compile` method](#example-pug-in-js-compile)
+5. Recipes
+   - [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
+   - [How to config `splitChunks`](#recipe-split-chunks)
+   - [How to split multiple node modules under their own names](#recipe-split-many-modules)
+   - [How to use HMR live reload](#recipe-hmr)
 8. Demo sites
    - [Hello World!](https://webdiscus.github.io/pug-plugin/hello-world/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world))
    - [Responsive images](https://webdiscus.github.io/pug-plugin/responsive-image/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/responsive-image))
@@ -106,23 +123,19 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
 - define Pug files in webpack entry
 - specify source scripts and styles directly in Pug
 - generated HTML contains already hashed CSS and JS output filenames
-- resolves URL in CSS for relative and module path, extract resolved resource to output path\
+- resolves source files in CSS URL and extract resolved resources to output path\
   not need more additional plugin such as [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
 - support the `auto` publicPath
 - support the `pretty` formatting  of generated HTML
-- support the module type `asset/resource`
-- support the module type `asset/inline`
-- support the module type `asset` to automatically choose between `resource` and `inline`
-- support the base64 encoding of binary images as data-URL in HTML and CSS
+- support the module types `asset/resource` `asset/inline` `asset`
+- support the `base64 encoding` of binary images as data-URL in HTML and CSS
 - support the `inline SVG` in HTML
 - support the `inline SVG` as data-URL in CSS
   ```scss
   background: url('./icons/iphone.svg') // CSS: url("data:image/svg+xml,<svg>...</svg>")
   ```
 - enable/disable extraction of comments to `*.LICENSE.txt` file
-- support the plugin modules to define a separate source / output path and filename for each file type
-- support the `post process` for modules to handle the extracted content
-- pug-plugin already contains the [pug-loader](https://github.com/webdiscus/pug-loader)
+- support the `postprocess` for modules to handle the extracted content
 - support the [responsive-loader](https://github.com/dazuaz/responsive-loader), see [docs](https://webdiscus.github.io/pug-plugin/responsive-image/) and [usage example](https://github.com/webdiscus/pug-plugin/tree/master/examples/responsive-image)
 
 
@@ -178,10 +191,7 @@ module.exports = {
     rules: [
       {
         test: /\.pug$/,
-        loader: PugPlugin.loader, // pug-plugin already contain the pug-loader
-        options: {
-          method: 'render', // fast method to generate static HTML files
-        }
+        loader: PugPlugin.loader, // the Pug loader
       },
       {
         test: /\.(css|sass|scss)$/,
@@ -405,17 +415,94 @@ The following parameters are available in the function:
  * @typedef {Object} ResourceInfo
  * @property {boolean} [verbose = false] Whether information should be displayed.
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from pug.
- * @property {string} outputFile The absolute path to generated output file (issuer of asset).
  * @property {string | (function(PathData, AssetInfo): string)} filename The filename template or function.
  * @property {string} sourceFile The absolute path to source file.
- * @property {string} assetFile The output asset file relative by `output.publicPath`.
+ * @property {string} outputPath The absolute path to output directory of asset.
+ * @property {string} assetFile The output asset file relative by outputPath.
  */
 ```
+
+<a id="loader-options" name="loader-options" href="#loader-options"></a>
+## Loader options
+
+The Pug plugin contain the [pug-loader](https://github.com/webdiscus/pug-loader).
+Complete description see under [pug-loader options](https://github.com/webdiscus/pug-loader#options).
+
+### `method`
+
+Type: `string` Default: `render`<br>
+
+> **Note**
+>
+> The default method of `pug-loader` is `compile`, but using the `pug-plugin` the default loader method is `render`,
+> because the plugin renders Pug to static HTML and this method is fastest.
+
+<a id="method-render" name="method-render" href="#method-render"></a>
+### Method `render`
+
+The `render` method renders Pug into HTML at compile time and exports the HTML as a string.
+
+Add to Webpack config the module rule:
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  // ...
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: PugPlugin.loader, // default method is 'render'
+      },
+    ],
+  },
+};
+```
+
+See the [example code](#example-pug-in-js-render).
+
+<a id="method-compile" name="method-compile" href="#method-compile"></a>
+### Method `compile`
+The `compile` method compiles Pug into a template function and in JavaScript can be called with variables to render into HTML at runtime.
+
+To use the `render` method for rendering Pug from the Webpack entry and the `compile` method in JavaScript, use the `oneOf` Webpack rule:
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  // ...
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        oneOf: [
+          // import Pug in JavaScript/TypeScript as template function
+          {
+            issuer: /\.(js|ts)$/, // match scripts where Pug is used
+            loader: PugPlugin.loader,
+            options: {
+              method: 'compile', // compile Pug into template function
+            },
+          },
+          // render Pug from Webpack entry into static HTML
+          {
+            loader: PugPlugin.loader, // default method is 'render'
+          },
+        ],
+      },
+    ],
+  },
+};
+```
+
+See the [example code](#example-pug-in-js-compile).
+
+---
+
 
 <a id="usage-examples" name="usage-examples" href="#usage-examples"></a>
 ## Usage examples
 
-### Using source files of JS, SCSS, images and fonts
+<a id="example-pug-js-scss-img-font" name="example-pug-js-scss-img-font" href="#example-pug-js-scss-img-font"></a>
+### Using JS, SCSS, images and fonts with Pug
 The simple example of resolving the asset resources via require() in Pug and via url() in scss.
 
 The webpack config:
@@ -456,9 +543,6 @@ module.exports = {
       {
         test: /\.pug$/,
         loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        }
       },
       {
         test: /\.(css|sass|scss)$/,
@@ -589,6 +673,189 @@ The generated HTML `dist/index.html` contains the hashed output filenames of the
 All this is done by one Pug plugin, without additional plugins and loaders. To save build time, to keep your webpack config clear and clean, just use this plugin.
 
 ---
+
+
+<a id="example-pug-in-js-render" name="example-pug-in-js-render" href="#example-pug-in-js-render"></a>
+### Using Pug in JavaScript with `render` method
+
+_./webpack.config.js_
+```js
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  output: {
+    path: path.join(__dirname, 'dist/'),
+    filename: '[name].[contenthash:8].js',
+  },
+  entry: {
+    index: './src/index.pug' // Pug plugin generates dist/index.html
+  },
+  plugins: [
+    new PugPlugin(),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: PugPlugin.loader,
+      },
+    ],
+  },
+};
+```
+
+_./src/index.pug_
+```pug
+html
+  head
+  body
+    h1 Hello Pug!
+    #js-component-container
+    script(src=require('./component.js'))
+```
+
+_./src/component.pug_
+```pug
+.component
+  h1 Title
+  p The teaser.
+```
+
+_./src/component.js_
+```js
+import componentHtml from './component.pug';
+const containerElm = document.getElementById('js-component-container');
+containerElm.innerHTML = componentHtml;
+```
+
+The `componentHtml` contain rendered HTML string:
+```html
+<div class="component">
+  <h1>Title</h1>
+  <p>The teaser.</p>
+</div>
+```
+
+The generated `./dist/index.html`:
+```html
+<html>
+  <head></head>
+  <body>
+    <h1>Hello Pug!</h1>
+    <div id="js-component-container">
+      <!-- The Pug component inserted in JavaScript -->
+      <div class="component">
+        <h1>Title</h1>
+        <p>The teaser.</p>
+      </div>
+    </div>
+    <script src='component.b855d8f4.js'></script>
+  </body>
+</html>
+```
+
+---
+
+
+<a id="example-pug-in-js-compile" name="example-pug-in-js-compile" href="#example-pug-in-js-compile"></a>
+### Using Pug in JavaScript with `compile` method
+
+_./webpack.config.js_
+```js
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  output: {
+    path: path.join(__dirname, 'dist/'),
+    filename: '[name].[contenthash:8].js',
+  },
+  entry: {
+    index: './src/index.pug' // Pug plugin generates dist/index.html
+  },
+  plugins: [
+    new PugPlugin(),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        oneOf: [
+          // import Pug in JavaScript/TypeScript as template function
+          {
+            issuer: /\.(js|ts)$/,
+            loader: PugPlugin.loader,
+            options: {
+              method: 'compile',
+            },
+          },
+          // render Pug from Webpack entry into static HTML
+          {
+            loader: PugPlugin.loader,
+          },
+        ],
+      },
+    ],
+  },
+};
+```
+
+_./src/index.pug_
+```pug
+html
+  head
+  body
+    h1 Hello Pug!
+    #js-component-container
+    script(src=require('./component.js'))
+```
+
+_./src/component.pug_ with variables
+```pug
+.component
+  h1 #{title}
+  p #{teaser}
+```
+
+_./src/component.js_
+```js
+import componentTmpl from './component.pug';
+const componentHtml = componentTmpl({
+  title: 'My component',
+  teaser: 'My teaser.'
+});
+const containerElm = document.getElementById('js-component-container');
+containerElm.innerHTML = componentHtml;
+```
+
+The `componentTmpl` contain the template function.
+The `componentHtml` contain rendered HTML string with passed data at runtime:
+```html
+<div class="component">
+  <h1>My component</h1>
+  <p>My teaser.</p>
+</div>
+```
+
+The generated `./dist/index.html`:
+```html
+<html>
+  <head></head>
+  <body>
+    <h1>Hello Pug!</h1>
+    <div id="js-component-container">
+      <!-- The Pug component with variables passed in JavaScript -->
+      <div class="component">
+        <h1>My component</h1>
+        <p>My teaser.</p>
+      </div>
+    </div>
+    <script src='component.b855d8f4.js'></script>
+  </body>
+</html>
+```
+
+---
+
 
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes

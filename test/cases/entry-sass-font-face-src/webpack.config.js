@@ -11,7 +11,7 @@ module.exports = {
   },
 
   entry: {
-    styles: './src/assets/scss/main.scss',
+    styles: './src/assets/styles/main.scss',
   },
 
   plugins: [

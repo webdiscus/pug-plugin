@@ -1,5 +1,42 @@
 # Change log
 
+## 4.0.0 (2022-08-03)
+- BREAKING CHANGE: 
+  default value `PugPlugin.loader.option.method` is now `render` instead of `compile`,
+  because it makes sense in the vast majority of use cases.\
+  By compatibility issues (when the method was not specified), add the `method` option:
+```js
+{
+  loader: PugPlugin.loader,
+  options: {
+    method: 'compile', // now the default method is `render`
+  }
+},
+```
+- BREAKING CHANGE:
+  the `outputFile` property of the ResourceInfo (the argument of `postprocess` function) was replaced with `outputPath`.\
+  By compatibility issues (when in the `postprocess` was used the `outputFile`),
+  add in your postprocess function the code line:
+```js
+new PugPlugin({
+  postprocess: (content, info) => {
+    const outputFile = path.join(info.outputPath, info.assetFile); // add this line to get the removed outputFile
+    // ...
+    return content;
+  }
+}),
+```
+- feat: add resolving of file alias for scripts and styles
+- feat: improve resolving of script files specified w/o extension
+- feat: improve performance
+- feat: update verbose output format to display output path and asset file separately
+- feat: update pug-loader to last version optimized for using with pug-plugin
+- fix: allow to use url query in script source file
+- fix: resolving of absolute path using root context
+- fix: resolving of alias to file using root context
+- refactor: optimize code
+- docs: update readme with usage examples for `render` and `compile` methods
+
 ## 3.1.3 (2022-07-23)
 - fix: issue by webpack serv/watch when Pug contains duplicate scripts
 - fix: display warning when Pug contains duplicate scripts

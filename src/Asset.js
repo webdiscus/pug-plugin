@@ -1,31 +1,33 @@
 const path = require('path');
-const { isWin } = require('./config');
-const { pathToPosix } = require('./utils');
+const { isWin, pathToPosix } = require('./Utils');
 
-const Asset = {
-  publicPath: '',
-  outputPath: '',
-  isAutoPublicPath: false,
-  isFunctionPublicPath: false,
+/**
+ * @singleton
+ */
+class Asset {
+  publicPath = '';
+  outputPath = '';
+  isAutoPublicPath = false;
+  isFunctionPublicPath = false;
 
-  files: new Map(),
-  fileCounter: new Map(),
+  files = new Map();
+  fileIndex = {};
 
   init({ outputPath, publicPath }) {
     this.outputPath = outputPath;
     this.publicPath = publicPath === undefined ? 'auto' : publicPath;
+    this.isFunctionPublicPath = typeof publicPath === 'function';
     this.isAutoPublicPath = this.publicPath === 'auto';
-    this.isFunctionPublicPath = typeof this.publicPath === 'function';
-  },
+  }
 
   /**
    * Reset settings.
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
   reset() {
+    this.fileIndex = {};
     this.files.clear();
-    this.fileCounter.clear();
-  },
+  }
 
   /**
    * Get the publicPath.
@@ -45,7 +47,7 @@ const Asset = {
     }
 
     return this.isFunctionPublicPath ? this.publicPath.call(null, {}) : this.publicPath;
-  },
+  }
 
   /**
    * Get the output asset file regards the publicPath.
@@ -69,15 +71,18 @@ const Asset = {
     const publicPath = this.isFunctionPublicPath ? this.publicPath.call(null, {}) : this.publicPath;
 
     return path.posix.join(publicPath, assetFile);
-  },
+  }
 
   /**
+   * Add resolved module asset.
+   * This asset can be as issuer for other resource assets.
+   *
    * @param {string} sourceFile
    * @param {string} assetFile
    */
-  addFile(sourceFile, assetFile) {
+  add(sourceFile, assetFile) {
     this.files.set(sourceFile, assetFile);
-  },
+  }
 
   /**
    * Find asset file by its source file.
@@ -87,7 +92,7 @@ const Asset = {
    */
   findAssetFile(sourceFile) {
     return this.files.get(sourceFile);
-  },
+  }
 
   /**
    * @param {string} sourceFile
@@ -104,11 +109,10 @@ const Asset = {
 
     let uniqueFilename = assetFile;
 
-    if (!this.fileCounter.has(assetFile)) {
-      this.fileCounter.set(assetFile, { count: 1 });
+    if (!this.fileIndex[assetFile]) {
+      this.fileIndex[assetFile] = 1;
     } else {
-      const res = this.fileCounter.get(assetFile);
-      const uniqId = res.count++;
+      const uniqId = this.fileIndex[assetFile]++;
       let pos = assetFile.lastIndexOf('.');
 
       // paranoid check of the filename extension, because it is very sensible, should normally never occur
@@ -116,13 +120,13 @@ const Asset = {
       uniqueFilename = assetFile.slice(0, pos) + '.' + uniqId + assetFile.slice(pos);
     }
 
-    this.addFile(sourceFile, uniqueFilename);
+    this.add(sourceFile, uniqueFilename);
 
     return {
       isCached: false,
       filename: uniqueFilename,
     };
-  },
-};
+  }
+}
 
-module.exports = Asset;
+module.exports = new Asset();

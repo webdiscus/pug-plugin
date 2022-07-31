@@ -27,10 +27,12 @@ const extractHtml = function (options = {}) {
      * @param {Compilation} compilation
      * @return {string | null}
      */
-    //postprocess(content, info, compilation) {
-    //  if (this.verbose) console.log(`Extract HTML: ${info.outputFile}\n`);
-    //  return content;
-    //},
+    // postprocess(content, info, compilation) {
+    //   if (this.verbose) {
+    //     console.log(info);
+    //   }
+    //   return content;
+    // },
   };
 
   this.options = { ...this.options, ...options };

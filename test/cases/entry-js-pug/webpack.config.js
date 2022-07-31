@@ -30,7 +30,7 @@ module.exports = {
         test: /\.pug$/,
         loader: PugPlugin.loader,
         options: {
-          //method: 'render',
+          method: 'compile',
         },
       },
     ],

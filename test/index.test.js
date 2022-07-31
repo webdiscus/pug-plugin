@@ -1,47 +1,32 @@
-const path = require('path');
-const rimraf = require('rimraf');
-
-import { copyRecursiveSync } from './utils/file';
+import path from 'path';
 import { compareFileListAndContent, exceptionContain, stdoutContain } from './utils/helpers';
-import { PugPluginError, PugPluginException } from '../src/exceptions';
-
-const AssetEntry = require('../src/AssetEntry');
-const { parseQuery } = require('../src/utils');
-
-// The base path of test directory.
-const basePath = path.resolve(__dirname, './');
+import { PugPluginError, PugPluginException } from '../src/Exceptions';
+import { parseQuery } from '../src/Utils';
+import AssetEntry from '../src/AssetEntry';
 
 const PATHS = {
-  base: basePath,
-  testSource: path.join(basePath, 'cases'),
-  // absolute path of temp outputs for test
-  testOutput: path.join(basePath, 'output'),
+  base: __dirname,
+  testSource: path.join(__dirname, 'cases'),
   // relative path in the test directory to web root dir name, same as by a web server (e.g. nginx)
   webRoot: '/public/',
   // relative path in the test directory to expected files for test
   expected: '/expected/',
   // relative path in the public directory
   output: '/assets/',
-  assets: '/public/assets/',
 };
 
+// 20s is required for test on slow instance like github
 const testTimeout = 20000;
 
-beforeAll(() => {
-  // delete all files from path
-  rimraf.sync(PATHS.testOutput);
-  // copy test files to temp directory
-  copyRecursiveSync(PATHS.testSource, PATHS.testOutput);
-});
+beforeAll(() => {});
 
 beforeEach(() => {
-  // Note: on linux/macOS not work.
-  // Use the testTimeout constant as argument in test(description, fn, testTimeout).
+  // on linux/macOS not work set the testTimeout in jest.config.js
   jest.setTimeout(testTimeout);
 });
 
 describe('unit tests', () => {
-  test('parseQuery', (done) => {
+  test('parseQuery array', (done) => {
     const received = parseQuery('file.pug?key=val&arr[]=a&arr[]=1');
     const expected = {
       key: 'val',
@@ -50,20 +35,30 @@ describe('unit tests', () => {
     expect(received).toEqual(expected);
     done();
   });
+
+  test('parseQuery json5', (done) => {
+    const received = parseQuery('file.pug?{sizes:[10,20,30], format: "webp"}');
+    const expected = {
+      format: 'webp',
+      sizes: [10, 20, 30],
+    };
+    expect(received).toEqual(expected);
+    done();
+  });
 });
 
 describe('AssetEntry tests', () => {
-  test('isEntryModule', (done) => {
-    const received = AssetEntry.isEntryModule({});
+  test('inEntry', (done) => {
+    const received = AssetEntry.inEntry('file.js');
     expect(received).toBeFalsy();
     done();
   });
 
-  test('resetAdditionalEntries', (done) => {
-    AssetEntry.addedToCompilationEntryNames = ['home', 'about'];
-    AssetEntry.resetAdditionalEntries();
-    const received = AssetEntry.addedToCompilationEntryNames;
-    expect(received).toEqual([]);
+  test('reset', (done) => {
+    AssetEntry.compilationEntryNames = new Set(['home', 'about']);
+    AssetEntry.reset();
+    const received = AssetEntry.compilationEntryNames;
+    expect(received).toEqual(new Set());
     done();
   });
 });
@@ -199,6 +194,14 @@ describe('integration tests', () => {
 
   test('entry: alias resolve.plugins, method compile', (done) => {
     compareFileListAndContent(PATHS, 'entry-alias-resolve-compile', done);
+  });
+
+  test('pug-loader config: pug in entry and require pug in js with query `pug-compile`', (done) => {
+    compareFileListAndContent(PATHS, 'pug-in-entry-and-js-query', done);
+  });
+
+  test('pug-loader config: pug in entry and require pug in js with multiple config', (done) => {
+    compareFileListAndContent(PATHS, 'pug-in-entry-and-js-config', done);
   });
 });
 
@@ -471,7 +474,7 @@ describe('exception tests', () => {
   });
 
   test('exception: execute template function', (done) => {
-    const containString = 'Failed to execute template function';
+    const containString = 'Failed to execute the template function';
     exceptionContain(PATHS, 'exception-execute-template', containString, done);
   });
 
@@ -491,7 +494,7 @@ describe('exception tests', () => {
   });
 
   test('exception: execute postprocess', (done) => {
-    const containString = 'Postprocess execution failed';
+    const containString = 'Postprocess is failed';
     exceptionContain(PATHS, 'exception-execute-postprocess', containString, done);
   });
 

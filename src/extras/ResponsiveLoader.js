@@ -1,13 +1,17 @@
 const vm = require('vm');
 const Asset = require('../Asset');
-const { parseQuery } = require('../utils');
-const { isWin } = require('../config');
+const { isWin, parseQuery } = require('../Utils');
 
-const ResponsiveLoader = {
-  isUsed: false,
-  options: null,
-  loaderOptions: new Map(),
-  searchModuleString: '/node_modules/responsive-loader/',
+class ResponsiveLoader {
+  isUsed = false;
+  options = null;
+  loaderOptions = new Map();
+  searchModuleString = '/node_modules/responsive-loader/';
+
+  constructor() {
+    // bind this context to the method for using in any context as reference to this method
+    this.getAsset = this.getAsset.bind(this);
+  }
 
   /**
    * Initialize.
@@ -22,7 +26,7 @@ const ResponsiveLoader = {
 
     if (rules) this.isUsed = JSON.stringify(rules).indexOf('"responsive-loader"') > 0;
     if (isWin) this.searchModuleString = '\\node_modules\\responsive-loader\\';
-  },
+  }
 
   /**
    * Find loader option used in the module.
@@ -49,7 +53,7 @@ const ResponsiveLoader = {
     }
 
     return this.loaderOptions.get(rawRequest);
-  },
+  }
 
   /**
    * Get the result of resource processing via `responsive-loader`.
@@ -62,10 +66,9 @@ const ResponsiveLoader = {
    * @returns {null | string} The compiled result as string to replace required resource with this result.
    */
   getAsset(module, issuerFile) {
-    const self = ResponsiveLoader;
-    if (self.isUsed !== true) return null;
+    if (this.isUsed !== true) return null;
 
-    const loaderOptions = self.findModuleLoaderOptions(module);
+    const loaderOptions = this.findModuleLoaderOptions(module);
     if (loaderOptions == null) return null;
 
     const { resource: sourceFile, rawRequest, buildInfo } = module;
@@ -111,7 +114,7 @@ const ResponsiveLoader = {
     }
 
     return asset;
-  },
-};
+  }
+}
 
-module.exports = ResponsiveLoader;
+module.exports = new ResponsiveLoader();

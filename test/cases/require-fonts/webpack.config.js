@@ -15,7 +15,7 @@ module.exports = {
 
   resolve: {
     alias: {
-      assets: path.join(__dirname, 'src/assets')
+      assets: path.join(__dirname, 'src/assets'),
     },
   },
 
@@ -31,7 +31,7 @@ module.exports = {
         test: /\.pug$/,
         loader: PugPlugin.loader,
         options: {
-          //method: 'render',
+          method: 'compile',
         },
       },
 

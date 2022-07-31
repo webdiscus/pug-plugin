@@ -9,6 +9,7 @@ const path = require('path');
  */
 export const readDirRecursiveSync = function (dir = './', returnAbsolutePath = true) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
+
   dir = path.resolve(dir);
 
   // get files within the current directory and add a path key to the file objects
@@ -29,7 +30,7 @@ export const readDirRecursiveSync = function (dir = './', returnAbsolutePath = t
  * @param {string} dest The path to the new copy.
  */
 export const copyRecursiveSync = function (src, dest) {
-  if (!fs.existsSync(src)) throw new Error(`The source '${src}' not found `);
+  if (!fs.existsSync(src)) throw new Error(`The source '${src}' not found!`);
 
   let stats = fs.statSync(src),
     isDirectory = stats.isDirectory();

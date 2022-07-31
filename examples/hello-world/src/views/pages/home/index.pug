@@ -1,4 +1,4 @@
-extends ~Views/layouts/default.pug
+extends Views/layouts/default.pug
 
 //- set variables used in layout
 block variables
@@ -20,16 +20,16 @@ block content
         Very simple web app to demonstrate how to easy include resources in Pug,
         using the <a href="https://github.com/webdiscus/pug-plugin/" class="link">pug-plugin</a>.
       //- override original attribute `viewBox` for inline SVG to reduce padding top/bottom in SVG
-      img.pug-logo(src=require('~Images/pug-logo.svg?inline') viewBox='0 25 128 80')
+      img.pug-logo(src=require('Images/pug-logo.svg?inline') viewBox='0 25 128 80')
 
   section
     .container
       .flex-row.fit-max
-        img.image-size(src=require('~Images/delphin.jpeg'))
+        img.image-size(src=require('Images/delphin.jpeg'))
         div Use a source file of an image in Pug:
           pre.language-pug: code
             :highlight(pug)
-              img(src=require('~Images/delphin.jpeg'))
+              img(src=require('Images/delphin.jpeg'))
 
           div Generated HTML:
           pre.language-html: code
@@ -45,10 +45,10 @@ block content
             :highlight(css)
               @font-face {
                 font-family: 'GlyphIcons';
-                src: url('~Fonts/GlyphIcons/glyphicons-halflings-regular.woff2') format('woff2');
+                src: url('Fonts/GlyphIcons/glyphicons-halflings-regular.woff2') format('woff2');
               }
               .header-bg {
-                background-image: url('~Images/header-bg.png');
+                background-image: url('Images/header-bg.png');
               }
 
           div Generated CSS:
@@ -65,11 +65,11 @@ block content
   section
     .container
       .flex-row.fit-max
-        img.pug-logo.image-size(src=require('~Images/icons/webpack.svg'))
+        img.pug-logo.image-size(src=require('Images/icons/webpack.svg'))
         div Supports the inline SVG in HTML.<br>Pug:
           pre.language-pug: code
             :highlight(pug)
-              img.logo(src=require('~Images/webpack.svg'))
+              img.logo(src=require('Images/webpack.svg'))
 
           div Generated HTML:
           pre.language-html: code
@@ -90,11 +90,11 @@ block content
       .flex-row.fit-max
         div.image-size
           each icon in icons
-            img.icon(src=require('~Images/icons/' + icon))
+            img.icon(src=require('Images/icons/' + icon))
         div Supports the inline images as data-URL in HTML.<br>Pug:
           pre.language-pug: code
             :highlight(pug)
-              img(src=require('~Images/icons/Premium.png'))
+              img(src=require('Images/icons/Premium.png'))
 
           div Generated HTML:
           pre.language-html: code
@@ -110,7 +110,7 @@ block content
           pre.language-css: code
             :highlight(css)
               .webicon-mac-svg {
-                background-image: url('~Images/icons/webicons/webicon-mac.svg');
+                background-image: url('Images/icons/webicons/webicon-mac.svg');
               }
 
           div Generated CSS:
@@ -129,7 +129,7 @@ block content
           pre.language-css: code
             :highlight(css)
               .webicon-apple-png {
-                background-image: url('~Images/icons/webicons/webicon-apple.png');
+                background-image: url('Images/icons/webicons/webicon-apple.png');
               }
 
           div Generated CSS:

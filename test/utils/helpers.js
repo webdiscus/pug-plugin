@@ -17,14 +17,14 @@ export const getCompareFileList = function (receivedPath, expectedPath) {
   };
 };
 
-export const getCompareFileContents = function (receivedFile, expectedFile, filter = /.(html|css|css.map)$/) {
+export const getCompareFileContents = function (receivedFile, expectedFile, filter = /.(html|css|css.map|js|js.map)$/) {
   return filter.test(receivedFile) && filter.test(expectedFile)
     ? { received: readTextFileSync(receivedFile), expected: readTextFileSync(expectedFile) }
     : { received: '', expected: '' };
 };
 
 export const compareFileListAndContent = (PATHS, relTestCasePath, done) => {
-  const absTestPath = path.join(PATHS.testOutput, relTestCasePath),
+  const absTestPath = path.join(PATHS.testSource, relTestCasePath),
     webRootPath = path.join(absTestPath, PATHS.webRoot),
     expectedPath = path.join(absTestPath, PATHS.expected);
 

@@ -1,9 +1,5 @@
-const path = require('path');
-
-const plugin = 'pug-plugin';
-const isWin = path.sep === '\\';
+const pluginName = 'pug-plugin';
 
 module.exports = {
-  plugin,
-  isWin,
+  pluginName,
 };

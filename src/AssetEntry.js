@@ -1,46 +1,57 @@
 const path = require('path');
-const { isFunction, parseRequest } = require('./utils');
+const { isFunction, parseRequest } = require('./Utils');
 
 /**
- * AssetEntry.
  * @singleton
  */
-const AssetEntry = {
-  /** @type {AssetEntryOptions[]} */
-  entries: [],
+class AssetEntry {
+  /** @type {Map<string, AssetEntryOptions>} */
+  entryMap = new Map();
+  compilationEntryNames = new Set();
 
-  /** @type {string[]} */
-  addedToCompilationEntryNames: [],
+  compilation = null;
+  EntryPlugin = null;
 
-  compilation: null,
-  EntryPlugin: null,
+  /**
+   * @param {string} outputPath The Webpack output path.
+   */
+  setWebpackOutputPath(outputPath) {
+    this.webpackOutputPath = outputPath;
+  }
 
   /**
    * @param {Compilation} compilation The instance of the webpack compilation.
    */
-  init(compilation) {
+  setCompilation(compilation) {
     this.compilation = compilation;
     this.EntryPlugin = compilation.compiler.webpack.EntryPlugin;
-    this.resetAdditionalEntries();
-  },
+  }
 
   /**
    * Clear caches.
    * This method is called only once, when the plugin is applied.
    */
   clear() {
-    this.entries = [];
-    this.addedToCompilationEntryNames = [];
-  },
+    this.entryMap.clear();
+  }
+
+  /**
+   * @param {string} name The entry name.
+   * @returns {AssetEntryOptions}
+   */
+  get(name) {
+    return this.entryMap.get(name);
+  }
 
   /**
    * @param {{}} entry The webpack entry object.
    * @param {AssetEntryOptions} assetEntryOptions
-   * @param {string} webpackOutputPath
    */
-  add(entry, assetEntryOptions, webpackOutputPath) {
-    const { outputPath, filenameTemplate } = assetEntryOptions;
-    const relativeOutputPath = path.isAbsolute(outputPath) ? path.relative(webpackOutputPath, outputPath) : outputPath;
+  add(entry, assetEntryOptions) {
+    const { name, outputPath, filenameTemplate } = assetEntryOptions;
+    const relativeOutputPath = path.isAbsolute(outputPath)
+      ? path.relative(this.webpackOutputPath, outputPath)
+      : outputPath;
 
     entry.filename = (pathData, assetInfo) => {
       if (!assetEntryOptions.filename) {
@@ -49,7 +60,6 @@ const AssetEntry = {
             // replace the setter with value of resolved filename
             delete this.filename;
             this.filename = filename;
-            this.file = path.join(outputPath, filename);
           },
         });
       }
@@ -62,23 +72,22 @@ const AssetEntry = {
       return filename;
     };
 
-    this.entries.push(assetEntryOptions);
-  },
+    this.entryMap.set(name, assetEntryOptions);
+  }
 
   /**
-   * Add a resource from pug, e.g. script, to webpack compilation.
+   * Add a script to webpack compilation.
    *
    * @param {string} name
    * @param {string} importFile
    * @param {string} filenameTemplate
-   * @param {string} outputPath
    * @param {string} context
    * @param {string} issuer
    * @return {boolean}
    */
-  addToCompilation({ name, importFile, filenameTemplate, outputPath, context, issuer }) {
-    // ignore duplicate entries with same name
-    if (name === false) return false;
+  addToCompilation({ name, importFile, filenameTemplate, context, issuer }) {
+    // skip duplicate entries
+    if (this.inEntry(name, importFile)) return false;
 
     const entry = {
       name,
@@ -101,13 +110,14 @@ const AssetEntry = {
       file: undefined,
       importFile,
       sourcePath: context,
-      outputPath,
+      outputPath: this.webpackOutputPath,
       postprocess: undefined,
       extract: undefined,
       verbose: false,
     };
 
-    this.add(entry, assetEntryOptions, outputPath);
+    this.add(entry, assetEntryOptions);
+    this.compilationEntryNames.add(name);
 
     // adds the entry of the script from pug to the compilation
     // see reference: node_modules/webpack/lib/EntryPlugin.js
@@ -116,42 +126,58 @@ const AssetEntry = {
       if (err) throw new Error(err);
     });
 
-    this.addedToCompilationEntryNames.push(name);
-
     return true;
-  },
+  }
 
   /**
-   * @param {string} name The entry name.
-   * @returns {AssetEntryOptions}
+   * Whether the entry is not unique.
+   *
+   * @param {string} name The name of the entry.
+   * @param {string} file The source file.
+   * @return {boolean}
    */
-  findByName(name) {
-    return this.entries.find((entry) => entry.name === name);
-  },
+  isNotUnique(name, file) {
+    const entry = this.entryMap.get(name);
+    return entry && entry.importFile !== file;
+  }
 
   /**
-   * @param {Module} module The chunk module.
-   * @returns {boolean}
+   * Whether the file in the entry already exists.
+   *
+   * @param {string} name The name of the entry.
+   * @param {string} file The source file.
+   * @return {boolean}
    */
-  isEntryModule(module) {
-    if (!module.resource) return false;
-
-    const { resource } = parseRequest(module.resource);
-
-    return this.entries.find((entry) => entry.importFile === resource) !== undefined;
-  },
+  inEntry(name, file) {
+    const entry = this.entryMap.get(name);
+    return entry && entry.importFile === file;
+  }
 
   /**
-   * Reset entries added not via webpack entry.
-   * This is important for webpack watch and serve.
+   * Whether the file is in an entry.
+   *
+   * @param {string} file The source file.
+   * @return {boolean}
    */
-  resetAdditionalEntries() {
-    for (const entryName of this.addedToCompilationEntryNames) {
-      const index = this.entries.findIndex((entry) => entry.name === entryName);
-      this.entries.splice(index, 1);
+  hasFile(file) {
+    const { resource } = parseRequest(file);
+    const entries = this.entryMap.entries();
+    for (let [name, entry] of entries) {
+      if (entry.importFile === resource) return true;
     }
-    this.addedToCompilationEntryNames = [];
-  },
-};
+    return false;
+  }
 
-module.exports = AssetEntry;
+  /**
+   * Remove entries added not via webpack entry.
+   * This method is called before each compilation after changes by `webpack serv/watch`.
+   */
+  reset() {
+    for (const entryName of this.compilationEntryNames) {
+      this.entryMap.delete(entryName);
+    }
+    this.compilationEntryNames.clear();
+  }
+}
+
+module.exports = new AssetEntry();

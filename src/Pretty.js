@@ -4,10 +4,10 @@ const beautify = require('js-beautify').html;
  * Pretty format HTML.
  * @singleton
  */
-const Pretty = {
+class Pretty {
   // intentionally hard coded options
   // user can the `pretty` option enable/disable only, without customizing
-  options: {
+  options = {
     html: {
       indent_size: 2,
       end_with_newline: true,
@@ -29,11 +29,11 @@ const Pretty = {
         newline_between_rules: false,
       },
     },
-  },
+  };
 
   format(content) {
     return beautify(content, this.options);
-  },
-};
+  }
+}
 
-module.exports = Pretty;
+module.exports = new Pretty();

@@ -1,5 +1,5 @@
-const PugPlugin = require('../../../');
 const path = require('path');
+const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'development',

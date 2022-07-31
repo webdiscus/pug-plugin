@@ -1,6 +1,7 @@
+// GitHub Page: https://webdiscus.github.io/pug-plugin/hello-world/
+
 const path = require('path');
-//const PugPlugin = require('pug-plugin');
-const PugPlugin = require('../../');
+const PugPlugin = require('pug-plugin');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
@@ -8,10 +9,7 @@ module.exports = (env, argv) => {
   return {
     mode: isProd ? 'production' : 'development',
     devtool: isProd ? 'source-map' : 'inline-source-map',
-
-    stats: {
-      preset: 'minimal',
-    },
+    stats: 'minimal',
 
     entry: {
       // !!! ATTENTION !!!
@@ -35,7 +33,6 @@ module.exports = (env, argv) => {
 
     output: {
       path: path.join(__dirname, 'dist'),
-      // build for GitHub Page: https://webdiscus.github.io/pug-plugin/hello-world/
       publicPath: 'auto',
       // output filename of scripts
       filename: 'assets/js/[name].[contenthash:8].js',
@@ -152,7 +149,7 @@ module.exports = (env, argv) => {
         directory: path.join(__dirname, 'dist'),
       },
       compress: true,
-      //open: true, // open in default browser
+      open: true, // open in default browser
       watchFiles: {
         paths: ['src/**/*.*'],
         options: {

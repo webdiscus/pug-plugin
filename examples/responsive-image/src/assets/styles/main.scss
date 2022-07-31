@@ -200,5 +200,5 @@ $height: 145;
 .demo-image {
   width: #{$width}px;
   height: #{$height}px;
-  background-image: url('~Images/image.webp?size=#{$width}');
+  background-image: url('Images/image.webp?size=#{$width}');
 }
