@@ -10,7 +10,7 @@
         Pug Plugin
         </a>
     </h1>
-  <div>Pug plugin for webpack compiles Pug files to HTML, extracts CSS and JS from their sources specified in Pug</div>
+  <div>Pug plugin for Webpack compiles Pug files to HTML, extracts CSS and JS from their sources specified in Pug</div>
 </div>
 
 ---
@@ -21,7 +21,7 @@
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
 
-Pug Plugin enable to use Pug files in webpack entry and generates HTML files that contain the hashed
+Pug Plugin enable to use Pug files in Webpack entry and generates HTML files that contain the hashed
 output JS and CSS filenames whose source files are specified in the Pug template.
 
 💡 **Highlights**:
@@ -29,11 +29,11 @@ output JS and CSS filenames whose source files are specified in the Pug template
 - The Pug file is the entry point for all scripts and styles.
 - Source scripts and styles should be specified directly in Pug.
 - All JS and CSS files will be extracted from their sources specified in Pug.
-- No longer need to define scripts and styles in the webpack entry.
+- No longer need to define scripts and styles in the Webpack entry.
 - No longer need to import styles in JavaScript to inject them into HTML via additional plugins.
 - Pug loader has built-in filters: `:highlight` `:markdown`.
 
-Specify the Pug files in the webpack entry:
+Specify the Pug files in the Webpack entry:
 
 ```js
 const PugPlugin = require('pug-plugin');
@@ -43,13 +43,13 @@ module.exports = {
     about: './src/views/about/index.pug', // output dist/about.html
   },
   plugins: [
-    new PugPlugin(), // enable processing of Pug files specified in webpack entry
+    new PugPlugin(), // enable processing of Pug files specified in Webpack entry
   ],
   module: {
     rules: [
       {
         test: /.pug$/,
-        loader: PugPlugin.loader, // pug-plugin already contain the pug-loader
+        loader: PugPlugin.loader, // Pug loader
       },
     ],
   },
@@ -99,28 +99,32 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
 1. [Install and Quick start](#install)
 2. [Features](#features)
 3. [Plugin options](#plugin-options)
-3. [Loader options](#loader-options)
+4. [Loader options](#loader-options)
    - [Method `render`](#method-render) 
    - [Method `compile`](#method-compile) 
-4. [Usage examples](#usage-examples)
+5. [Usage examples](#usage-examples)
    - [Using JS, SCSS, images and fonts with Pug](#example-pug-js-scss-img-font)
    - [Using Pug in JavaScript with `render` method](#example-pug-in-js-render)
    - [Using Pug in JavaScript with `compile` method](#example-pug-in-js-compile)
-5. Recipes
+6. [Recipes](#recipes)
+   - [How to keep the source folder structure in output directory for individual Pug files](#recipe-keep-individual-pug-dirs)
+   - [How to keep the source folder structure in output directory for all Pug files](#recipe-keep-all-pug-dirs)
+   - [How to keep the source folder structure in output directory for all resources like fonts](#recipe-keep-all-resource-dirs)
    - [How to import CSS/SCSS from `node_module`](#recipe-import-style-from-module)
    - [How to config `splitChunks`](#recipe-split-chunks)
    - [How to split multiple node modules under their own names](#recipe-split-many-modules)
    - [How to use HMR live reload](#recipe-hmr)
-8. Demo sites
+7. Demo sites
    - [Hello World!](https://webdiscus.github.io/pug-plugin/hello-world/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world))
    - [Responsive images](https://webdiscus.github.io/pug-plugin/responsive-image/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/responsive-image))
    - [Usage `:highlight` filter](https://webdiscus.github.io/pug-loader/pug-filters/highlight.html) ([source](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters))
    - [Usage `:markdown` filter](https://webdiscus.github.io/pug-loader/pug-filters/markdown.html) ([source](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters))
 
+
 ## Features
 <a id="features" name="features" href="#features"></a>
 
-- define Pug files in webpack entry
+- specify Pug files in Webpack entry
 - specify source scripts and styles directly in Pug
 - generated HTML contains already hashed CSS and JS output filenames
 - resolves source files in CSS URL and extract resolved resources to output path\
@@ -167,7 +171,7 @@ module.exports = {
   },
 
   entry: {
-    // don't define scripts and styles in the webpack entry,
+    // don't define scripts and styles in the Webpack entry,
     // all scripts and styles must be specified in Pug
 
     // define Pug files in entry:
@@ -236,7 +240,7 @@ Generated HTML:
 > 
 > - Don't define styles and JS files in entry. You can use `require()` for source files of JS and SCSS in Pug.
 > - Don't import styles in JS. Use `require()` for style files in Pug.
-> - Don't use `html-webpack-plugin` to render Pug files in HTML. The Pug plugin processes files from webpack entry.
+> - Don't use `html-webpack-plugin` to render Pug files in HTML. The Pug plugin processes files from Webpack entry.
 > - Don't use `mini-css-extract-plugin` to extract CSS from styles. The Pug plugin extract CSS from styles required in Pug.
 
 <a id="plugin-options" name="plugin-options" href="#plugin-options"></a>
@@ -253,7 +257,7 @@ Show the file information at processing of entry.
 ### `pretty`
 Type: `boolean` Default: `false`<br>
 Pretty formatting the resulting HTML. Use this option for debugging only. For production build should be disabled.
-This option only works for Pug files defined in the webpack entry.
+This option only works for Pug files defined in the Webpack entry.
 
 > **Warning**️ 
 > 
@@ -301,14 +305,16 @@ The output directory for processed entries. This directory can be relative by `w
 ### `filename`
 Type: `string | Function` Default: `webpack.output.filename || '[name].html'`<br>
 The name of output file.
-- If type is `string` then following substitutions (see [output.filename](https://webpack.js.org/configuration/output/#outputfilename) for chunk-level) are available in template string:
+- If type is `string` then following substitutions (see [output.filename](https://webpack.js.org/configuration/output/#template-strings) for chunk-level) are available in template string:
   - `[id]` The ID of the chunk.
   - `[name]` Only filename without extension or path.
   - `[contenthash]` The hash of the content.
   - `[contenthash:nn]` The `nn` is the length of hashes (defaults to 20).
-- If type is `Function` then following parameters are available in the function:
-  - `@param {webpack PathData} pathData` See the description of this type [here](https://webpack.js.org/configuration/output/#template-strings)
-  - `@param {webpack AssetInfo} assetInfo`
+- If type is `Function` then following arguments are available in the function:
+  - `@param {PathData} pathData` has the useful properties (see the [type PathData](https://webpack.js.org/configuration/output/#outputfilename)):
+     - `pathData.filename` the full path to source file 
+     - `pathData.chunk.name` the name of entry key 
+  - `@param {AssetInfo} assetInfo` Mostly this object is empty.
   - `@return {string}` The name or template string of output file.
 
 ### `modules`
@@ -367,7 +373,7 @@ module.exports = {
 ```
 
 The `name` is the filename of required style source.
-For example, if source file is `styles.scss`, then output filename will be `assets/css/styles.1234abcd.css`.\n
+For example, if source file is `styles.scss`, then output filename will be `assets/css/styles.1234abcd.css`.\
 If you want to have a different output filename, you can use the `filename` options as the [function](https://webpack.js.org/configuration/output/#outputfilename). 
 
 > **Note** 
@@ -405,10 +411,10 @@ The post process for extracted content from compiled entry.
 The following parameters are available in the function:
   - `@param {string} content` The content of compiled entry.
   - `@param {ResourceInfo} info` The info of current asset.
-  - `@param {webpack Compilation} compilation` The webpack [compilation object](https://webpack.js.org/api/compilation-object/).
+  - `@param {webpack Compilation} compilation` The Webpack [compilation object](https://webpack.js.org/api/compilation-object/).
   - `@return {string | null}` Return string content to save to output directory.\
     If return `null` then the compiled content of the entry will be ignored, and will be saved original content compiled as JS module.
-    Returning `null` can be useful for debugging to see the source of the compilation of the webpack loader.
+    Returning `null` can be useful for debugging to see the source of the compilation of the Webpack loader.
 
 ```js
 /**
@@ -505,7 +511,7 @@ See the [example code](#example-pug-in-js-compile).
 ### Using JS, SCSS, images and fonts with Pug
 The simple example of resolving the asset resources via require() in Pug and via url() in scss.
 
-The webpack config:
+The Webpack config:
 ```js
 const PugPlugin = require('pug-plugin');
 module.exports = {
@@ -573,12 +579,12 @@ The Pug template `./src/pages/home/index.pug`:
 ```pug
 html
   head
-    link(rel="icon" type="image/png" href=require('~Images/favicon.png'))
+    link(rel="icon" type="image/png" href=require('Images/favicon.png'))
     link(href=require('./styles.scss') rel='stylesheet')
   body
     .header Here is the header with background image
     h1 Hello Pug!
-    img(src=require('~Images/pug-logo.jpg') alt="pug logo")
+    img(src=require('Images/pug-logo.jpg') alt="pug logo")
     script(src=require('./main.js'))
 ```
 
@@ -593,10 +599,10 @@ The source styles `./src/pages/home/styles.scss`
 // The package 'material-icons' must be installed in packages.json.
 @use 'material-icons'; 
 
-// Resolve the font in the directory using the webpack alias.
+// Resolve the font in the directory using the Webpack alias.
 @font-face {
   font-family: 'Montserrat';
-  src: url('~Fonts/Montserrat/Montserrat-Regular.woff2'); // pug-plugin can resolve url
+  src: url('Fonts/Montserrat/Montserrat-Regular.woff2'); // pug-plugin can resolve url
   ...
 }
 
@@ -605,7 +611,7 @@ body {
 }
 
 .header {
-  background-image: url('~Images/header.png'); // pug-plugin can resolve url
+  background-image: url('Images/header.png'); // pug-plugin can resolve url
   ...
 }
 ```
@@ -670,7 +676,7 @@ The generated HTML `dist/index.html` contains the hashed output filenames of the
 </html>
 ```
 
-All this is done by one Pug plugin, without additional plugins and loaders. To save build time, to keep your webpack config clear and clean, just use this plugin.
+All this is done by one Pug plugin, without additional plugins and loaders. To save build time, to keep your Webpack config clear and clean, just use this plugin.
 
 ---
 
@@ -860,6 +866,140 @@ The generated `./dist/index.html`:
 <a id="recipes" name="recipes" href="#recipes"></a>
 ## Recipes
 
+
+<a id="recipe-keep-individual-pug-dirs" name="recipe-keep-individual-pug-dirs" href="#recipe-keep-individual-pug-dirs"></a>
+### Keep the source folder structure in output directory for individual Pug files
+
+There are two ways to keep/change the output filename for Pug files:
+
+- use the Webpack entry key as unique path to output file
+- use the Webpack entry as object with `filename` property as a Function like `keepPugFolderStructure()` in the example below
+
+```js
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+
+const sourcePath = path.join(__dirname, 'src');               // => /path/to/src
+
+const keepPugFolderStructure = (pathData) => {
+  const sourceFile = pathData.filename;                       // => /path/to/src/pages/about.pug
+  const relativeFile = path.relative(sourcePath, sourceFile); // => pages/about.pug
+  const { dir, name } = path.parse(relativeFile);             // dir: 'pages', name: 'about'
+  return `${dir}/${name}.html`;                               // => dist/pages/about.html
+};
+
+module.exports = {
+  entry: {
+    index: './src/index.pug', // dist/index.html
+    'pages/contact': './src/pages/contact/index.pug', // dist/pages/contact.html
+    // any unique key, not used to generate the output filename
+    page001: {
+      import: './src/pages/about.pug',
+      filename: keepPugFolderStructure, // => dist/pages/about.html
+    },
+  },
+
+  plugins: [new PugPlugin()],
+
+  module: {
+    rules: [
+      {
+        test: /\.(pug)$/,
+        loader: PugPlugin.loader,
+      },
+    ],
+  },
+};
+```
+
+<a id="recipe-keep-all-pug-dirs" name="recipe-keep-all-pug-dirs" href="#recipe-keep-all-pug-dirs"></a>
+### Keep the source folder structure in output directory for all Pug files
+
+To keep/change the output filename for all Pug files, use the `filename` option of the Pug plugin as a Function like `keepPugFolderStructure()` in the example:
+
+```js
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+
+const sourcePath = path.join(__dirname, 'src');               // => /path/to/src
+
+const keepPugFolderStructure = (pathData) => {
+  const sourceFile = pathData.filename;                       // => /path/to/src/pages/about.pug
+  const relativeFile = path.relative(sourcePath, sourceFile); // => pages/about.pug
+  const { dir, name } = path.parse(relativeFile);             // dir: 'pages', name: 'about'
+  return `${dir}/${name}.html`;                               // => dist/pages/about.html
+};
+
+module.exports = {
+  entry: {
+    // Note: each key must be unique, not used to generate the output filename.
+    // The output filename will be generated by source filename via the keepPugFolderStructure().
+    page001: './src/index.pug', // => dist/index.html
+    page002: './src/pages/about.pug', // => dist/pages/about.html
+    page003: './src/pages/contact/index.pug', // => dist/pages/contact/index.html
+  },
+
+  plugins: [
+    new PugPlugin({
+      // use the function to dynamic generate output filenames for all Pug files defined in the entry
+      filename: keepPugFolderStructure,
+    }),
+  ],
+
+  module: {
+    rules: [
+      {
+        test: /\.(pug)$/,
+        loader: PugPlugin.loader,
+      },
+    ],
+  },
+};
+```
+
+<a id="recipe-keep-all-resource-dirs" name="recipe-keep-all-resource-dirs" href="#recipe-keep-all-resource-dirs"></a>
+### Keep the source folder structure in output directory for all fonts
+
+To keep/change the output filename for all asset resources, like fonts, use the `generator.filename` as a Function, for example:
+
+```js
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+
+const sourceDirname = 'src/';
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.(woff|woff2|svg|eot|ttf|otf)$/,
+        include: /[\\/]fonts[\\/]/, // match SVG font only from '/fonts/' directory
+        type: 'asset/resource',
+        generator: {
+          filename: (pathData) => {
+            const { dir } = path.parse(pathData.filename); // the filename is relative path by project
+            const outputPath = dir.replace(sourceDirname, '');
+            return outputPath + '/[name][ext]';
+          },
+        },
+      },
+    ],
+  },
+};
+```
+
+The source font files: 
+```
+src/assets/fonts/OpenSans/open-sans-italic.svg
+src/assets/fonts/OpenSans/open-sans-regular.svg
+```
+
+The font files in output `dist/` directory will have original folder structure:
+```
+dist/assets/fonts/OpenSans/open-sans-italic.svg
+dist/assets/fonts/OpenSans/open-sans-regular.svg
+```
+
 <a id="recipe-import-style-from-module" name="recipe-import-style-from-module" href="#recipe-import-style-from-module"></a>
 ### Import CSS/SCSS from module
 
@@ -1025,7 +1165,7 @@ module.exports = {
     runtimeChunk: 'single',
     splitChunks: {
       chunks: 'all',
-      minSize: 10000, // extract modules bigger than ~10KB, defaults is 30KB
+      minSize: 10000, // extract modules bigger than 10KB, defaults is 30KB
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // split JS only, ignore CSS modules
@@ -1055,7 +1195,7 @@ dist/js/script.3010da09.js
 <a id="recipe-hmr" name="recipe-hmr" href="#recipe-hmr"></a>
 ### HMR live reload
 
-To enable live reload by changes any file add in the webpack config following options:
+To enable live reload by changes any file add in the Webpack config following options:
 ```js
 devServer: {
   static: {

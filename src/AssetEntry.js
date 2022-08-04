@@ -64,6 +64,11 @@ class AssetEntry {
         });
       }
 
+      // the `filename` property of the `PathData` type should be a source file, but in entry this property not exists
+      if (pathData.filename == null) {
+        pathData.filename = assetEntryOptions.importFile;
+      }
+
       let filename = isFunction(filenameTemplate) ? filenameTemplate(pathData, assetInfo) : filenameTemplate;
       if (relativeOutputPath) {
         filename = path.posix.join(relativeOutputPath, filename);

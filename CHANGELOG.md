@@ -1,5 +1,9 @@
 # Change log
 
+## 4.1.0 (2022-08-03)
+- feat: add the `filename` property to the `pathData` argument of the `filename(pathData)` function in entry object
+- docs: add in readme recipes how to keep original folder structure in output directory
+
 ## 4.0.0 (2022-08-03)
 - BREAKING CHANGE: 
   default value `PugPlugin.loader.option.method` is now `render` instead of `compile`,

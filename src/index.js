@@ -83,7 +83,7 @@ const {
  *   and save the file relative by output path, defined in webpack.options.output.path.
  * @property {string | function(PathData, AssetInfo): string} filenameTemplate The filename template or function.
  * @property {string} filename The asset filename.
- *  The template strings support only this substitutions: [name], [base], [path], [ext], [id], [contenthash], [contenthash:nn]
+ *  The template strings support only these substitutions: [name], [base], [path], [ext], [id], [contenthash], [contenthash:nn]
  *  See https://webpack.js.org/configuration/output/#outputfilename
  * @property {string} importFile
  * @property {string} outputPath

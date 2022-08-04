@@ -1,6 +1,8 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
+const sourceDirname = 'src/';
+
 module.exports = {
   mode: 'production',
   devtool: false,
@@ -42,7 +44,7 @@ module.exports = {
         generator: {
           filename: (pathData) => {
             const { dir } = path.parse(pathData.filename);
-            const outputPath = dir.replace('src/', '');
+            const outputPath = dir.replace(sourceDirname, '');
             return outputPath + '/[name].[hash:8][ext]';
           },
         },

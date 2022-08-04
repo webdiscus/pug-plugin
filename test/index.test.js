@@ -196,6 +196,14 @@ describe('integration tests', () => {
     compareFileListAndContent(PATHS, 'entry-alias-resolve-compile', done);
   });
 
+  test('entry: keep all output folder structure for pug', (done) => {
+    compareFileListAndContent(PATHS, 'entry-pug-keep-all-output-dir', done);
+  });
+
+  test('entry: keep single output folder structure for pug', (done) => {
+    compareFileListAndContent(PATHS, 'entry-pug-keep-single-output-dir', done);
+  });
+
   test('pug-loader config: pug in entry and require pug in js with query `pug-compile`', (done) => {
     compareFileListAndContent(PATHS, 'pug-in-entry-and-js-query', done);
   });
