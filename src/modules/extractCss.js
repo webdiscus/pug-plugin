@@ -5,140 +5,139 @@ const { outToConsole } = require('../Utils');
 
 /**
  * The plugin module to extract the CSS and source map from asset.
+ *
  * @note If webpack mode is `production` then `css-loader` minify the CSS self,
  *   if webpack mode is `development` then CSS is pretty formatted.
  *
- * @param {ModuleOptions} options The custom options.
- * @return {ModuleOptions} Default options merged with custom options.
+ * @type {ModuleOptions}
  */
-const extractCss = function (options = {}) {
-  this.options = {
-    test: /\.(css|scss|sass|less|styl)$/,
-    enabled: true,
-    verbose: false,
-    sourcePath: null,
-    outputPath: null,
-    filename: '[name].css',
 
-    /**
-     * Extract CSS and source map.
-     *
-     * @note The @import handling in CSS is not supported, e.g.: @import 'assets/css/style.css'.
-     *    Disable @import at-rules handling in `css-loader`:
-     *    {
-     *      test: /\.(css|scss)$/i,
-     *      use: [
-     *        {
-     *          loader: 'css-loader'
-     *          options: {
-     *            import: false, // disable @import at-rules handling
-     *          },
-     *        },
-     *        'sass-loader',
-     *      ],
-     *    },
-     *
-     * @param {array} sourceMaps
-     * @param {string} assetFile
-     * @param {Compilation} compilation
-     * @returns {string}
-     * @private
-     */
-    extract(sourceMaps, assetFile, compilation) {
-      const { compiler } = compilation;
-      const { RawSource, ConcatSource } = compiler.webpack.sources;
-      const { devtool } = compiler.options;
-      const isInlineSourceMap = devtool && devtool.startsWith('inline-');
-      const concatMapping = new ConcatSource();
+const extractCss = {
+  test: /\.(css|scss|sass|less|styl)$/,
+  enabled: true,
+  verbose: false,
+  sourcePath: null,
+  outputPath: null,
+  filename: '[name].css',
 
-      let contentCSS = '';
-      let contentMapping = '';
-      let hasMapping = false;
-      let mapFile;
-      let file = '';
+  /**
+   * Extract CSS and source map.
+   *
+   * @note The @import handling in CSS is not supported, e.g.: @import 'assets/css/style.css'.
+   *    Disable @import at-rules handling in `css-loader`:
+   *    {
+   *      test: /\.(css|scss)$/i,
+   *      use: [
+   *        {
+   *          loader: 'css-loader'
+   *          options: {
+   *            import: false, // disable @import at-rules handling
+   *          },
+   *        },
+   *        'sass-loader',
+   *      ],
+   *    },
+   *
+   * @param {array} sourceMaps
+   * @param {string} assetFile
+   * @param {Compilation} compilation
+   * @returns {string}
+   * @private
+   */
+  extract(sourceMaps, assetFile, compilation) {
+    const { compiler } = compilation;
+    const { RawSource, ConcatSource } = compiler.webpack.sources;
+    const { devtool } = compiler.options;
+    const isInlineSourceMap = devtool && devtool.startsWith('inline-');
+    const concatMapping = new ConcatSource();
 
-      for (const item of sourceMaps) {
-        if (!Array.isArray(item)) continue;
+    let contentCSS = '';
+    let contentMapping = '';
+    let hasMapping = false;
+    let mapFile;
+    let file = '';
 
-        const [sourceFile, content, media, sourceMap, supports, layer] = item;
+    for (const item of sourceMaps) {
+      if (!Array.isArray(item)) continue;
 
-        if (contentCSS) contentCSS += '\n';
+      const [sourceFile, content, media, sourceMap, supports, layer] = item;
 
-        // when in SCSS is used import of CSS file, like `@import url('./style.css');`
-        // then `sourceFile` is null and `content` contains the output CSS filename
-        if (sourceFile == null && content.endsWith('.css')) {
-          contentCSS += `@import url(${content});`;
-          continue;
-        }
+      if (contentCSS) contentCSS += '\n';
 
-        contentCSS += content;
-
-        if (sourceMap) {
-          if (isInlineSourceMap) {
-            const sourceURLs = sourceMap.sources
-              .map((source) => '/*# sourceURL=' + (sourceMap.sourceRoot || '') + source + ' */')
-              .join('\n');
-            const base64 = Buffer.from(JSON.stringify(sourceMap)).toString('base64');
-            contentMapping +=
-              '\n' + sourceURLs + '\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64 + ' */';
-          } else {
-            concatMapping.add(new RawSource(JSON.stringify(sourceMap)));
-          }
-          hasMapping = true;
-        }
-
-        if (!file && sourceFile) file = sourceFile;
+      // when in SCSS is used import of CSS file, like `@import url('./style.css');`
+      // then `sourceFile` is null and `content` contains the output CSS filename
+      if (sourceFile == null && content.endsWith('.css')) {
+        contentCSS += `@import url(${content});`;
+        continue;
       }
 
-      if (hasMapping) {
+      contentCSS += content;
+
+      if (sourceMap) {
         if (isInlineSourceMap) {
-          contentCSS += contentMapping;
+          const sourceURLs = sourceMap.sources
+            .map((source) => '/*# sourceURL=' + (sourceMap.sourceRoot || '') + source + ' */')
+            .join('\n');
+          const base64 = Buffer.from(JSON.stringify(sourceMap)).toString('base64');
+          contentMapping +=
+            '\n' + sourceURLs + '\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64 + ' */';
         } else {
-          mapFile = assetFile + '.map';
-          contentCSS += `\n/*# sourceMappingURL=${path.basename(mapFile)} */`;
-          compilation.emitAsset(mapFile, concatMapping);
+          concatMapping.add(new RawSource(JSON.stringify(sourceMap)));
         }
+        hasMapping = true;
       }
 
-      if (this.verbose) {
-        let verbose =
-          ansis.black.bgGreen(`[${pluginName}]`) +
-          ansis.black.bgWhite(` Extract CSS `) +
-          ' in ' +
-          ansis.cyan(file) +
-          `\n` +
-          ` - ${ansis.magenta(assetFile)}\n`;
-        if (mapFile) verbose += ` - ${ansis.magenta(mapFile)}\n`;
-        outToConsole(verbose);
+      if (!file && sourceFile) file = sourceFile;
+    }
+
+    if (hasMapping) {
+      if (isInlineSourceMap) {
+        contentCSS += contentMapping;
+      } else {
+        mapFile = assetFile + '.map';
+        contentCSS += `\n/*# sourceMappingURL=${path.basename(mapFile)} */`;
+        compilation.emitAsset(mapFile, concatMapping);
       }
+    }
 
-      return contentCSS;
-    },
+    if (this.verbose) {
+      let verbose =
+        ansis.black.bgGreen(`[${pluginName}]`) +
+        ansis.black.bgWhite(` Extract CSS `) +
+        ' in ' +
+        ansis.cyan(file) +
+        `\n` +
+        ` - ${ansis.magenta(assetFile)}\n`;
+      if (mapFile) verbose += ` - ${ansis.magenta(mapFile)}\n`;
+      outToConsole(verbose);
+    }
 
-    /**
-     * The post process for extracted CSS content.
-     * This method can be overridden in module options.
-     *
-     * @note The content is readonly!
-     *   The CSS content should don't be change, because it has already the compiled source map.
-     *
-     * @param {string} content The css content generated by css-loader.
-     * @param {ResourceInfo} info
-     * @param {Compilation} compilation
-     * @return {string | null}
-     */
-    // postprocess(content, info, compilation) {
-    //   // the content here should be readonly
-    //   if (this.verbose) {
-    //     console.log(info);
-    //   }
-    //   return content;
-    // },
-  };
+    return contentCSS;
+  },
 
-  this.options = { ...this.options, ...options };
-
-  return this.options;
+  /**
+   * The post process for extracted CSS content.
+   * This method can be overridden in module options.
+   *
+   * @note The content is readonly!
+   *   The CSS content should don't be change, because it has already the compiled source map.
+   *
+   * @param {string} content The css content generated by css-loader.
+   * @param {ResourceInfo} info
+   * @param {Compilation} compilation
+   * @return {string | null}
+   */
+  // postprocess(content, info, compilation) {
+  //   // the content here should be readonly
+  //   if (this.verbose) {
+  //     console.log(info);
+  //   }
+  //   return content;
+  // },
 };
 
-module.exports = extractCss;
+/**
+ * @param {ModuleOptions | {}} options The custom options.
+ * @return {ModuleOptions} Default options merged with custom options.
+ */
+module.exports = (options = {}) => ({ ...extractCss, ...options });

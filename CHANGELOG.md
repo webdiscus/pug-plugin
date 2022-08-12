@@ -1,5 +1,12 @@
 # Change log
 
+## 4.1.1 (2022-08-12)
+- fix: resolve style in Pug from node_modules by module name, e.g.: `link(href=require('bootstrap') rel='stylesheet')`
+- fix: avoids generate a needless runtime code of css-loader in user js file when specified both style and script with using splitChunks
+- chore: update pug-loader
+- test: reduce test fixtures size and test time
+- docs: update readme
+
 ## 4.1.0 (2022-08-03)
 - feat: add the `filename` property to the `pathData` argument of the `filename(pathData)` function in entry object
 - docs: add in readme recipes how to keep original folder structure in output directory

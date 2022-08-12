@@ -3,7 +3,6 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
-  //mode: 'development',
 
   entry: {
     index: './src/index.pug',
@@ -13,14 +12,13 @@ module.exports = {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
     filename: 'assets/js/[name].[contenthash:8].js',
-    clean: true,
   },
 
   optimization: {
     splitChunks: {
       cacheGroups: {
         vendor: {
-          test: /[\\/]node_modules[\\/]/,
+          test: /\.(js|ts)/,
           name: 'vendors',
           chunks: 'all',
         },

@@ -1,5 +1,6 @@
-@use "~bootstrap/scss/bootstrap";
+//- resolve 'sass' field in package.json of the style module
+@use '@test-fixtures/scss' as fixture;
 
-body {
-  color: bootstrap.$primary;
+h1 {
+  color: fixture.$primary;
 }

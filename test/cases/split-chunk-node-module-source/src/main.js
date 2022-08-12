@@ -1,3 +1,3 @@
-import 'bootstrap';
+import lorem from '@test-fixtures/lorem';
 
-console.log('>> main.js');
+console.log('>> Main: ', lorem.getTitle());

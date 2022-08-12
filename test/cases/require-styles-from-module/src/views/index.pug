@@ -1,8 +1,10 @@
 html
   head
-    //- test require css from node_modules
-    link(rel='stylesheet' href=require('material-icons/css/material-icons.css'))
-    //- test require css from local directory
-    link(rel='stylesheet' href=require('./styles.css'))
+    link(href=require('./favicon.ico') rel='icon')
+    //- resolve 'style' field in package.json of the style module
+        must be resolved compiled CSS file from node module
+    link(href=require('@test-fixtures/scss') rel='alternate stylesheet')
+    //- test require scss from local directory
+    link(rel='stylesheet' href=require('./styles.scss'))
   body
     h1 Hello Pug!

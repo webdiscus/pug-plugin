@@ -15,29 +15,6 @@ module.exports = {
     clean: true,
   },
 
-  optimization: {
-    runtimeChunk: 'single', // extract runtime script from all modules
-    splitChunks: {
-      chunks: 'all',
-      minSize: 10000, // extract modules bigger than 10KB, defaults is 30KB
-      cacheGroups: {
-        vendor: {
-          //test: /[\\/]node_modules[\\/]/,
-          test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // use it when in Pug is defined CSS from node modules to exclude CSS from group
-          name(module) {
-            // save many modules from same scope as `scope-module.js`
-            //const name = module.resourceResolveData.descriptionFileData.name.replace('@', '').replace('/', '-');
-
-            // save many modules from same scope in scope directory
-            const name = module.resourceResolveData.descriptionFileData.name.replace('@', '');
-
-            return `npm.${name}`;
-          },
-        },
-      },
-    },
-  },
-
   plugins: [
     new PugPlugin({
       //pretty: true,
@@ -61,5 +38,29 @@ module.exports = {
         use: ['css-loader', 'sass-loader'],
       },
     ],
+  },
+
+  optimization: {
+    runtimeChunk: 'single', // extract runtime script from all modules
+    splitChunks: {
+      chunks: 'all',
+      minSize: 10000, // extract modules bigger than 10KB, defaults is 30KB
+      cacheGroups: {
+        vendor: {
+          //test: /[\\/]node_modules[\\/]/,
+          test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // use it when in Pug is defined CSS from node modules to exclude CSS from group
+          name(module) {
+            // save many modules from same scope as `scope-module.js`
+            //const name = module.resourceResolveData.descriptionFileData.name.replace('@', '').replace('/', '-');
+
+            // save many modules from same scope in scope directory
+            const name = module.resourceResolveData.descriptionFileData.name.replace('@', '');
+
+            return `npm.${name}`;
+          },
+          enforce: true,
+        },
+      },
+    },
   },
 };

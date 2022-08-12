@@ -1,12 +1,12 @@
 const vm = require('vm');
 const path = require('path');
-const { merge } = require('webpack-merge');
+//const { merge } = require('webpack-merge');
 const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator');
 
 const { pluginName } = require('./config');
 const { isFunction, isWin, pathToPosix, parseRequest } = require('./Utils');
 
-const { loader, plugin } = require('./ModuleProxy');
+const { loader, plugin } = require('./Modules');
 const extractCss = require('./modules/extractCss');
 const extractHtml = require('./modules/extractHtml');
 
@@ -48,14 +48,14 @@ const {
  * @property {boolean} [enabled = true] Enable/disable the plugin.
  * @property {boolean} [verbose = false] Show the information at processing entry files.
  * @property {boolean} [pretty = false] Formatted output of generated HTML.
- * @property {string} [sourcePath = options.context] The absolute path to sources.
- * @property {string} [outputPath = options.output.path] The output directory for an asset.
+ * @property {string | null} [sourcePath = options.context] The absolute path to sources.
+ * @property {string | null} [outputPath = options.output.path] The output directory for an asset.
  * @property {string | function(PathData, AssetInfo): string} [filename = '[name].html'] The file name of output file.
  *   See https://webpack.js.org/configuration/output/#outputfilename.
  *   Must be an absolute or a relative by the context path.
  * @property {function(string, ResourceInfo, Compilation): string | null} postprocess The post process for extracted content from entry.
- * @property {ModuleOptions[]} [modules = []]
- * @property {ModuleOptions} extractCss The options for embedded plugin module to extract CSS.
+ * @property {Array<ModuleOptions>} [modules = []]
+ * @property {ModuleOptions | {}} extractCss The options for embedded plugin module to extract CSS.
  * @property {boolean} [`extractComments` = false] Whether comments shall be extracted to a separate file.
  *   If the original filename is foo.js, then the comments will be stored to foo.js.LICENSE.txt.
  *   This option enable/disable storing of *.LICENSE.txt file.
@@ -107,36 +107,36 @@ const {
  */
 
 /**
- * @type {PugPluginOptions}
- */
-const defaultOptions = {
-  test: /\.(pug)$/,
-  enabled: true,
-  verbose: false,
-  pretty: false,
-  sourcePath: null,
-  outputPath: null,
-  filename: '[name].html',
-  postprocess: null,
-  modules: [],
-  extractCss: {},
-  extractComments: false,
-};
-
-/**
  * Class PugPlugin.
  */
 class PugPlugin {
+  /** @type {PugPluginOptions} */
+  options = {};
+
   entryLibrary = {
     name: 'return',
-    type: 'jsonp',
+    type: 'jsonp', // compiles JS from source into HTML string via Function()
   };
 
   /**
-   * @param {PugPluginOptions|{}} options
+   * @param {PugPluginOptions | {}} options
    */
   constructor(options = {}) {
-    this.options = merge({}, defaultOptions, options);
+    this.options = {
+      test: /\.(pug)$/,
+      enabled: true,
+      verbose: false,
+      pretty: false,
+      sourcePath: null,
+      outputPath: null,
+      filename: '[name].html',
+      postprocess: null,
+      modules: [],
+      extractCss: {},
+      extractComments: false,
+      ...options,
+    };
+
     this.enabled = this.options.enabled !== false;
     this.verbose = this.options.verbose === true;
     this.pretty = this.options.pretty === true;
@@ -145,14 +145,19 @@ class PugPlugin {
       optionModulesException(options.modules);
     }
 
-    let moduleOptions = extractCss(options.extractCss);
-    let hasModule = this.options.modules.find((item) => item.test.source === moduleOptions.test.source);
-    if (!hasModule) {
-      this.options.modules.unshift(moduleOptions);
+    let extractCssOptions = extractCss(options.extractCss);
+    const styleTestSource = extractCssOptions.test.source;
+    const moduleExtractCssOptions = this.options.modules.find((item) => item.test.source === styleTestSource);
+
+    if (moduleExtractCssOptions) {
+      extractCssOptions = moduleExtractCssOptions;
+    } else {
+      this.options.modules.unshift(extractCssOptions);
     }
+    this.options.extractCss = extractCssOptions;
 
     // let know pug-loader that pug-plugin is being used
-    plugin.init();
+    plugin.init(this.options);
   }
 
   apply(compiler) {
@@ -184,9 +189,10 @@ class PugPlugin {
     // initialize responsible-loader module
     ResponsiveLoader.init(compiler);
 
-    // enable library type `jsonp` for compilation JS from source into HTML string via Function()
-    if (webpackOptions.output.enabledLibraryTypes.indexOf('jsonp') < 0) {
-      webpackOptions.output.enabledLibraryTypes.push('jsonp');
+    // enable library type
+    const libraryType = this.entryLibrary.type;
+    if (webpackOptions.output.enabledLibraryTypes.indexOf(libraryType) < 0) {
+      webpackOptions.output.enabledLibraryTypes.push(libraryType);
     }
 
     if (!this.options.sourcePath) this.options.sourcePath = webpackOptions.context;
@@ -274,6 +280,13 @@ class PugPlugin {
         if (request.startsWith('data:')) return;
 
         if (issuer && issuer.length > 0) {
+          const [requestFile] = request.split('?', 1);
+          const extractCss = this.options.extractCss;
+          if (extractCss.enabled && extractCss.test.test(issuer) && requestFile.endsWith('.js')) {
+            // ignore runtime scripts of a loader, because a style can't have a javascript dependency
+            return false;
+          }
+
           const scriptFile = AssetScript.resolveFile(request);
           if (scriptFile) {
             const name = AssetScript.getUniqueName(scriptFile, issuer);
@@ -647,32 +660,35 @@ class PugPlugin {
   /**
    * Compile the source generated by loaders such as `css-loader`, `html-loader`, `pug-loader`.
    *
-   * @param {string} source The source generated by `css-loader`.
+   * @param {string} code The source code.
    * @param {string} sourceFile The full path of source file.
    * @param {string} assetFile
    * @param {ResourceInfo} postprocessInfo
    * @param {ModuleOptions} pluginModule
    * @return {Buffer}
    */
-  compileSource(source, sourceFile, assetFile, postprocessInfo, pluginModule) {
+  compileSource(code, sourceFile, assetFile, postprocessInfo, pluginModule) {
     let result, compiledCode;
     Resolver.setIssuer(sourceFile);
 
-    const sourceCjs = this.toCommonJS(source);
+    if (code.indexOf('export default') > -1) {
+      code = this.toCommonJS(code);
+    }
+
     const contextOptions = {
       require: Resolver.require,
       // the `module.id` is required for `css-loader`, in module extractCss expected as source path
       module: { id: sourceFile },
     };
     const contextObject = vm.createContext(contextOptions);
-    const script = new vm.Script(sourceCjs, { filename: sourceFile });
+    const script = new vm.Script(code, { filename: sourceFile });
 
     compiledCode = script.runInContext(contextObject) || '';
 
     try {
       result = isFunction(compiledCode) ? compiledCode() : compiledCode;
     } catch (error) {
-      executeTemplateFunctionException(error, sourceFile, source);
+      executeTemplateFunctionException(error, sourceFile, code);
     }
 
     // pretty format HTML
@@ -697,32 +713,30 @@ class PugPlugin {
   }
 
   /**
-   * Transform source of a module to the CommonJS module.
-   * @param {string} source ESM code.
+   * Transform source code from ESM to CommonJS.
+   *
+   * @param {string} code ESM code.
    * @returns {string} CommonJS code.
    */
-  toCommonJS(source) {
-    if (source.indexOf('export default') >= 0) {
-      // import to require
-      const importMatches = source.matchAll(/import (.+) from "(.+)";/g);
-      for (const [match, variable, file] of importMatches) {
-        source = source.replace(match, `var ${variable} = require('${file}');`);
-      }
-      // new URL to require
-      const urlMatches = source.matchAll(/= new URL\("(.+?)"(?:.*?)\);/g);
-      for (const [match, file] of urlMatches) {
-        source = source.replace(match, `= require('${file}');`);
-      }
-
-      // TODO: implement clever method to replace module `export default`, but not in any string, e.g.:
-      //   - export default '<h1>Code example: `var code = "hello";export default code;` </h1>';
-      // cases:
-      //   export default '<h1>Hello World!</h1>';
-      //   var code = '<h1>Hello World!</h1>';export default code;
-      source = source.replace(/export default (.+);/, 'module.exports = $1;');
+  toCommonJS(code) {
+    // import to require
+    const importMatches = code.matchAll(/import (.+) from "(.+)";/g);
+    for (const [match, variable, file] of importMatches) {
+      code = code.replace(match, `var ${variable} = require('${file}');`);
+    }
+    // new URL to require
+    const urlMatches = code.matchAll(/= new URL\("(.+?)"(?:.*?)\);/g);
+    for (const [match, file] of urlMatches) {
+      code = code.replace(match, `= require('${file}');`);
     }
 
-    return source;
+    // TODO: implement clever method to replace module `export default`, but not in a text
+    //   use cases:
+    //     export default '<h1>Hello World!</h1>'; // OK
+    //     export default '<h1>Code example: `var code = "hello";export default code;` </h1>'; // <= fix it
+    code = code.replace(/export default (.+);/, 'module.exports = $1;');
+
+    return code;
   }
 
   /**

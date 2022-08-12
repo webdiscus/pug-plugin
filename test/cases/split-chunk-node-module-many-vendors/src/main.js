@@ -1,7 +1,6 @@
-import { Button, Tooltip } from 'bootstrap';
-import merge from 'webpack-merge';
+import { lorem, libA, libB } from '@test-fixtures/js';
 
 console.log('>> main.js');
-console.log('- [bootstrap] Button.NAME: ', Button.NAME);
-console.log('- [popperjs/core] Tooltip.eventName: ', Tooltip.eventName('mouseover'));
-console.log('- [webpack-merge]: ', merge({}, { description: 'merge objects' }));
+console.log('Lorem: ', lorem.getTitle());
+console.log('Lib 1: ', libA.getName());
+console.log('Lib 2: ', libB.getName());

@@ -1,10 +1,8 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 
-const isProduction = false;
-
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
+  mode: 'production',
   devtool: 'source-map',
 
   output: {

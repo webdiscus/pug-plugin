@@ -1,10 +1,7 @@
 html
   head
-    //-link(href=require('bootstrap/dist/css/bootstrap.min.css') rel='stylesheet')
-    //-script(src=require('bootstrap/dist/js/bootstrap.min') defer)
-    script(src=require('bootstrap/dist/js/bootstrap.bundle.min') defer)
-
-    //-link(href=require('./styles.scss') rel='stylesheet')
+    link(href=require('./styles.scss') rel='stylesheet')
+    script(src=require('@test-fixtures/lorem') defer)
   body
     h1 Hello Pug!
-    //-script(src=require('./main'))
+    script(src=require('./main'))

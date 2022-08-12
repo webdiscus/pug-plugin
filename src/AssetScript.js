@@ -1,7 +1,7 @@
 const path = require('path');
 const Asset = require('./Asset');
 const AssetEntry = require('./AssetEntry');
-const { scriptStore } = require('./ModuleProxy');
+const { scriptStore } = require('./Modules');
 
 /** @typedef {Parameters<import("webpack").Chunk["isInGroup"]>[0]} ChunkGroup */
 

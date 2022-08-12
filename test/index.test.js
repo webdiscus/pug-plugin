@@ -15,8 +15,7 @@ const PATHS = {
   output: '/assets/',
 };
 
-// 20s is required for test on slow instance like github
-const testTimeout = 20000;
+const testTimeout = 5000;
 
 beforeAll(() => {});
 
@@ -124,21 +123,13 @@ describe('options', () => {
     compareFileListAndContent(PATHS, 'options-verbose', done);
   });
 
-  test(
-    'options.extractComments = true',
-    (done) => {
-      compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
-    },
-    testTimeout
-  );
+  test('options.extractComments = true', (done) => {
+    compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
+  });
 
-  test(
-    'options.extractComments = false',
-    (done) => {
-      compareFileListAndContent(PATHS, 'option-extract-comments-false', done);
-    },
-    testTimeout
-  );
+  test('options.extractComments = false', (done) => {
+    compareFileListAndContent(PATHS, 'option-extract-comments-false', done);
+  });
 });
 
 describe('source map', () => {
@@ -244,11 +235,7 @@ describe('extract css', () => {
   });
 });
 
-describe('require assets tests', () => {
-  test('require fonts in pug', (done) => {
-    compareFileListAndContent(PATHS, 'require-fonts', done);
-  });
-
+describe('require images', () => {
   test('require images in pug, method compile', (done) => {
     compareFileListAndContent(PATHS, 'require-images-compile', done);
   });
@@ -259,6 +246,24 @@ describe('require assets tests', () => {
 
   test('require images in pug, method html', (done) => {
     compareFileListAndContent(PATHS, 'require-images-html', done);
+  });
+
+  test('require image variable in pug, method compile', (done) => {
+    compareFileListAndContent(PATHS, 'require-images-variable-compile', done);
+  });
+
+  test('require image variable in pug, method render', (done) => {
+    compareFileListAndContent(PATHS, 'require-images-variable-render', done);
+  });
+
+  test('require image variable in pug, method html', (done) => {
+    compareFileListAndContent(PATHS, 'require-images-variable-html', done);
+  });
+});
+
+describe('require assets', () => {
+  test('require fonts in pug', (done) => {
+    compareFileListAndContent(PATHS, 'require-fonts', done);
   });
 
   test('require assets in pug, method render', (done) => {
@@ -330,37 +335,21 @@ describe('split chunks', () => {
     compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-prod', done);
   });
 
-  test(
-    'load min styles and scripts from node module',
-    (done) => {
-      compareFileListAndContent(PATHS, 'split-chunk-node-module-min', done);
-    },
-    testTimeout
-  );
+  test('import source scripts and styles from node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
+  });
 
-  test(
-    'import source scripts and styles from node module',
-    (done) => {
-      compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
-    },
-    testTimeout
-  );
+  test('import source scripts and styles from many node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
+  });
 
-  test(
-    'import source scripts and styles from many node module',
-    (done) => {
-      compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
-    },
-    testTimeout
-  );
+  test('load vendor scripts from node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-vendor', done);
+  });
 
-  test(
-    'load vendor scripts from node module',
-    (done) => {
-      compareFileListAndContent(PATHS, 'split-chunk-vendor', done);
-    },
-    testTimeout
-  );
+  test('extract css and js w/o runtime code of css-loader', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-css-js', done);
+  });
 });
 
 describe('resolve url in style', () => {

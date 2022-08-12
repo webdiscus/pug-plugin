@@ -1,8 +1,10 @@
-// test deep import
-@import 'fonts';
+// test deep @use
+@use 'images';
+@use 'fonts';
 
-$color: darkred;
+/*! main.scss */
 
 h1 {
-  color: $color;
+  color: darkred;
+  font-family: Montserrat, sans-serif;
 }

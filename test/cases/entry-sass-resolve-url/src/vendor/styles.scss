@@ -1,8 +1,8 @@
 // test relative import
 @use '../assets/styles/fonts';
 
-$color: blue;
+/*! styles.scss */
 
 h2 {
-  color: $color;
+  color: blue;
 }

@@ -224,13 +224,14 @@ class Resolver {
 
     // require script in tag <script src=require('./main.js')>, asset filename set via replaceSourceFilesInCompilation()
     const scriptFile = AssetScript.resolveFile(rawRequest);
+
     if (scriptFile != null) {
       if (this.isDuplicate(scriptFile, issuer)) {
         const filePath = path.relative(this.rootContext, scriptFile);
         const issuerPath = path.relative(this.rootContext, issuer);
-
         duplicateScriptWarning(filePath, issuerPath);
       }
+
       return scriptFile;
     }
 
@@ -249,7 +250,6 @@ class Resolver {
         if (assetFile.endsWith('.css') && this.isDuplicate(assetFile, issuer)) {
           const filePath = path.relative(this.rootContext, sourceFile);
           const issuerPath = path.relative(this.rootContext, issuer);
-
           duplicateStyleWarning(filePath, issuerPath);
         }
         return assetFile;
