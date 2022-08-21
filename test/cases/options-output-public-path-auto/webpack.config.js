@@ -25,6 +25,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
+      //verbose: true,
       extractCss: {
         // output filename of styles
         filename: (pathInfo) => {

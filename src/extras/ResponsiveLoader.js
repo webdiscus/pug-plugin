@@ -16,7 +16,7 @@ class ResponsiveLoader {
   /**
    * Initialize.
    *
-   * @param {{}} compiler The webpack compiler object.
+   * @param {Object} compiler The webpack compiler object.
    */
   init(compiler) {
     const { rules } = compiler.options.module || {};
@@ -32,8 +32,8 @@ class ResponsiveLoader {
    * Find loader option used in the module.
    * Note: different modules may have their own loader options.
    *
-   * @param {NormaModule} module The Webpack module of asset.
-   * @return {null|{}} Return loader options if module found otherwise null.
+   * @param {Object} module The Webpack module of asset.
+   * @return {null|Object} Return loader options if module found otherwise null.
    */
   findModuleLoaderOptions(module) {
     const { rawRequest, loaders } = module;
@@ -61,9 +61,9 @@ class ResponsiveLoader {
    * Note: in Pug is impossible use `responsive-loader` as object,
    * because a processing happen in a later stage then used result in Pug template.
    *
-   * @param {NormaModule} module The Webpack module of asset.
+   * @param {Object} module The Webpack module of asset.
    * @param {string} issuerFile The source file of issuer,
-   * @returns {null | string} The compiled result as string to replace required resource with this result.
+   * @returns {null|string} The compiled result as string to replace required resource with this result.
    */
   getAsset(module, issuerFile) {
     if (this.isUsed !== true) return null;

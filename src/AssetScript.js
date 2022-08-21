@@ -2,8 +2,7 @@ const path = require('path');
 const Asset = require('./Asset');
 const AssetEntry = require('./AssetEntry');
 const { scriptStore } = require('./Modules');
-
-/** @typedef {Parameters<import("webpack").Chunk["isInGroup"]>[0]} ChunkGroup */
+const { isWin, pathToPosix } = require('./Utils');
 
 /**
  * @singleton
@@ -29,12 +28,21 @@ class AssetScript {
   }
 
   /**
+   * @param {{__isScript?:boolean|undefined, resource:string}} module The Webpack chunk module.
+   *    Properties:<br>
+   *      __isScript is cached state whether the Webpack module was resolved as JavaScript;<br>
+   *      resource is source file of Webpack module.
    *
-   * @param {string} request
    * @return {boolean}
    */
-  has(request) {
-    return scriptStore.has(request);
+  isScript(module) {
+    if (module.__isScript == null) {
+      let [scriptFile] = module.resource.split('?', 1);
+      if (isWin) scriptFile = pathToPosix(scriptFile);
+      module.__isScript = scriptStore.has(scriptFile);
+    }
+
+    return module.__isScript;
   }
 
   /**

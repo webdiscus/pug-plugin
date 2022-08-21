@@ -6,12 +6,13 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'public/'),
-    publicPath: '/',
+    publicPath: 'auto',
     filename: '[name].[contenthash:8].js',
   },
 
   entry: {
-    index: './src/index.pug',
+    index: './src/views/home/index.pug',
+    about: './src/views/about/index.pug',
   },
 
   plugins: [
@@ -21,7 +22,10 @@ module.exports = {
       extractCss: {
         verbose: true,
       },
-      filename: (pathData, assetInfo) => 'index.html',
+      filename: (pathData, assetInfo) => {
+        //console.log('filename: ', pathData.chunk.name, '\n', pathData.filename);
+        return pathData.chunk.name + '.html';
+      },
     }),
   ],
 

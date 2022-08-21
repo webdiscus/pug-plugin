@@ -1,5 +1,5 @@
 const path = require('path');
-const { isFunction, parseRequest } = require('./Utils');
+const { isFunction } = require('./Utils');
 
 /**
  * @singleton
@@ -11,6 +11,8 @@ class AssetEntry {
 
   compilation = null;
   EntryPlugin = null;
+
+  counter = 0;
 
   /**
    * @param {string} outputPath The Webpack output path.
@@ -54,15 +56,7 @@ class AssetEntry {
       : outputPath;
 
     entry.filename = (pathData, assetInfo) => {
-      if (!assetEntryOptions.filename) {
-        Object.defineProperty(assetEntryOptions, 'filename', {
-          set(filename) {
-            // replace the setter with value of resolved filename
-            delete this.filename;
-            this.filename = filename;
-          },
-        });
-      }
+      if (assetEntryOptions.filename != null) return assetEntryOptions.filename;
 
       // the `filename` property of the `PathData` type should be a source file, but in entry this property not exists
       if (pathData.filename == null) {
@@ -73,6 +67,7 @@ class AssetEntry {
       if (relativeOutputPath) {
         filename = path.posix.join(relativeOutputPath, filename);
       }
+      assetEntryOptions.filename = filename;
 
       return filename;
     };
@@ -156,21 +151,6 @@ class AssetEntry {
   inEntry(name, file) {
     const entry = this.entryMap.get(name);
     return entry && entry.importFile === file;
-  }
-
-  /**
-   * Whether the file is in an entry.
-   *
-   * @param {string} file The source file.
-   * @return {boolean}
-   */
-  hasFile(file) {
-    const { resource } = parseRequest(file);
-    const entries = this.entryMap.entries();
-    for (let [name, entry] of entries) {
-      if (entry.importFile === resource) return true;
-    }
-    return false;
   }
 
   /**

@@ -1,6 +1,7 @@
 html
   head
-    script(src=require('Scripts/main.js') defer)
+    //- test resolving of script with a query
+    script(src=require('Scripts/main.js?ver=123') defer)
   body
     h1 Hello World!
     #root

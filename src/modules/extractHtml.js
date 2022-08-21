@@ -9,6 +9,7 @@ const extractHtml = {
   test: /\.(html)$/,
   enabled: true,
   verbose: false,
+  verboseHeader: 'Extract HTML',
   sourcePath: null,
   outputPath: null,
   filename: '[name].html',
@@ -24,7 +25,7 @@ const extractHtml = {
    * @param {string} content The extracted html.
    * @param {ResourceInfo} info
    * @param {Compilation} compilation
-   * @return {string | null}
+   * @return {string|null}
    */
   // postprocess(content, info, compilation) {
   //   if (this.verbose) {
@@ -35,7 +36,7 @@ const extractHtml = {
 };
 
 /**
- * @param {ModuleOptions | {}} options The custom options.
+ * @param {ModuleOptions|{}} options The custom options.
  * @return {ModuleOptions} Default options merged with custom options.
  */
 module.exports = (options = {}) => ({ ...extractHtml, ...options });

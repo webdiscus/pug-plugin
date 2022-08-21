@@ -7,8 +7,5 @@ const pugLoaderPath = '@webdiscus/pug-loader';
 // Update path in both pug-loader/src/Modules.js and pug-plugin/src/Modules.js files.
 //const pugLoaderPath = '../../pug-loader';
 
-module.exports = {
-  loader: require.resolve(pugLoaderPath),
-  plugin: require(pugLoaderPath + '/src/Plugin.js'),
-  scriptStore: require(pugLoaderPath + '/src/ScriptStore.js'),
-};
+module.exports = require(pugLoaderPath + '/src/Modules.js');
+module.exports.loader = require.resolve(pugLoaderPath);

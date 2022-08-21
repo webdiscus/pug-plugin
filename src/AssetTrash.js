@@ -18,16 +18,16 @@ class AssetTrash {
   }
 
   /**
-   * Add a junk js file to trash.
+   * Add a junk asset file to trash.
    *
    * @param {string} file
    */
-  toTrash(file) {
+  add(file) {
     this.trash.push(file);
   }
 
   /**
-   * Remove all js trash files from compilation.
+   * Remove all trash files from compilation.
    *
    * @param {Compilation} compilation The instance of the webpack compilation.
    */

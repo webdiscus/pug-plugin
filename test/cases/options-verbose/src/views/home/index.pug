@@ -1,0 +1,15 @@
+html
+  head
+    link(rel='stylesheet' href=require('../../styles/styles.css'))
+    link(rel='stylesheet' href=require('./styles.css'))
+    script(src=require('./main.js'))
+  body
+    h1 Home
+    p Text
+    //- test asset inline
+    img.inline(src=require('../../images/imac.svg'))
+    img.inline(src=require('../../images/iphone.png'))
+    //- test asset resource
+    img.file(src=require('../../images/image.png'))
+    //- test responsive loader
+    img.file(src=require('../../images/image.webp'))

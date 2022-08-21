@@ -127,6 +127,23 @@ class Asset {
       filename: uniqueFilename,
     };
   }
+
+  /**
+   * @param {{__isStyle?:boolean|undefined, __isDependencyTypeUrl?:boolean|undefined, resource:string, loaders:Array<{loader:string}>}} module The Webpack chunk module.
+   *    Properties:<br>
+   *      __isStyle is cached state whether the Webpack module was resolved as style;<br>
+   *      resource is source file of Webpack module;<br>
+   *      loaders is an array of loaders for this module
+   *
+   * @return {boolean}
+   */
+  isStyle(module) {
+    if (module.__isStyle == null) {
+      module.__isStyle = module.loaders.find((item) => item.loader.indexOf('css-loader') > 0) != null;
+    }
+
+    return module.__isStyle;
+  }
 }
 
 module.exports = new Asset();

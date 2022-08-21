@@ -123,12 +123,12 @@ describe('options', () => {
     compareFileListAndContent(PATHS, 'options-verbose', done);
   });
 
-  test('options.extractComments = true', (done) => {
-    compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
-  });
-
   test('options.extractComments = false', (done) => {
     compareFileListAndContent(PATHS, 'option-extract-comments-false', done);
+  });
+
+  test('options.extractComments = true', (done) => {
+    compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
   });
 });
 
@@ -380,21 +380,25 @@ describe('responsive images', () => {
   });
 });
 
-describe('require asset/inline', () => {
+describe('inline assets', () => {
   test('query ?inline, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-asset-inline-query', done);
+    compareFileListAndContent(PATHS, 'inline-asset-query', done);
+  });
+
+  test('svgo loader', (done) => {
+    compareFileListAndContent(PATHS, 'inline-asset-query-svgo', done);
   });
 
   test('data-URL and inline-SVG in pug and css, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-asset-inline-pug-css', done);
+    compareFileListAndContent(PATHS, 'inline-asset-pug-css', done);
   });
 
   test('decide by size data-URL/inline-SVG or file, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-asset-inline-decide-size', done);
+    compareFileListAndContent(PATHS, 'inline-asset-decide-size', done);
   });
 
   test('data-URL and inline-SVG exclude fonts, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-asset-inline-exclude-svg-fonts', done);
+    compareFileListAndContent(PATHS, 'inline-asset-exclude-svg-fonts', done);
   });
 });
 
@@ -430,6 +434,11 @@ describe('warning tests', () => {
   test('duplicate scripts', (done) => {
     const containString = 'Duplicate scripts are not allowed';
     stdoutContain(PATHS, 'warning-duplicate-scripts', containString, done);
+  });
+
+  test('duplicate scripts using alias', (done) => {
+    const containString = 'Duplicate scripts are not allowed';
+    stdoutContain(PATHS, 'warning-duplicate-scripts-alias', containString, done);
   });
 
   test('duplicate styles', (done) => {

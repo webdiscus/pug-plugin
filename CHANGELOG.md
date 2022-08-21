@@ -1,5 +1,16 @@
 # Change log
 
+## 4.2.0 (2022-08-22)
+- feat: display details verbose data for extracted CSS, images, data-URL, inline SVG, etc.
+- fix: fix `info.filename` property of postprocess() argument for pug files
+- fix: prevents webpack generating needless alternative requests for pug files\
+       to avoid double compiling some pug files containing the require() function
+- fix: the entry filename as a function is replaced by the resolved asset name to avoid redundant calling of the filename function by access to the filename property
+- refactor: optimize Webpack hook functions
+- refactor: optimize resolving and improve performance
+- refactor: optimize verbose output
+- test: add test for using pug-plugin with svgo-loader
+
 ## 4.1.1 (2022-08-12)
 - fix: resolve style in Pug from node_modules by module name, e.g.: `link(href=require('bootstrap') rel='stylesheet')`
 - fix: avoids generate a needless runtime code of css-loader in user js file when specified both style and script with using splitChunks

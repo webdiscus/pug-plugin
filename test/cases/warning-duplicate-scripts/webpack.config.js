@@ -8,17 +8,11 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'public/'),
     publicPath: '/',
-    filename: 'assets/js/[name].[contenthash:8].js',
-  },
-
-  resolve: {
-    alias: {
-      Scripts: path.join(__dirname, 'src/assets/scripts/'),
-    },
+    filename: 'js/[name].js',
   },
 
   entry: {
-    index: './src/views/index.pug',
+    index: './src/index.pug',
   },
 
   plugins: [new PugPlugin()],

@@ -118,7 +118,7 @@ const webpackEntryWarning = (file) => {
       `For example:\n` +
       `  ${hlTag`link`}(${hlAttr`href`}=${hlFn`require`}(${hlVal`'./styles.scss'`}) ${hlAttr`rel`}=${hlVal`'stylesheet'`})\n` +
       `  ${hlTag`script`}(${hlAttr`src`}=${hlFn`require`}(${hlVal`'./scripts.js'`}) ${hlAttr`defer`})\n` +
-      `For more information, see ${ansis.blueBright`https://github.com/webdiscus/pug-plugin`}.`
+      `For more information, see ${ansis.blueBright`https://github.com/webdiscus/pug-plugin`}.\n`
   );
 };
 
