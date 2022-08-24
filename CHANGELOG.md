@@ -1,5 +1,11 @@
 # Change log
 
+## 4.2.1 (2022-08-24)
+- fix: correct resolve output path of url() in CSS with relative public path,\
+       if public path is relative, then output path of asset required not in Pug file
+       will be auto resolved relative to the issuer
+- test: add test case for correct import CSS node module contained the '.css' extension in module name, e.g. 'normalize.css'
+
 ## 4.2.0 (2022-08-22)
 - feat: display details verbose data for extracted CSS, images, data-URL, inline SVG, etc.
 - fix: fix `info.filename` property of postprocess() argument for pug files

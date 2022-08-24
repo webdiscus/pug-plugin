@@ -1,0 +1,9 @@
+body {
+  // should be resolved relative by compiled CSS file in output path
+  background-image: url('../images/image.png');
+  background-repeat: repeat;
+}
+
+h1 {
+  color: darkred;
+}

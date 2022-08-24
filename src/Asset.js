@@ -5,19 +5,29 @@ const { isWin, pathToPosix } = require('./Utils');
  * @singleton
  */
 class Asset {
-  publicPath = '';
-  outputPath = '';
-  isAutoPublicPath = false;
-  isFunctionPublicPath = false;
-
   files = new Map();
   fileIndex = {};
 
   init({ outputPath, publicPath }) {
+    if (typeof publicPath === 'function') {
+      publicPath = publicPath.call(null, {});
+    }
+
     this.outputPath = outputPath;
     this.publicPath = publicPath === undefined ? 'auto' : publicPath;
-    this.isFunctionPublicPath = typeof publicPath === 'function';
-    this.isAutoPublicPath = this.publicPath === 'auto';
+
+    // reset initial states
+    this.isAutoPublicPath = false;
+    this.isUrlPublicPath = false;
+    this.isRelativePublicPath = false;
+
+    if (this.publicPath === 'auto') {
+      this.isAutoPublicPath = true;
+    } else if (/^(\/\/|https?:\/\/)/i.test(this.publicPath)) {
+      this.isUrlPublicPath = true;
+    } else if (!this.publicPath.startsWith('/')) {
+      this.isRelativePublicPath = true;
+    }
   }
 
   /**
@@ -25,8 +35,8 @@ class Asset {
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
   reset() {
-    this.fileIndex = {};
     this.files.clear();
+    this.fileIndex = {};
   }
 
   /**
@@ -36,7 +46,13 @@ class Asset {
    * @return {string|*|string}
    */
   getPublicPath(issuer) {
-    if (this.isAutoPublicPath) {
+    let isAutoRelative = false;
+    if (issuer) {
+      const [issuerFile] = issuer.split('?', 1);
+      isAutoRelative = this.isRelativePublicPath && !issuerFile.endsWith('.pug');
+    }
+
+    if (this.isAutoPublicPath || isAutoRelative) {
       if (!issuer) return '';
 
       const issuerFullFilename = path.resolve(this.outputPath, issuer);
@@ -46,7 +62,7 @@ class Asset {
       return isWin ? pathToPosix(publicPath) : publicPath;
     }
 
-    return this.isFunctionPublicPath ? this.publicPath.call(null, {}) : this.publicPath;
+    return this.publicPath;
   }
 
   /**
@@ -57,7 +73,14 @@ class Asset {
    * @return {string}
    */
   getOutputFile(assetFile, issuer) {
-    if (this.isAutoPublicPath) {
+    let isAutoRelative = false;
+    if (issuer) {
+      const [issuerFile] = issuer.split('?', 1);
+      isAutoRelative = this.isRelativePublicPath && !issuerFile.endsWith('.pug');
+    }
+
+    // if public path is relative, then all resource required not in Pug file must be auto resolved
+    if (this.isAutoPublicPath || isAutoRelative) {
       if (!issuer) return assetFile;
 
       const issuerFullFilename = path.resolve(this.outputPath, issuer);
@@ -68,9 +91,7 @@ class Asset {
       return isWin ? pathToPosix(outputFilename) : outputFilename;
     }
 
-    const publicPath = this.isFunctionPublicPath ? this.publicPath.call(null, {}) : this.publicPath;
-
-    return path.posix.join(publicPath, assetFile);
+    return path.posix.join(this.publicPath, assetFile);
   }
 
   /**

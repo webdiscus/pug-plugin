@@ -1,0 +1,26 @@
+// test node module with name contained '.css'
+// try to resolve the 'node_modules/normalize.css/normalize.css' file
+
+// Fields in package.json of 'normalize.css' module:
+// "main": "normalize.css",
+// "style": "normalize.css",
+
+// Note: '@import' is deprecated by 'sass'.
+//@import "normalize.css"; // OK
+//@import "~normalize.css"; // OK
+//@import "normalize.css/normalize"; // OK
+
+//@use "normalize.css"; // SassError: Can't find stylesheet to import.
+//@use "normalize.css" as normalize; // SassError: Can't find stylesheet to import.
+
+// Note: the `~` prefix is deprecated by 'sass-loader'
+//@use "~normalize.css"; // SassError: The default namespace \"~normalize\" is not a valid Sass identifier.
+//@use "~normalize.css" as normalize; // OK, but the `~` prefix is deprecated by 'sass-loader'
+
+//@use "normalize.css/normalize.css"; // SassError: Can't find stylesheet to import.
+@use "normalize.css/normalize"; // OK, but file is w/o extension
+
+/*! styles.scss */
+h1 {
+  color: red;
+}

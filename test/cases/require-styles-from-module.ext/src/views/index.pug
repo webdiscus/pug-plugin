@@ -1,0 +1,12 @@
+html
+  head
+    link(href=require('./favicon.ico') rel='icon')
+
+    //- resolve the style module containing in the name the '.css' suffix
+        must be resolved compiled CSS file from node module
+    link(href=require('normalize.css') rel='alternate stylesheet')
+
+    //- test require scss from local directory
+    link(rel='stylesheet' href=require('./styles.scss'))
+  body
+    h1 Hello Pug!

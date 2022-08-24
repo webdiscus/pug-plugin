@@ -282,6 +282,10 @@ describe('require assets', () => {
     compareFileListAndContent(PATHS, 'require-styles-from-module', done);
   });
 
+  test('require styles in pug from node_modules with .ext in module name', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-from-module.ext', done);
+  });
+
   test('require styles with same name', (done) => {
     compareFileListAndContent(PATHS, 'require-styles-with-same-name', done);
   });
@@ -363,6 +367,10 @@ describe('resolve url in style', () => {
 
   test('relative path in url', (done) => {
     compareFileListAndContent(PATHS, 'resolve-url-relative', done);
+  });
+
+  test('relative public path', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-url-relative-public-path', done);
   });
 });
 
