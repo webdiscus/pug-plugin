@@ -70,6 +70,7 @@ class Resolver {
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
   reset() {
+    this.data.forEach((item) => item.issuers.clear());
     this.duplicates.clear();
   }
 
