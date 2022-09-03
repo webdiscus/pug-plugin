@@ -1,1 +1,1 @@
-console.log('>> Global loaded script.');
+console.log('>> Global script');

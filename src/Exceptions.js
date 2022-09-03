@@ -102,26 +102,6 @@ const postprocessException = (error, info) => {
   PugPluginError(message, error);
 };
 
-/**
- * @param {string} file The source file of asset.
- */
-const webpackEntryWarning = (file) => {
-  const hlAttr = ansis.hex('#c59df0');
-  const hlFn = ansis.hex('#79c0ff');
-  const hlVal = ansis.hex('#a5d6ff');
-  const hlTag = ansis.hex('#7de686');
-
-  outToConsole(
-    `${ansis.black.bgYellow(`[${pluginName}] WARNING `)} ` +
-      `${ansis.yellow`Scripts and styles are not allowed in Webpack entry, they must be specified directly in Pug!`}\n` +
-      `The file ${ansis.cyan(file)} must be specified in Pug.\n` +
-      `For example:\n` +
-      `  ${hlTag`link`}(${hlAttr`href`}=${hlFn`require`}(${hlVal`'./styles.scss'`}) ${hlAttr`rel`}=${hlVal`'stylesheet'`})\n` +
-      `  ${hlTag`script`}(${hlAttr`src`}=${hlFn`require`}(${hlVal`'./scripts.js'`}) ${hlAttr`defer`})\n` +
-      `For more information, see ${ansis.blueBright`https://github.com/webdiscus/pug-plugin`}.\n`
-  );
-};
-
 const duplicateScriptWarning = (request, issuer) => {
   const { resource } = parseRequest(request);
   outToConsole(
@@ -148,7 +128,6 @@ module.exports = {
   resolveException,
   executeTemplateFunctionException,
   postprocessException,
-  webpackEntryWarning,
   duplicateScriptWarning,
   duplicateStyleWarning,
 };

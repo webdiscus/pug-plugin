@@ -1,7 +1,4 @@
 const path = require('path');
-const ansis = require('ansis');
-const { pluginName } = require('../config');
-const { outToConsole } = require('../Utils');
 
 /**
  * The plugin module to extract the CSS and source map from asset.

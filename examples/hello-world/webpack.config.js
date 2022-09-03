@@ -54,7 +54,7 @@ module.exports = (env, argv) => {
     plugins: [
       // enable processing of Pug files from entry
       new PugPlugin({
-        //verbose: !isProd, // output information about the process to console
+        verbose: !isProd, // output information about the process to console
         pretty: !isProd, // formatting of HTML
         extractCss: {
           // output filename of styles
@@ -69,7 +69,6 @@ module.exports = (env, argv) => {
           test: /\.pug$/,
           loader: PugPlugin.loader,
           options: {
-            method: 'render', // fastest method to generate static HTML files
             // enable filters only those used in pug
             embedFilters: {
               // :escape

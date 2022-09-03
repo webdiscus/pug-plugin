@@ -1,9 +1,6 @@
 const vm = require('vm');
 const path = require('path');
 
-// the 'webpack-sources' is already in webpack dependency
-// noinspection NpmUsedModulesInstalled (JetBrains)
-const { RawSource } = require('webpack-sources');
 const JavascriptParser = require('webpack/lib/javascript/JavascriptParser');
 const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator');
 
@@ -32,12 +29,7 @@ const {
   verboseExtractInlineResource,
 } = require('./Verbose');
 
-const {
-  optionModulesException,
-  executeTemplateFunctionException,
-  postprocessException,
-  webpackEntryWarning,
-} = require('./Exceptions');
+const { optionModulesException, executeTemplateFunctionException, postprocessException } = require('./Exceptions');
 
 /** @typedef {import('webpack').Compiler} Compiler */
 /** @typedef {import('webpack').Compilation} Compilation */
@@ -115,6 +107,11 @@ const {
  */
 
 const verboseList = new Set();
+let startTime = 0;
+let profilerTime = 0;
+
+/** @type RawSource This objects will be assigned by plugin initialisation. */
+let RawSource, HotUpdateChunk;
 
 /**
  * Class PugPlugin.
@@ -132,7 +129,6 @@ class PugPlugin {
   webpackContext = '';
   webpackOutputPath = '';
   webpackOutputFilename = '';
-  HotUpdateChunk = null;
 
   /**
    * @param {PugPluginOptions|{}} options
@@ -202,15 +198,18 @@ class PugPlugin {
   apply(compiler) {
     if (!this.enabled) return;
 
-    const { webpack } = compiler;
-    const webpackOptions = compiler.options;
+    // TODO: disable before commit, because works in node.js >= 16 only
+    // startTime = performance.now();
+
+    const { webpack, options: webpackOptions } = compiler;
+
+    RawSource = webpack.sources.RawSource;
+    HotUpdateChunk = webpack.HotUpdateChunk;
 
     // save using webpack options
     this.webpackContext = webpackOptions.context;
     this.webpackOutputPath = webpackOptions.output.path;
     this.webpackOutputFilename = webpackOptions.output.filename;
-    this.HotUpdateChunk = webpack.HotUpdateChunk;
-    //this.RawSource = webpack.sources.RawSource;
 
     Asset.init({
       outputPath: this.webpackOutputPath,
@@ -286,8 +285,6 @@ class PugPlugin {
    * @param {Object<name:string, entry: Object>} entries The webpack entries.
    */
   afterProcessEntry(context, entries) {
-    const scriptExtensionRegexp = /\.(js|cjs|mjs|ts|tsx)$/;
-    const styleExtensionRegexp = /\.(css|scss|sass|less|styl)$/;
     const extensionRegexp = this.options.test;
 
     for (let name in entries) {
@@ -296,12 +293,6 @@ class PugPlugin {
       const importFile = entry.import[0];
       let [sourceFile] = importFile.split('?', 1);
       const module = this.getModule(sourceFile);
-
-      // scripts and styles are not allowed in the entry, they must be specified directly in Pug
-      if (scriptExtensionRegexp.test(sourceFile) || styleExtensionRegexp.test(sourceFile)) {
-        const relativeSourceFile = path.relative(this.webpackContext, sourceFile);
-        webpackEntryWarning(relativeSourceFile);
-      }
 
       if (!extensionRegexp.test(sourceFile) && !module) continue;
       if (!entry.library) entry.library = this.entryLibrary;
@@ -468,7 +459,7 @@ class PugPlugin {
    * @param {Object} codeGenerationResults
    */
   renderManifest(result, { chunk, chunkGraph, outputOptions, codeGenerationResults }) {
-    const { compilation, HotUpdateChunk, verbose } = this;
+    const { compilation, verbose } = this;
 
     if (chunk instanceof HotUpdateChunk) return;
 
@@ -719,7 +710,7 @@ class PugPlugin {
 
   /**
    * Executed when the compilation has completed.
-   * Reset initial settings for webpack serve/watch.
+   * Reset initial settings and caches by webpack serve/watch.
    *
    * @param {Object} stats
    */
@@ -758,11 +749,16 @@ class PugPlugin {
       }
     }
     verboseList.clear();
+
     Asset.reset();
     AssetEntry.reset();
     AssetScript.reset();
     AssetTrash.reset();
     Resolver.reset();
+
+    // [profiling]
+    // profilerTime += performance.now() - startTime;
+    // console.log('\n === pug-plugin time :\n', profilerTime);
   }
 }
 

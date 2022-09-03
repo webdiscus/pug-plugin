@@ -1,5 +1,14 @@
 # Change log
 
+## 4.3.0 (2022-09-03)
+- feat: add resolving for require in Pug conditional
+- feat: add resolving for require in Pug mixin argument
+- feat: add resolving for require in Pug `each in` and in `each of` iteration object
+- fix: resolve outdated asset filenames after rebuild via webpack dev server, #42
+- chore: remove warning 'scripts and styles should be specified in Pug'
+- chore: update pug-loader
+- chore: update dev dependencies
+
 ## 4.2.1 (2022-08-24)
 - fix: correct resolve output path of url() in CSS with relative public path,\
        if public path is relative, then output path of asset required not in Pug file

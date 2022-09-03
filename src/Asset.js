@@ -5,7 +5,19 @@ const { isWin, pathToPosix } = require('./Utils');
  * @singleton
  */
 class Asset {
+  /**
+   * The cache of resolved output asset filenames.
+   * The key is the resolved source file.
+   * The value is the output asset filename.
+   *
+   * @type {Map<string, string>}
+   */
   files = new Map();
+
+  /**
+   * Unique last index for each file with same name.
+   * @type {Object<file: string, index: number>}
+   */
   fileIndex = {};
 
   init({ outputPath, publicPath }) {
@@ -35,8 +47,8 @@ class Asset {
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
   reset() {
-    this.files.clear();
     this.fileIndex = {};
+    this.files.clear();
   }
 
   /**
@@ -152,9 +164,9 @@ class Asset {
   /**
    * @param {{__isStyle?:boolean|undefined, __isDependencyTypeUrl?:boolean|undefined, resource:string, loaders:Array<{loader:string}>}} module The Webpack chunk module.
    *    Properties:<br>
-   *      __isStyle is cached state whether the Webpack module was resolved as style;<br>
-   *      resource is source file of Webpack module;<br>
-   *      loaders is an array of loaders for this module
+   *      __isStyle {boolean} The cached state whether the Webpack module was resolved as style.<br>
+   *      resource {string} The source file of Webpack module.<br>
+   *      loaders {Array<string>} The loaders for this module.
    *
    * @return {boolean}
    */

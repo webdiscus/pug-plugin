@@ -372,6 +372,10 @@ describe('resolve url in style', () => {
   test('relative public path', (done) => {
     compareFileListAndContent(PATHS, 'resolve-url-relative-public-path', done);
   });
+
+  test('resolve-url-deep', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-url-deep', done);
+  });
 });
 
 describe('responsive images', () => {
@@ -429,16 +433,6 @@ describe('require in script tag', () => {
 });
 
 describe('warning tests', () => {
-  test('scripts are not allowed in entry', (done) => {
-    const containString = 'Scripts and styles are not allowed in Webpack entry';
-    stdoutContain(PATHS, 'warning-entry-scripts', containString, done);
-  });
-
-  test('styles are not allowed in entry', (done) => {
-    const containString = 'Scripts and styles are not allowed in Webpack entry';
-    stdoutContain(PATHS, 'warning-entry-styles', containString, done);
-  });
-
   test('duplicate scripts', (done) => {
     const containString = 'Duplicate scripts are not allowed';
     stdoutContain(PATHS, 'warning-duplicate-scripts', containString, done);

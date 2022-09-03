@@ -70,6 +70,8 @@ class Resolver {
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
   reset() {
+    // reset outdated assets after rebuild via webpack dev server
+    // note: new filenames are generated on the fly in the this.resolveAsset() method
     this.data.forEach((item) => item.issuers.clear());
     this.duplicates.clear();
   }
@@ -254,9 +256,8 @@ class Resolver {
     // @import CSS rule is not supported
     if (rawRequest.indexOf('??ruleSet') > 0) resolveException(rawRequest, issuer);
 
-    // require script in tag <script src=require('./main.js')>, asset filename set via replaceSourceFilesInCompilation()
+    // require script in tag <script src=require('./main.js')>, set an asset filename via replaceSourceFilesInCompilation()
     const scriptFile = AssetScript.resolveFile(rawRequest);
-
     if (scriptFile != null) {
       if (this.isDuplicate(scriptFile, issuer)) {
         const filePath = path.relative(this.rootContext, scriptFile);

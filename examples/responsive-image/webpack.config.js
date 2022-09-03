@@ -50,7 +50,6 @@ module.exports = (env, argv) => {
           test: /\.(pug)$/,
           loader: PugPlugin.loader,
           options: {
-            method: 'render', // fastest method to generate static HTML files
             // enable filters only those used in pug
             embedFilters: {
               // :escape
