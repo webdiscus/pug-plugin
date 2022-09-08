@@ -1,5 +1,8 @@
 # Change log
 
+## 4.3.1 (2022-09-08)
+- fix: fixed last stable version of ansis in dependency
+
 ## 4.3.0 (2022-09-03)
 - feat: add resolving for require in Pug conditional
 - feat: add resolving for require in Pug mixin argument
