@@ -1,6 +1,7 @@
-const ansis = require('ansis');
 const { pluginName } = require('./config');
 const { outToConsole, isFunction } = require('./Utils');
+const { green, greenBright, cyan, cyanBright, magenta, yellowBright, black, ansi } = require('ansis/colors');
+const grayBright = ansi(245);
 
 // width of labels in first column
 const padWidth = 12;
@@ -14,22 +15,15 @@ const verboseEntry = ({ name, importFile, outputPath, filename, filenameTemplate
    * @param {string|Function} filenameTemplate
    */
   outToConsole(
-    `${ansis.black.bgGreen(`[${pluginName}]`)} Compile the entry ${ansis.green(name)}\n` +
+    `${black.bgGreen`[${pluginName}]`} Compile the entry ${green(name)}\n` +
       'filename: '.padStart(padWidth) +
-      `${
-        isFunction(filenameTemplate)
-          ? ansis.greenBright`[Function: filename]`
-          : ansis.magenta(filenameTemplate.toString())
-      }\n` +
+      `${isFunction(filenameTemplate) ? greenBright`[Function: filename]` : magenta(filenameTemplate.toString())}\n` +
       'asset: '.padStart(padWidth) +
-      ansis.cyanBright(filename) +
-      '\n' +
+      `${cyanBright(filename)}\n` +
       'to: '.padStart(padWidth) +
-      ansis.cyanBright(outputPath) +
-      '\n' +
+      `${cyanBright(outputPath)}\n` +
       'source: '.padStart(padWidth) +
-      ansis.cyan(importFile) +
-      '\n'
+      `${cyan(importFile)}\n`
   );
 };
 
@@ -62,19 +56,16 @@ const verboseExtractModule = ({ issuers, sourceFile, outputPath, assetFile, head
   if (!header) header = 'Extract Module';
 
   outToConsole(
-    `${ansis.black.bgGreen(`[${pluginName}]`) + ansis.black.bgWhite(` ${header} `)}\n` +
+    `${black.bgGreen`[${pluginName}]`}${black.bgWhite` ${header} `}\n` +
       'asset: '.padStart(padWidth) +
-      ansis.cyanBright(assetFile) +
-      '\n' +
+      `${cyanBright(assetFile)}\n` +
       'to: '.padStart(padWidth) +
-      ansis.cyanBright(outputPath) +
-      '\n' +
+      `${cyanBright(outputPath)}\n` +
       'source: '.padStart(padWidth) +
-      ansis.cyan(sourceFile) +
-      '\n' +
+      `${cyan(sourceFile)}\n` +
       'from: '.padStart(padWidth) +
       '\n' +
-      ansis.magenta('- '.padStart(padWidth) + issuerFiles.join('\n' + '- '.padStart(padWidth))) +
+      magenta('- '.padStart(padWidth) + issuerFiles.join('\n' + '- '.padStart(padWidth))) +
       '\n'
   );
 };
@@ -90,19 +81,13 @@ const verboseResolveResource = ({ issuers, sourceFile }) => {
   for (let [issuer, asset] of issuers) {
     let value = asset && asset.startsWith('data:') ? asset.slice(0, asset.indexOf(',')) + ',...' : asset;
     issuersStr +=
-      'in: '.padStart(padWidth) +
-      ansis.magenta(issuer) +
-      '\n' +
-      'as: '.padStart(padWidth) +
-      ansis.ansi(245)(value) +
-      '\n';
+      'in: '.padStart(padWidth) + `${magenta(issuer)}\n` + 'as: '.padStart(padWidth) + `${grayBright(value)}\n`;
   }
 
   outToConsole(
-    `${ansis.black.bgGreen(`[${pluginName}]`) + ansis.black.bgWhite(` ${header} `)}\n` +
+    `${black.bgGreen`[${pluginName}]`}${black.bgWhite` ${header} `}\n` +
       'source: '.padStart(padWidth) +
-      ansis.cyan(sourceFile) +
-      '\n' +
+      `${cyan(sourceFile)}\n` +
       issuersStr
   );
 };
@@ -120,14 +105,16 @@ const verboseExtractInlineResource = ({ sourceFile, data }) => {
 
   if (data.dataUrl) {
     const issuers = Array.from(data.dataUrl.issuers);
+
     dataUrlStr =
       'data URL: '.padStart(padWidth) +
-      ansis.ansi(245)(data.cache.dataUrl.slice(0, data.cache.dataUrl.indexOf(',')) + ',...') +
+      grayBright(data.cache.dataUrl.slice(0, data.cache.dataUrl.indexOf(',')) + ',...') +
       '\n';
+
     dataUrlIssuersStr =
       'in: '.padStart(padWidth) +
       '\n' +
-      ansis.magenta('- '.padStart(padWidth) + issuers.join('\n' + '- '.padStart(padWidth))) +
+      magenta('- '.padStart(padWidth) + issuers.join('\n' + '- '.padStart(padWidth))) +
       '\n';
   }
 
@@ -140,19 +127,18 @@ const verboseExtractInlineResource = ({ sourceFile, data }) => {
       attrsString += ' ' + key + '="' + attrs[key] + '"';
     }
 
-    inlineSvgStr = 'inline SVG: '.padStart(padWidth) + ansis.yellowBright('<svg' + attrsString + '>...</svg>') + '\n';
+    inlineSvgStr = 'inline SVG: '.padStart(padWidth) + yellowBright('<svg' + attrsString + '>...</svg>') + '\n';
     inlineSvgIssuersStr =
       'in: '.padStart(padWidth) +
       '\n' +
-      ansis.magenta('- '.padStart(padWidth) + issuers.join('\n' + '- '.padStart(padWidth))) +
+      magenta('- '.padStart(padWidth) + issuers.join('\n' + '- '.padStart(padWidth))) +
       '\n';
   }
 
   outToConsole(
-    `${ansis.black.bgGreen(`[${pluginName}]`) + ansis.black.bgWhite(` ${header} `)}\n` +
+    `${black.bgGreen`[${pluginName}]`}${black.bgWhite` ${header} `}\n` +
       'source: '.padStart(padWidth) +
-      ansis.cyan(sourceFile) +
-      '\n' +
+      `${cyan(sourceFile)}\n` +
       dataUrlStr +
       dataUrlIssuersStr +
       inlineSvgStr +

@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const ansis = require('ansis');
+const { red, green, cyan, cyanBright, yellow, magenta, white, black, blueBright } = require('ansis/colors');
 const { pluginName } = require('./config');
 const { outToConsole, parseRequest } = require('./Utils');
 
-const ansisPluginName = `\n${ansis.red(`[${pluginName}]`)}`;
+const ansiPluginName = `\n${red`[${pluginName}]`}`;
 let lastError = null;
 
 class PugPluginException extends Error {
@@ -40,8 +40,8 @@ const PugPluginError = function (message, error = '') {
  */
 const optionModulesException = (modules) => {
   const message =
-    `${ansisPluginName} The plugin option ${ansis.green`modules`} must be the array of ${ansis.green`ModuleOptions`} but given:\n` +
-    ansis.cyanBright(JSON.stringify(modules));
+    `${ansiPluginName} The plugin option ${green`modules`} must be the array of ${green`ModuleOptions`} but given:\n` +
+    cyanBright(JSON.stringify(modules));
 
   PugPluginError(message);
 };
@@ -52,15 +52,14 @@ const optionModulesException = (modules) => {
  * @throws {Error}
  */
 const resolveException = (file, issuer) => {
-  let message = `${ansisPluginName} Can't resolve the file ${ansis.cyan(file)} in ${ansis.blueBright(issuer)}`;
+  let message = `${ansiPluginName} Can't resolve the file ${cyan(file)} in ${blueBright(issuer)}`;
 
   if (path.isAbsolute(file) && !fs.existsSync(file)) {
-    message += `\n${ansis.yellow`The reason:`} this file not found!`;
+    message += `\n${yellow`The reason:`} this file not found!`;
   } else if (/\.css$/.test(file) && file.indexOf('??ruleSet')) {
-    //message += `\nThe ${ansis.yellow('@import CSS rule')} is not supported. Avoid CSS imports!`;
     message +=
-      `\nThe handling of ${ansis.yellow`@import at-rules in CSS`} is not supported. Disable the 'import' option in 'css-loader':\n` +
-      ansis.white`
+      `\nThe handling of ${yellow`@import at-rules in CSS`} is not supported. Disable the 'import' option in 'css-loader':\n` +
+      white`
 {
   test: /\.(css|scss)$/i,
   use: [
@@ -85,8 +84,7 @@ const resolveException = (file, issuer) => {
  * @throws {Error}
  */
 const executeTemplateFunctionException = (error, sourceFile, source) => {
-  const message =
-    `${ansisPluginName} Failed to execute the template function'.\n` + `The source file: '${ansis.cyan(sourceFile)}'.`;
+  const message = `${ansiPluginName} Failed to execute the template function'.\nSource file: '${cyan(sourceFile)}'`;
 
   PugPluginError(message, error);
 };
@@ -97,7 +95,7 @@ const executeTemplateFunctionException = (error, sourceFile, source) => {
  * @throws {Error}
  */
 const postprocessException = (error, info) => {
-  const message = `${ansisPluginName} Postprocess is failed'.\n` + `The source file: '${ansis.cyan(info.sourceFile)}'.`;
+  const message = `${ansiPluginName} Postprocess is failed'.\n` + `Source file: '${cyan(info.sourceFile)}'.`;
 
   PugPluginError(message, error);
 };
@@ -105,9 +103,9 @@ const postprocessException = (error, info) => {
 const duplicateScriptWarning = (request, issuer) => {
   const { resource } = parseRequest(request);
   outToConsole(
-    `${ansis.black.bgYellow(`[${pluginName}] WARNING `)} ` +
-      `${ansis.yellow`Duplicate scripts are not allowed in same Pug file!`}\n` +
-      `The file ${ansis.cyan(resource)} is already used in ${ansis.magenta(issuer)}.\n` +
+    `${black.bgYellow`[${pluginName}] WARNING `} ` +
+      `${yellow`Duplicate scripts are not allowed in same Pug file!`}\n` +
+      `The file ${cyan(resource)} is already used in ${magenta(issuer)}.\n` +
       `Note: only first script will be resolved, all duplicates will be ignored.\n`
   );
 };
@@ -115,9 +113,9 @@ const duplicateScriptWarning = (request, issuer) => {
 const duplicateStyleWarning = (request, issuer) => {
   const { resource } = parseRequest(request);
   outToConsole(
-    `${ansis.black.bgYellow(`[${pluginName}] WARNING `)} ` +
-      `${ansis.yellow`Duplicate styles are not allowed in same Pug file!`}\n` +
-      `The file ${ansis.cyan(resource)} is already used in ${ansis.magenta(issuer)}.\n`
+    `${black.bgYellow`[${pluginName}] WARNING `} ` +
+      `${yellow`Duplicate styles are not allowed in same Pug file!`}\n` +
+      `The file ${cyan(resource)} is already used in ${magenta(issuer)}.\n`
   );
 };
 

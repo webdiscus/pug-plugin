@@ -1,5 +1,5 @@
 const path = require('path');
-const ansis = require('ansis');
+const { yellow, cyan, black } = require('ansis/colors');
 const { pluginName } = require('./config');
 const Resolver = require('./Resolver');
 
@@ -91,9 +91,9 @@ class UrlDependency {
       // paranoid check for possible nested style imports, in real project should never be reached
       if (++this.dependencyDeep > this.maxDependencyDeep) {
         throw new Error(
-          `\n${ansis.black.bgRedBright(`[${pluginName}]`)} Max ${ansis.yellow(
+          `\n${black.bgRedBright`[${pluginName}]`} Max ${yellow(
             this.maxDependencyDeep.toString()
-          )} nesting by resolving is reached.\nPlease use an alias to resolve the ${ansis.cyan(resource)} url in style.`
+          )} nesting by resolving is reached.\nPlease use an alias to resolve the ${cyan(resource)} url in style.`
         );
       }
 

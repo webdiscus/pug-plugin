@@ -1,5 +1,10 @@
 # Change log
 
+## 4.3.2 (2022-09-11)
+- fix: resolve modules whose package.json contains `exports` field
+- chore: update pug-loader
+- chore: update dev dependencies
+
 ## 4.3.1 (2022-09-08)
 - fix: fixed last stable version of ansis in dependency
 
