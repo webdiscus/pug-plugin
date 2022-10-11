@@ -1,0 +1,23 @@
+extends Views/layouts/default.pug
+
+//- set variables used in layout
+block variables
+  //- relative route to current page
+  - route = 'index.html'
+  - lang = lang || 'en'
+  - setLanguage(lang)
+
+  - const title = t`Home`
+
+//- add page specifically styles
+append style
+  link(href=require('./styles.scss') rel='stylesheet')
+
+//- add page specifically scripts
+append script
+  script(src=require('./main.js') defer)
+
+block content
+  section
+    .container.flex-column.center-x
+      h1= t`Hello multi-language world!`

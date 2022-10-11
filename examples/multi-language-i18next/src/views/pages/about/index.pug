@@ -1,0 +1,24 @@
+extends Views/layouts/default.pug
+
+//- set variables used in layout
+block variables
+  //- relative route to current page
+  - route = 'about.html'
+  - lang = lang || 'en'
+  - setLanguage(lang)
+
+  - const title = t`About`
+
+//- add page specifically styles
+append style
+  link(href=require('./styles.scss') rel='stylesheet')
+
+//- add page specifically scripts
+append script
+  script(src=require('./main.js') defer='')
+
+block content
+  section
+    .container.flex-column.center-x
+      h1= t`About`
+      .teaser= t`Example how to use multi-language with the pug-plugin and i18next.`

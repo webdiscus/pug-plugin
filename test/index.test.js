@@ -330,6 +330,12 @@ describe('resolve paths in root context', () => {
   });
 });
 
+describe('resolve assets in pug with url query', () => {
+  test('resolve-assets-multi-lang-page', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-assets-multi-lang-page', done);
+  });
+});
+
 describe('split chunks', () => {
   test('resolve assets when used split chunk, development', (done) => {
     compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-dev', done);

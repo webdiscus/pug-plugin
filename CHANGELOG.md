@@ -1,7 +1,13 @@
 # Change log
 
+## 4.3.3 (2022-10-11)
+- fix: resolving of assets in pug templates with url query
+- chore: added example for usage multi-language pages with i18next
+- chore: update pug-loader
+- chore: update dev dependencies
+
 ## 4.3.2 (2022-09-11)
-- fix: resolve modules whose package.json contains `exports` field
+- fix: resolving of modules whose package.json contains `exports` field
 - chore: update pug-loader
 - chore: update dev dependencies
 

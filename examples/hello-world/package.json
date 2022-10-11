@@ -6,8 +6,7 @@
   "scripts": {
     "start": "webpack serve --mode=development",
     "build": "webpack --mode=production --progress",
-    "preview": "npm run build && http-server dist -og",
-    "docs": "webpack --mode=production --env type=docs --progress"
+    "preview": "npm run build && http-server dist -og"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",

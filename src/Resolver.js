@@ -13,7 +13,12 @@ class Resolver {
   /**
    * @type {string} The issuer filename of required the file.
    */
-  issuer = '';
+  issuerFile = '';
+
+  /**
+   * @type {string} The issuer request of required the file.
+   */
+  issuerRequest = '';
 
   /**
    * @type {string} The context directory of required the file.
@@ -79,11 +84,13 @@ class Resolver {
   /**
    * Set the current source file, which is the issuer for assets when compiling the source code.
    *
-   * @param {string} issuer
+   * @param {string} file The issuer filename, w/o query.
+   * @param {string} request The issuer request.
    */
-  setIssuer(issuer) {
-    this.issuer = issuer;
-    this.context = path.dirname(issuer);
+  setIssuer(file, request) {
+    this.issuerFile = file;
+    this.issuerRequest = request;
+    this.context = path.dirname(file);
   }
 
   /**
@@ -250,18 +257,19 @@ class Resolver {
    * @throws {Error}
    */
   require(rawRequest) {
-    const { issuer, context } = this;
+    const { issuerFile, issuerRequest, context } = this;
     const request = path.resolve(context, rawRequest);
 
     // @import CSS rule is not supported
-    if (rawRequest.indexOf('??ruleSet') > 0) resolveException(rawRequest, issuer);
+    if (rawRequest.indexOf('??ruleSet') > 0) resolveException(rawRequest, issuerRequest);
 
     // require script in tag <script src=require('./main.js')>, set an asset filename via replaceSourceFilesInCompilation()
     const scriptFile = AssetScript.resolveFile(rawRequest);
+
     if (scriptFile != null) {
-      if (this.isDuplicate(scriptFile, issuer)) {
+      if (this.isDuplicate(scriptFile, issuerRequest)) {
         const filePath = path.relative(this.rootContext, scriptFile);
-        const issuerPath = path.relative(this.rootContext, issuer);
+        const issuerPath = path.relative(this.rootContext, issuerRequest);
         duplicateScriptWarning(filePath, issuerPath);
       }
 
@@ -272,29 +280,29 @@ class Resolver {
     if (AssetInline.isDataUrl(rawRequest)) return rawRequest;
 
     // bypass the asset/inline as inline SVG
-    if (AssetInline.isInlineSvg(request, issuer)) return request;
+    if (AssetInline.isInlineSvg(request, issuerFile)) return request;
 
     // resolve resources
-    const sourceFile = this.getSourceFile(rawRequest, issuer);
+    const sourceFile = this.getSourceFile(rawRequest, issuerFile);
     if (sourceFile != null) {
-      const assetFile = this.resolveAsset(sourceFile, issuer);
+      const assetFile = this.resolveAsset(sourceFile, issuerFile);
       if (assetFile != null) {
-        if (assetFile.endsWith('.css') && this.isDuplicate(assetFile, issuer)) {
+        if (assetFile.endsWith('.css') && this.isDuplicate(assetFile, issuerRequest)) {
           const filePath = path.relative(this.rootContext, sourceFile);
-          const issuerPath = path.relative(this.rootContext, issuer);
+          const issuerPath = path.relative(this.rootContext, issuerRequest);
           duplicateStyleWarning(filePath, issuerPath);
         }
         return assetFile;
       }
       // try to resolve inline data url
-      const dataUrl = AssetInline.getDataUrl(sourceFile, issuer);
+      const dataUrl = AssetInline.getDataUrl(sourceFile, issuerFile);
       if (dataUrl != null) return dataUrl;
     }
 
     // require only js code or json data
     if (/\.js[a-z0-9]*$/i.test(rawRequest)) return require(request);
 
-    resolveException(rawRequest, issuer);
+    resolveException(rawRequest, issuerRequest);
   }
 }
 

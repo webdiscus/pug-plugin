@@ -26,12 +26,12 @@ output JS and CSS filenames whose source files are specified in the Pug template
 
 💡 **Highlights**:
 
-- The Pug file is the entry point for all scripts and styles.
+- Pug file is the entry point for all scripts and styles.
 - Source scripts and styles should be specified directly in Pug.
 - All JS and CSS files will be extracted from their sources specified in Pug.
 - No longer need to define scripts and styles in the Webpack entry.
 - No longer need to import styles in JavaScript to inject them into HTML via additional plugins.
-- Pug loader has built-in filters: `:highlight` `:markdown`.
+- Pug loader has built-in filters: `:escape` `:code` `:highlight` `:markdown`.
 
 Specify the Pug files in the Webpack entry:
 
@@ -117,6 +117,7 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
    - [How to use HMR live reload](#recipe-hmr)
 7. Demo sites
    - [Hello World!](https://webdiscus.github.io/pug-plugin/hello-world/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world))
+   - [Multi-language pages using i18next](https://webdiscus.github.io/pug-plugin/multi-language-i18next/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/multi-language-i18next))
    - [Responsive images](https://webdiscus.github.io/pug-plugin/responsive-image/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/responsive-image))
    - [Usage `:highlight` filter](https://webdiscus.github.io/pug-loader/pug-filters/highlight.html) ([source](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters))
    - [Usage `:markdown` filter](https://webdiscus.github.io/pug-loader/pug-filters/markdown.html) ([source](https://github.com/webdiscus/pug-loader/tree/master/examples/pug-filters))

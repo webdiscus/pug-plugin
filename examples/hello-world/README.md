@@ -25,7 +25,7 @@ Build resources for GitHub Page: https://webdiscus.github.io/pug-plugin/hello-wo
 
 1. Generate resources:
     ```
-    npm run docs
+    npm run build
     ```
 2. Copy generated files from `/examples/hello-world/dist/` to `/docs/hello-world/`.
 

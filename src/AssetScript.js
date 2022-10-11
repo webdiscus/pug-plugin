@@ -47,13 +47,11 @@ class AssetScript {
 
   /**
    * @param {string} file The source file of script.
-   * @param  {string} issuer The issuer of the asset.
    * @return {string } Return unique assetFile
    */
-  getUniqueName(file, issuer) {
+  getUniqueName(file) {
     const { name } = path.parse(file);
     let uniqueName = name;
-    let result = name;
 
     // the entrypoint name must be unique, if already exists then add an index: `main` => `main.1`, etc.
     if (AssetEntry.isNotUnique(name, file)) {
@@ -61,11 +59,9 @@ class AssetScript {
         this.index[name] = 1;
       }
       uniqueName = name + '.' + this.index[name]++;
-      result = uniqueName;
     }
-    scriptStore.setName(uniqueName, file, issuer);
 
-    return result;
+    return uniqueName;
   }
 
   /**
