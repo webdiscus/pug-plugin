@@ -11,7 +11,7 @@ module.exports = {
   },
 
   output: {
-    path: path.join(__dirname, 'public/'),
+    path: path.join(__dirname, 'dist/'),
     filename: '[name].[contenthash:8].js',
     publicPath: '', // test url() in CSS with relative public path
   },

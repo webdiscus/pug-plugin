@@ -3,28 +3,26 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
-  devtool: false,
 
-  output: {
-    path: path.join(__dirname, 'dist/'),
-    publicPath: '/',
-    filename: 'js/[name].js',
-  },
+  // test default output path
+  // output: {
+  //   path: path.join(__dirname, 'dist/'),
+  // },
 
   entry: {
     index: './src/index.pug',
   },
 
-  plugins: [new PugPlugin()],
+  plugins: [
+    // zero config
+    new PugPlugin(),
+  ],
 
   module: {
     rules: [
       {
         test: /\.pug$/,
         loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
       },
     ],
   },

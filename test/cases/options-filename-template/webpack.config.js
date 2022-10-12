@@ -5,7 +5,7 @@ module.exports = {
   mode: 'production',
 
   output: {
-    path: path.join(__dirname, 'public/'),
+    path: path.join(__dirname, 'dist/'),
     publicPath: '/',
   },
 
@@ -16,7 +16,7 @@ module.exports = {
     },
     home: {
       import: './src/views/home.pug',
-      filename: './pages/[name].html', // output __dirname/public/pages/home.html
+      filename: './pages/[name].html', // output __dirname/dist/pages/home.html
     },
     about: './src/views/about.pug',
   },

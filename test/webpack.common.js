@@ -1,8 +1,4 @@
 module.exports = {
-  output: {
-    filename: '[name].js',
-  },
-
   plugins: [],
 
   module: {

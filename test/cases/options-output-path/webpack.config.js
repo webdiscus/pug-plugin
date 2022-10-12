@@ -6,7 +6,7 @@ module.exports = {
   devtool: false,
 
   output: {
-    path: path.join(__dirname, 'public/'),
+    path: path.join(__dirname, 'dist/'),
     publicPath: '/',
     filename: 'pages/[name]/scripts.[contenthash:8].js',
   },

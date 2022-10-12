@@ -2,7 +2,7 @@ const path = require('path');
 const PugPlugin = require('../../../');
 
 const templatePath = path.join(__dirname, 'src/views/');
-const htmlPath = path.join(__dirname, 'public/help/');
+const htmlPath = path.join(__dirname, 'dist/help/');
 
 module.exports = {
   mode: 'production',
@@ -14,7 +14,7 @@ module.exports = {
   },
 
   output: {
-    path: path.join(__dirname, 'public/'),
+    path: path.join(__dirname, 'dist/'),
     publicPath: '/',
   },
 

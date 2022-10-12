@@ -8,7 +8,8 @@ const PATHS = {
   base: __dirname,
   testSource: path.join(__dirname, 'cases'),
   // relative path in the test directory to web root dir name, same as by a web server (e.g. nginx)
-  webRoot: '/public/',
+  //webRoot: '/public/',
+  webRoot: '/dist/',
   // relative path in the test directory to expected files for test
   expected: '/expected/',
   // relative path in the public directory
@@ -129,6 +130,10 @@ describe('options', () => {
 
   test('options.extractComments = true', (done) => {
     compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
+  });
+
+  test('default webpack config', (done) => {
+    compareFileListAndContent(PATHS, 'webpack-config-default', done);
   });
 });
 

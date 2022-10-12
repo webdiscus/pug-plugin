@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "4.3.3",
+  "version": "4.3.4",
   "description": "Pug plugin for webpack compiles Pug files to HTML, extracts CSS and JS from their sources specified in Pug.",
   "keywords": [
     "pug",

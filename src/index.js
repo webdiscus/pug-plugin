@@ -231,8 +231,8 @@ class PugPlugin {
 
     // save using webpack options
     this.webpackContext = webpackOptions.context;
-    this.webpackOutputPath = webpackOptions.output.path;
-    this.webpackOutputFilename = webpackOptions.output.filename;
+    this.webpackOutputPath = webpackOptions.output.path || path.join(__dirname, 'dist');
+    this.webpackOutputFilename = webpackOptions.output.filename || '[name].js';
 
     Asset.init({
       outputPath: this.webpackOutputPath,

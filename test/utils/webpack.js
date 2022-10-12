@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const process = require('process');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
@@ -7,6 +8,9 @@ const prepareWebpackConfig = (PATHS, relTestCasePath, webpackOpts = {}) => {
   const testPath = path.join(PATHS.testSource, relTestCasePath),
     configFile = path.join(testPath, 'webpack.config.js'),
     commonConfigFile = path.join(PATHS.base, 'webpack.common.js');
+
+  // change directory to current test folder, needed for test default webpack output path
+  process.chdir(testPath);
 
   if (!fs.existsSync(configFile)) {
     throw new Error(`The config file '${configFile}' not found for test: ${relTestCasePath}`);

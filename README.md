@@ -39,11 +39,12 @@ Specify the Pug files in the Webpack entry:
 const PugPlugin = require('pug-plugin');
 module.exports = {
   entry: {
+    // define your Pug files here
     index: './src/views/home/index.pug',  // output dist/index.html
     about: './src/views/about/index.pug', // output dist/about.html
   },
   plugins: [
-    new PugPlugin(), // enable processing of Pug files specified in Webpack entry
+    new PugPlugin(), // enable rendering of Pug files defined in Webpack entry
   ],
   module: {
     rules: [
@@ -55,6 +56,12 @@ module.exports = {
   },
 };
 ```
+
+> **Note**
+> 
+> The key of `entry` object is a relative output file w/o extension `.html` in output path.\
+> The default `output.path` is `path.join(__dirname, 'dist')`.\
+> The default `output.filename` is `[name].js`.
 
 Add source scripts and styles directly to Pug using `require()`:
 ```pug

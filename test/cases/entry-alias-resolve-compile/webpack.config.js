@@ -1,8 +1,6 @@
 const path = require('path');
 const PugPlugin = require('../../../');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const basePath = path.resolve(__dirname);
-const webRootPath = path.join(basePath, 'public/');
 
 module.exports = {
   mode: 'production',
@@ -13,14 +11,14 @@ module.exports = {
   },
 
   resolve: {
-    plugins: [new TsConfigPathsPlugin({ configFile: path.join(basePath, 'tsconfig.json') })],
+    plugins: [new TsConfigPathsPlugin({ configFile: path.join(__dirname, 'tsconfig.json') })],
     alias: {
       AliasImages: path.join(__dirname, 'src/assets/images/'),
     },
   },
 
   output: {
-    path: webRootPath,
+    path: path.join(__dirname, 'dist/'),
     publicPath: '',
   },
 

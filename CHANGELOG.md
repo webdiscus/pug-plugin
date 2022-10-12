@@ -1,5 +1,9 @@
 # Change log
 
+## 4.3.4 (2022-10-13)
+- fix: set default value of `output.path` as `path.join(__dirname, 'dist')`
+- fix: set default value of `output.filename` as `[name].js`
+
 ## 4.3.3 (2022-10-11)
 - fix: resolving of assets in pug templates with url query
 - chore: added example for usage multi-language pages with i18next
