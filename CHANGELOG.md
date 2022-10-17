@@ -1,12 +1,27 @@
 # Change log
 
+## 4.4.0 (2022-10-17)
+- feat: add support the `asset/source` e.g. for inline CSS/SCSS in Pug:\
+  _pug template_
+  ```pug
+  style=require('./styles.scss?raw')
+  ```
+  _webpack config_
+  ```js
+  {
+    resourceQuery: /raw/,
+    type: 'asset/source',
+    use: ['css-loader', 'sass-loader'],
+  }
+  ```
+
 ## 4.3.4 (2022-10-13)
 - fix: set default value of `output.path` as `path.join(__dirname, 'dist')`
 - fix: set default value of `output.filename` as `[name].js`
 
 ## 4.3.3 (2022-10-11)
 - fix: resolving of assets in pug templates with url query
-- chore: added example for usage multi-language pages with i18next
+- chore: add example for usage multi-language pages with i18next
 - chore: update pug-loader
 - chore: update dev dependencies
 

@@ -319,6 +319,10 @@ describe('require assets', () => {
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
   // });
+
+  test('require inline styles in pug', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-inline', done);
+  });
 });
 
 describe('resolve paths in root context', () => {

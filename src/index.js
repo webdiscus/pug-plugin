@@ -20,6 +20,7 @@ const AssetEntry = require('./AssetEntry');
 const AssetResource = require('./AssetResource');
 const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
+const AssetSource = require('./AssetSource');
 const AssetTrash = require('./AssetTrash');
 
 const {
@@ -538,6 +539,7 @@ class PugPlugin {
           }
 
           assetModules.add({
+            type: module.type,
             // postprocessInfo
             isEntry: true,
             verbose: entry.verbose,
@@ -609,6 +611,7 @@ class PugPlugin {
         }
 
         assetModules.add({
+          type: module.type,
           // postprocessInfo
           isEntry: false,
           verbose: moduleVerbose,
@@ -625,6 +628,34 @@ class PugPlugin {
             identifier: `${pluginName}.${chunk.id}.${id}`,
             hash,
           },
+        });
+      } else if (module.type === 'asset/source') {
+        const pluginModule = this.getModule(sourceFile);
+        if (pluginModule == null) continue;
+
+        AssetSource.add({ sourceFile: resource, issuerAssetFile: entry.filename });
+
+        if (verbose) {
+          verboseList.add({
+            isAssetSource: true,
+            sourceFile: resource,
+          });
+        }
+
+        assetModules.add({
+          type: module.type,
+          // postprocessInfo
+          isEntry: false,
+          verbose: pluginModule.verbose || entry.verbose,
+          outputPath: null,
+          filenameTemplate: null,
+          // renderContent arguments
+          source: module.originalSource(),
+          sourceFile,
+          resource,
+          assetFile: null,
+          pluginModule,
+          fileManifest: {},
         });
       } else if (module.type === 'asset/resource') {
         // resource required in pug or in css via url()
@@ -671,6 +702,7 @@ class PugPlugin {
 
     AssetScript.replaceSourceFilesInCompilation(compilation);
     AssetInline.insertInlineSvg(compilation);
+    AssetSource.inlineSource(compilation);
   }
 
   /**
@@ -681,9 +713,10 @@ class PugPlugin {
    * @param {string} resource The full path of source file with URL query.
    * @param {string} assetFile
    * @param {ModuleOptions} pluginModule
-   * @return {string|null}
+   * @return {string|null} When return null then not emit file.
    */
   renderModule({
+    type,
     source,
     sourceFile,
     resource,
@@ -700,6 +733,10 @@ class PugPlugin {
       // TODO: reproduce this error and write test
       // the source is empty when webpack config contains an error
       return null;
+    }
+
+    if (Buffer.isBuffer(code)) {
+      code = code.toString();
     }
 
     if (code.indexOf('export default') > -1) {
@@ -750,6 +787,11 @@ class PugPlugin {
       }
     }
 
+    if (type === 'asset/source') {
+      AssetSource.setSource(resource, content);
+      return null;
+    }
+
     return content;
   }
 
@@ -763,7 +805,7 @@ class PugPlugin {
     // display verbose after rendering of all modules
     if (verboseList.size > 0) {
       for (let item of verboseList) {
-        const { isEntry, isModule, isAssetResource, isAssetInline, sourceFile } = item;
+        const { isEntry, isModule, isAssetResource, isAssetSource, isAssetInline, sourceFile } = item;
         if (isEntry) {
           const entry = AssetEntry.get(item.name);
           verboseEntry(entry);
@@ -784,6 +826,8 @@ class PugPlugin {
             issuers: data.issuers,
             outputPath: this.webpackOutputPath,
           });
+        } else if (isAssetSource) {
+          // TODO: implement
         } else if (isAssetInline) {
           const data = AssetInline.data.get(sourceFile);
           verboseExtractInlineResource({

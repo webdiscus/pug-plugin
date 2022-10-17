@@ -54,7 +54,7 @@ module.exports = (env, argv) => {
     plugins: [
       // enable processing of Pug files from entry
       new PugPlugin({
-        verbose: !isProd, // output information about the process to console
+        //verbose: !isProd, // output information about the process to console
         pretty: !isProd, // formatting of HTML
         extractCss: {
           // output filename of styles
@@ -87,9 +87,24 @@ module.exports = (env, argv) => {
         },
 
         // styles
+        // {
+        //   test: /\.(css|sass|scss)$/,
+        //   use: ['css-loader', 'sass-loader'],
+        // },
         {
           test: /\.(css|sass|scss)$/,
-          use: ['css-loader', 'sass-loader'],
+          oneOf: [
+            // inline styles in HTML
+            {
+              resourceQuery: /^\?raw/u,
+              type: 'asset/source',
+              use: ['css-loader', 'sass-loader'],
+            },
+            // load styles as file
+            {
+              use: ['css-loader', 'sass-loader'],
+            },
+          ],
         },
 
         // fonts

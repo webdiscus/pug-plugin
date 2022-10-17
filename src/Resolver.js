@@ -2,6 +2,7 @@ const path = require('path');
 const Asset = require('./Asset');
 const AssetInline = require('./AssetInline');
 const AssetScript = require('./AssetScript');
+const AssetSource = require('./AssetSource');
 const { resolveException, duplicateScriptWarning, duplicateStyleWarning } = require('./Exceptions');
 
 /**
@@ -275,6 +276,9 @@ class Resolver {
 
       return scriptFile;
     }
+
+    // bypass inline asset/source
+    if (AssetSource.isInline(rawRequest)) return rawRequest;
 
     // bypass the asset contained data-URL
     if (AssetInline.isDataUrl(rawRequest)) return rawRequest;
