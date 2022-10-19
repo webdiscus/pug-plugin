@@ -22,6 +22,11 @@ class Resolver {
   issuerRequest = '';
 
   /**
+   * @type {string} The output filename of current entry point.
+   */
+  entryAsset = '';
+
+  /**
    * @type {string} The context directory of required the file.
    */
   context = '';
@@ -87,11 +92,13 @@ class Resolver {
    *
    * @param {string} file The issuer filename, w/o query.
    * @param {string} request The issuer request.
+   * @param {string} entryAsset The current entry point.
    */
-  setIssuer(file, request) {
+  setIssuer(file, request, entryAsset) {
     this.issuerFile = file;
     this.issuerRequest = request;
     this.context = path.dirname(file);
+    this.entryAsset = entryAsset;
   }
 
   /**
@@ -216,24 +223,25 @@ class Resolver {
    *
    * @param {string} sourceFile The resolved full path of resource.
    * @param {string} issuer The issuer of resource.
+   * @param {string|null} entryAsset
    * @return {string|null}
    */
-  resolveAsset(sourceFile, issuer) {
+  resolveAsset(sourceFile, issuer, entryAsset) {
     const item = this.data.get(sourceFile);
     if (!item) return null;
 
     let assetFile = item.issuers.get(issuer);
-    if (assetFile) return assetFile;
+    if (assetFile && !entryAsset) return assetFile;
 
     const { originalAssetFile, moduleHandler } = item;
-
     let assetOutputFile;
+
     if (originalAssetFile != null) {
       // normalize output asset files
       if (AssetInline.isDataUrl(originalAssetFile)) {
         assetOutputFile = originalAssetFile;
       } else {
-        const issuerAssetFile = Asset.findAssetFile(issuer);
+        const issuerAssetFile = entryAsset || Asset.findAssetFile(issuer);
         if (issuerAssetFile) {
           assetOutputFile = Asset.getOutputFile(originalAssetFile, issuerAssetFile);
         }
@@ -258,7 +266,7 @@ class Resolver {
    * @throws {Error}
    */
   require(rawRequest) {
-    const { issuerFile, issuerRequest, context } = this;
+    const { entryAsset, issuerFile, issuerRequest, context } = this;
     const request = path.resolve(context, rawRequest);
 
     // @import CSS rule is not supported
@@ -277,27 +285,32 @@ class Resolver {
       return scriptFile;
     }
 
-    // bypass inline asset/source
-    if (AssetSource.isInline(rawRequest)) return rawRequest;
-
     // bypass the asset contained data-URL
     if (AssetInline.isDataUrl(rawRequest)) return rawRequest;
+
+    // bypass the inline CSS
+    if (AssetSource.isInline(rawRequest)) return rawRequest;
 
     // bypass the asset/inline as inline SVG
     if (AssetInline.isInlineSvg(request, issuerFile)) return request;
 
     // resolve resources
     const sourceFile = this.getSourceFile(rawRequest, issuerFile);
+
     if (sourceFile != null) {
-      const assetFile = this.resolveAsset(sourceFile, issuerFile);
+      const isInline = AssetSource.isInline(issuerRequest);
+      const assetFile = this.resolveAsset(sourceFile, issuerFile, isInline ? entryAsset : null);
+
       if (assetFile != null) {
         if (assetFile.endsWith('.css') && this.isDuplicate(assetFile, issuerRequest)) {
           const filePath = path.relative(this.rootContext, sourceFile);
           const issuerPath = path.relative(this.rootContext, issuerRequest);
           duplicateStyleWarning(filePath, issuerPath);
         }
+
         return assetFile;
       }
+
       // try to resolve inline data url
       const dataUrl = AssetInline.getDataUrl(sourceFile, issuerFile);
       if (dataUrl != null) return dataUrl;

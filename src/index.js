@@ -76,6 +76,11 @@ const { optionModulesException, executeTemplateFunctionException, postprocessExc
  */
 
 /**
+ * @typedef {ModuleOptions} ModuleProps
+ * @property {boolean} [`isInline` = false] Whether inline CSS should contain inline source map.
+ */
+
+/**
  * @typedef {Object} AssetEntryOptions
  * @property {string} name The key of webpack entry.
  * @property {string} file The output asset file with absolute path.
@@ -400,6 +405,7 @@ class PugPlugin {
       }
     }
 
+    //console.log('\n *** beforeResolve:\n', request, '\n', issuer, '\n', resolveData);
     if (resolveData.dependencyType === 'url') {
       UrlDependency.resolve(resolveData);
     }
@@ -509,7 +515,9 @@ class PugPlugin {
     AssetScript.setIssuerFilename(entry.request, entry.filename);
 
     for (const module of chunkModules) {
-      const { buildInfo, resource } = module;
+      const { buildInfo, resource, resourceResolveData } = module;
+      const resourceQuery = resourceResolveData ? resourceResolveData.query : null;
+      const isInline = (resourceQuery && resourceQuery.startsWith('?inline')) || module.type === 'asset/source';
 
       if (!resource || AssetInline.isDataUrl(resource)) continue;
 
@@ -539,7 +547,8 @@ class PugPlugin {
           }
 
           assetModules.add({
-            type: module.type,
+            isInline,
+            entryAsset: null,
             // postprocessInfo
             isEntry: true,
             verbose: entry.verbose,
@@ -593,8 +602,12 @@ class PugPlugin {
 
         Resolver.addAsset(resource, assetFile, issuerFile);
 
-        // skip already processed assets
-        if (isCached === true) {
+        if (isInline) {
+          AssetSource.add(resource);
+        }
+
+        // skip already processed file assets, but all inline assets must be processed
+        if (isCached && !isInline) {
           continue;
         }
 
@@ -611,7 +624,8 @@ class PugPlugin {
         }
 
         assetModules.add({
-          type: module.type,
+          isInline,
+          entryAsset: entry.filename,
           // postprocessInfo
           isEntry: false,
           verbose: moduleVerbose,
@@ -630,10 +644,13 @@ class PugPlugin {
           },
         });
       } else if (module.type === 'asset/source') {
+        // TODO: remove in v5.0 the usage of 'asset/source' to inline CSS,
+        //  because the 'asset/source' type not support url() in inline CSS
+        //  and inline CSS already works via '?inline' query
         const pluginModule = this.getModule(sourceFile);
         if (pluginModule == null) continue;
 
-        AssetSource.add({ sourceFile: resource, issuerAssetFile: entry.filename });
+        AssetSource.add(resource);
 
         if (verbose) {
           verboseList.add({
@@ -643,7 +660,8 @@ class PugPlugin {
         }
 
         assetModules.add({
-          type: module.type,
+          isInline,
+          entryAsset: entry.filename,
           // postprocessInfo
           isEntry: false,
           verbose: pluginModule.verbose || entry.verbose,
@@ -660,6 +678,7 @@ class PugPlugin {
       } else if (module.type === 'asset/resource') {
         // resource required in pug or in css via url()
         AssetResource.render(module, issuerFile);
+
         if (verbose) {
           verboseList.add({
             isAssetResource: true,
@@ -668,6 +687,7 @@ class PugPlugin {
         }
       } else if (module.type === 'asset/inline') {
         AssetInline.render({ module, chunk, codeGenerationResults, issuerAssetFile: entry.filename });
+
         if (verbose) {
           verboseList.add({
             isAssetInline: true,
@@ -712,11 +732,12 @@ class PugPlugin {
    * @param {string} sourceFile The full path of source file w/o URL query.
    * @param {string} resource The full path of source file with URL query.
    * @param {string} assetFile
-   * @param {ModuleOptions} pluginModule
+   * @param {ModuleProps} pluginModule
    * @return {string|null} When return null then not emit file.
    */
   renderModule({
-    type,
+    isInline,
+    entryAsset,
     source,
     sourceFile,
     resource,
@@ -743,7 +764,7 @@ class PugPlugin {
       code = toCommonJS(code);
     }
 
-    Resolver.setIssuer(sourceFile, resource);
+    Resolver.setIssuer(sourceFile, resource, entryAsset);
 
     const contextOptions = {
       require: Resolver.require,
@@ -768,6 +789,7 @@ class PugPlugin {
 
     if (pluginModule) {
       if (pluginModule.extract) {
+        pluginModule.isInline = isInline;
         content = pluginModule.extract(content, assetFile, this.compilation);
       }
       if (pluginModule.postprocess) {
@@ -787,8 +809,8 @@ class PugPlugin {
       }
     }
 
-    if (type === 'asset/source') {
-      AssetSource.setSource(resource, content);
+    if (isInline) {
+      AssetSource.setSource(resource, entryAsset, content);
       return null;
     }
 

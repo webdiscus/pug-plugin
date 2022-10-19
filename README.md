@@ -29,7 +29,6 @@ output JS and CSS filenames whose source files are specified in the Pug template
 - Pug file is the entry point for all scripts and styles.
 - Source scripts and styles should be specified directly in Pug.
 - All JS and CSS files will be extracted from their sources specified in Pug.
-- Inline CSS from processed styles using asset module `asset/source`.
 - No longer need to define scripts and styles in the Webpack entry.
 - No longer need to import styles in JavaScript to inject them into HTML via additional plugins.
 - Pug loader has built-in filters: `:escape` `:code` `:highlight` `:markdown`.
@@ -120,7 +119,7 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
    - [How to keep the source folder structure in output directory for all resources like fonts](#recipe-keep-all-resource-dirs)
    - [How to load JS and CSS for browser from `node_modules` in Pug](#recipe-default-script-style-from-module)
    - [How to import style from `node_module` in SCSS](#recipe-import-style-from-module)
-   - [How to inline CSS](#recipe-inline-css)
+   - [How to inline CSS in HTML](#recipe-inline-css)
    - [How to config `splitChunks`](#recipe-split-chunks)
    - [How to split multiple node modules under their own names](#recipe-split-many-modules)
    - [How to use HMR live reload](#recipe-hmr)
@@ -142,8 +141,9 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
   not need more additional plugin such as [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
 - support the `auto` publicPath
 - support the `pretty` formatting  of generated HTML
-- support the module types `asset/resource` `asset/inline` `asset/source` `asset`
+- support the module types `asset/resource` `asset/inline` `asset`
 - support the `base64 encoding` of binary images as data-URL in HTML and CSS
+- support the `inline CSS` in HTML
 - support the `inline SVG` in HTML
 - support the `inline SVG` as data-URL in CSS
   ```scss
@@ -1085,27 +1085,15 @@ Example how to import the style theme `tomorrow` of the [prismjs](https://github
 
 
 <a id="recipe-inline-css" name="recipe-inline-css" href="#recipe-inline-css"></a>
-### Inline CSS
+### Inline CSS in HTML
 
-To inline CSS extracted from style source use the asset module type `asset/source`.\
-If you load styles as file and inline as CSS in HTML then use a URL query for inlined style file, e.g. `?raw`.
+To inline CSS extracted from style source in HTML use the `?inline` URL query.
 
-Add to `module.rule` of Webpack config:
+_Webpack config rule for styles_
 ```js
 {
   test: /\.(css|sass|scss)$/,
-  oneOf: [
-    // inline styles in HTML
-    {
-      resourceQuery: /^\?raw/u,
-      type: 'asset/source',
-      use: ['css-loader', 'sass-loader'],
-    },
-    // load styles as file
-    {
-      use: ['css-loader', 'sass-loader'],
-    },
-  ],
+  use: ['css-loader', 'sass-loader'],
 },
 ```
 
@@ -1126,7 +1114,7 @@ html
     link(href=require('./main.scss') rel='stylesheet')
     
     // inline CSS from styles.scss
-    style=require('./styles.scss?raw')
+    style=require('./styles.scss?inline')
   body
     h1 Hello World!
 ```
@@ -1136,7 +1124,7 @@ _Generated HTML_
 <html>
   <head>
     <!-- load CSS as file -->
-    <link href="/assets/css/main.05e4dd86.css" rel="stylesheet">
+    <link href="assets/css/main.05e4dd86.css" rel="stylesheet">
 
     <!-- inline CSS from styles.scss -->
     <style>
@@ -1144,10 +1132,10 @@ _Generated HTML_
         color: crimson;
       }
     </style>
-    
   </head>
   <body>
     <h1>Hello Pug!</h1>
+  </body>
 </html>
 
 ```

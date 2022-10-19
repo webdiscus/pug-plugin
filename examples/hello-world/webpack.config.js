@@ -10,6 +10,7 @@ module.exports = (env, argv) => {
   return {
     mode: isProd ? 'production' : 'development',
     devtool: isProd ? 'source-map' : 'inline-source-map',
+    //devtool: 'source-map',
     stats: 'minimal',
 
     entry: {
@@ -87,24 +88,9 @@ module.exports = (env, argv) => {
         },
 
         // styles
-        // {
-        //   test: /\.(css|sass|scss)$/,
-        //   use: ['css-loader', 'sass-loader'],
-        // },
         {
           test: /\.(css|sass|scss)$/,
-          oneOf: [
-            // inline styles in HTML
-            {
-              resourceQuery: /^\?raw/u,
-              type: 'asset/source',
-              use: ['css-loader', 'sass-loader'],
-            },
-            // load styles as file
-            {
-              use: ['css-loader', 'sass-loader'],
-            },
-          ],
+          use: ['css-loader', 'sass-loader'],
         },
 
         // fonts

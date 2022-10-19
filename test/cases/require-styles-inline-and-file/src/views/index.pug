@@ -1,0 +1,8 @@
+html
+  head
+    //- load CSS as file
+    link(href=require('Styles/styles.css') rel='stylesheet')
+    //- inline CSS
+    style=require('Styles/inline-styles.css?raw')
+  body
+    h1 Hello World!

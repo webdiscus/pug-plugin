@@ -319,9 +319,27 @@ describe('require assets', () => {
   // test('require css in pug and resolve in css the url(image), method html', (done) => {
   //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
   // });
+});
 
-  test('require inline styles in pug', (done) => {
+describe('inline', () => {
+  test('require inline style', (done) => {
     compareFileListAndContent(PATHS, 'require-styles-inline', done);
+  });
+
+  test('require inline style with source-map', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-inline-source-map', done);
+  });
+
+  test('require inline style with inline-source-map', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-inline-source-map-inline', done);
+  });
+
+  test('require inline style and style as file', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-inline-and-file', done);
+  });
+
+  test('resolve URL', (done) => {
+    compareFileListAndContent(PATHS, 'require-styles-inline-resolve-url', done);
   });
 });
 

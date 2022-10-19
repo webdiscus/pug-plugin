@@ -1,15 +1,35 @@
 # Change log
 
-## 4.4.0 (2022-10-17)
-- feat: add support the `asset/source` e.g. for inline CSS/SCSS in Pug:\
-  _pug template_
+## 4.5.0 (2022-10-20)
+- feat: add resolving url() in inlined CSS using the `?inline` query\
+  **USAGE CHANGES since v4.4.0**\
+  _Pug template_
   ```pug
-  style=require('./styles.scss?raw')
+  //- to inline CSS use exact the `?inline` query
+  style=require('./styles.scss?inline')
   ```
-  _webpack config_
+  _Webpack config_
   ```js
   {
-    resourceQuery: /raw/,
+    // resourceQuery: /inline/, // <= the `?inline` query is already hard coded in plugin
+    // type: 'asset/source', // <= to resolve url() in inlined CSS don't use this module type
+    test: /\.(css|sass|scss)$/,
+    use: ['css-loader', 'sass-loader'],
+  }
+  ``` 
+- fix: source map in inlined CSS
+- docs: update readme
+
+## 4.4.0 (2022-10-17)
+- feat: add support the `asset/source` module type to inline CSS/SCSS w/o url():\
+  _Pug template_
+  ```pug
+  style=require('./styles.scss?inline')
+  ```
+  _Webpack config_
+  ```js
+  {
+    resourceQuery: /inline/,
     type: 'asset/source',
     use: ['css-loader', 'sass-loader'],
   }

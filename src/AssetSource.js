@@ -10,42 +10,27 @@ class AssetSource {
   }
 
   /**
-   *
    * @param {string} sourceFile
-   * @param {string} issuerAssetFile
    */
-  add({ sourceFile, issuerAssetFile }) {
-    let item = this.data.get(sourceFile);
-    if (!item) {
-      item = {
-        issuers: new Set(),
-        source: undefined,
-      };
+  add(sourceFile) {
+    if (!this.data.has(sourceFile)) {
+      this.data.set(sourceFile, {
+        issuers: new Map(),
+      });
     }
-
-    item.issuers.add(issuerAssetFile);
-    this.data.set(sourceFile, item);
   }
 
   /**
-   * @param {string} request
+   * @param {string} sourceFile
+   * @param {string} entryAsset
    * @param {string} source
    */
-  setSource(request, source) {
-    const item = this.data.get(request);
+  setSource(sourceFile, entryAsset, source) {
+    const item = this.data.get(sourceFile);
     if (!item) return;
 
-    item.source = source;
-    this.data.set(request, item);
-  }
-
-  /**
-   *
-   * @param request
-   * @return {any}
-   */
-  get(request) {
-    return this.data.get(request);
+    item.issuers.set(entryAsset, source);
+    this.data.set(sourceFile, item);
   }
 
   /**
@@ -57,9 +42,7 @@ class AssetSource {
     const RawSource = compilation.compiler.webpack.sources.RawSource;
 
     for (let [sourceFile, item] of this.data) {
-      const { issuers, source } = item;
-
-      for (const assetFile of issuers) {
+      for (let [assetFile, source] of item.issuers) {
         const asset = compilation.assets[assetFile];
         if (!asset) continue;
 
