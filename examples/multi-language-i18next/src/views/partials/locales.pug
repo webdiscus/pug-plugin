@@ -1,0 +1,22 @@
+-
+  //- variable from URL query
+  lang = lang || 'en'
+
+  const i18next = require('i18next')
+
+  //- translate function
+  const t = (key) => i18next.t(key)
+
+  //- initialize i18next
+  i18next.init({
+    lng: 'en',
+    fallbackLng: 'en',
+    supportedLngs: ['de', 'en'],
+    resources: {
+      en: { translation: require('Locales/en_US.json') },
+      de: { translation: require('Locales/de_DE.json') },
+    },
+  });
+
+  //- set language
+  i18next.changeLanguage(lang)

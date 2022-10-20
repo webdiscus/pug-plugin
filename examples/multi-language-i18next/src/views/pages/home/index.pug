@@ -3,10 +3,7 @@ extends Views/layouts/default.pug
 //- set variables used in layout
 block variables
   //- relative route to current page
-  - route = 'index.html'
-  - lang = lang || 'en'
-  - setLanguage(lang)
-
+  - const route = 'index.html'
   - const title = t`Home`
 
 //- add page specifically styles
@@ -15,7 +12,7 @@ append style
 
 //- add page specifically scripts
 append script
-  script(src=require('./main.js') defer)
+  script(src=require('./main.js') defer='')
 
 block content
   section

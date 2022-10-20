@@ -3,10 +3,7 @@ extends Views/layouts/default.pug
 //- set variables used in layout
 block variables
   //- relative route to current page
-  - route = 'about.html'
-  - lang = lang || 'en'
-  - setLanguage(lang)
-
+  - const route = 'about.html'
   - const title = t`About`
 
 //- add page specifically styles

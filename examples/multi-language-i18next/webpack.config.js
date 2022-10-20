@@ -1,28 +1,7 @@
 // GitHub Page: https://webdiscus.github.io/pug-plugin/multi-language-i18next/
 
-const fs = require('fs');
 const path = require('path');
 const PugPlugin = require('pug-plugin');
-const i18next = require('i18next');
-
-// translates
-const enLangData = fs.readFileSync(path.join(__dirname, 'src/locales/en_US.json'), {
-  encoding: 'utf-8',
-});
-const deLangData = fs.readFileSync(path.join(__dirname, 'src/locales/de_DE.json'), {
-  encoding: 'utf-8',
-});
-
-// initialize i18next
-i18next.init({
-  lng: 'en',
-  fallbackLng: 'en',
-  supportedLngs: ['de', 'en'],
-  resources: {
-    en: { translation: JSON.parse(enLangData) },
-    de: { translation: JSON.parse(deLangData) },
-  },
-});
 
 // relative public paths to locale pages
 const langPath = {
@@ -64,6 +43,7 @@ module.exports = (env, argv) => {
         Views: path.join(__dirname, 'src/views/'),
         Styles: path.join(__dirname, 'src/assets/styles/'),
         Scripts: path.join(__dirname, 'src/assets/scripts/'),
+        Locales: path.join(__dirname, 'src/locales/'),
       },
     },
 
@@ -85,8 +65,6 @@ module.exports = (env, argv) => {
           loader: PugPlugin.loader,
           options: {
             data: {
-              t: (key) => i18next.t(key), // translate function
-              setLanguage: (lang) => i18next.changeLanguage(lang), // set language
               langPath,
             },
           },
