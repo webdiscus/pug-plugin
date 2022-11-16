@@ -235,8 +235,12 @@ describe('extract css', () => {
     compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
   });
 
-  test('@import url()', (done) => {
+  test('@import url() in SCSS', (done) => {
     compareFileListAndContent(PATHS, 'extract-css-import-url', done);
+  });
+
+  test('@import url() in CSS', (done) => {
+    compareFileListAndContent(PATHS, 'import-url-css', done);
   });
 });
 

@@ -120,6 +120,7 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
    - [How to load JS and CSS for browser from `node_modules` in Pug](#recipe-default-script-style-from-module)
    - [How to import style from `node_module` in SCSS](#recipe-import-style-from-module)
    - [How to inline CSS in HTML](#recipe-inline-css)
+   - [How to use @import url() in CSS](#recipe-import-url-in-css)
    - [How to config `splitChunks`](#recipe-split-chunks)
    - [How to split multiple node modules under their own names](#recipe-split-many-modules)
    - [How to use HMR live reload](#recipe-hmr)
@@ -1139,6 +1140,43 @@ _Generated HTML_
 </html>
 
 ```
+
+<a id="recipe-import-url-in-css" name="recipe-import-url-in-css" href="#recipe-import-url-in-css"></a>
+### How to use @import url() in CSS
+
+> **Warning**
+> 
+> Don't use `@import in CSS`. It's very `bad practice`.
+>
+
+Bad example:\
+_main.css_
+```css
+@import 'path/to/style.css';
+```
+
+Pug plugin not support handling of `@import url` in CSS. Imported url will be passed 1:1 into resulting CSS.
+**The problem:** defaults, `css-loader` handles @import at-rule, which causes an issue in the Pug plugin.
+To avoid this problem add the `import: false` option to `css-loader` to disable handling of @import at-rule in CSS:
+
+```js
+{
+  test: /.(css)$/i,
+  use: [
+    {
+      loader: 'css-loader',
+      options: {
+        import: false, // pass @import url as is
+      },
+    },
+  ],
+},
+```
+
+> **Note**
+> 
+> Because imported in CSS files are not handled, these files need to be manually copied to a `dist` folder using the `copy-webpack-plugin`.
+
 
 <a id="recipe-split-chunks" name="recipe-split-chunks" href="#recipe-split-chunks"></a>
 ### Configuration of `splitChunks`
