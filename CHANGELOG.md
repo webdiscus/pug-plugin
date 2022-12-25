@@ -1,5 +1,12 @@
 # Change log
 
+## 4.5.1 (2022-12-26)
+- fix: generate correct script asset filename by HMR after changes, sometimes filenames are mixed up between files
+- fix: passing `data` in loader option when the `self` loader option is true in compile method
+- refactor: optimize code
+- docs: update readme
+- chore: update github workflows
+
 ## 4.5.0 (2022-10-20)
 - feat: add resolving url() in inlined CSS using the `?inline` query\
   **USAGE CHANGES since v4.4.0**\

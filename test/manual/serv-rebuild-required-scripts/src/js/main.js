@@ -1,1 +1,1 @@
-console.log('\nCommon main script');
+console.log('\nCommon main script: 123');

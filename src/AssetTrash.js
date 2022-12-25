@@ -1,19 +1,17 @@
 /**
  * AssetTrash singleton.
  * Accumulate and remove junk assets from compilation.
- *
- * @singleton
  */
 class AssetTrash {
-  trash = [];
-  commentRegexp = /^\/\*\!.+\.LICENSE\.txt\s*\*\/\s*/;
-  commentFileSuffix = '.LICENSE.txt';
+  static trash = [];
+  static commentRegexp = /^\/\*\!.+\.LICENSE\.txt\s*\*\/\s*/;
+  static commentFileSuffix = '.LICENSE.txt';
 
   /**
    * Reset settings.
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
-  reset() {
+  static reset() {
     this.trash = [];
   }
 
@@ -22,7 +20,7 @@ class AssetTrash {
    *
    * @param {string} file
    */
-  add(file) {
+  static add(file) {
     this.trash.push(file);
   }
 
@@ -31,7 +29,7 @@ class AssetTrash {
    *
    * @param {Compilation} compilation The instance of the webpack compilation.
    */
-  clearCompilation(compilation) {
+  static clearCompilation(compilation) {
     this.trash.forEach((file) => {
       compilation.deleteAsset(file);
     });
@@ -41,7 +39,7 @@ class AssetTrash {
   /**
    * @param {Compilation} compilation The instance of the webpack compilation.
    */
-  removeComments(compilation) {
+  static removeComments(compilation) {
     if (compilation.assets) {
       const { commentRegexp, commentFileSuffix: suffix } = this;
       const { RawSource } = compilation.compiler.webpack.sources;
@@ -58,4 +56,4 @@ class AssetTrash {
   }
 }
 
-module.exports = new AssetTrash();
+module.exports = AssetTrash;

@@ -66,13 +66,13 @@ module.exports = {
 Add source scripts and styles directly to Pug using `require()`:
 ```pug
 link(href=require('./styles.scss') rel='stylesheet')
-script(src=require('./main.js'))
+script(src=require('./main.js') defer='defer')
 ```
 
 Generated HTML contains hashed CSS and JS output filenames:
 ```html
 <link href="/assets/css/styles.05e4dd86.css" rel="stylesheet">
-<script src="/assets/js/main.f4b855d8.js"></script>
+<script src="/assets/js/main.f4b855d8.js" defer="defer"></script>
 ```
 
 Just one Pug plugin replaces the functionality of many plugins and loaders used with Pug:
@@ -179,7 +179,7 @@ module.exports = {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
     // output filename of JS files
-    filename: 'assets/js/[name].[contenthash:8].js'
+    filename: 'assets/js/[name].[contenthash:8].js',
   },
 
   entry: {
@@ -187,8 +187,8 @@ module.exports = {
     // all scripts and styles must be specified in Pug
 
     // define Pug files in entry:
-    index: './src/views/index.pug',      // output index.html
-    about: './src/views/about/index.pug' // output about.html
+    index: './src/views/index.pug',       // output index.html
+    about: './src/views/about/index.pug', // output about.html
     // ...
   },
 
@@ -198,9 +198,9 @@ module.exports = {
       pretty: true, // formatting HTML, should be used in development mode only
       extractCss: {
         // output filename of CSS files
-        filename: 'assets/css/[name].[contenthash:8].css'
+        filename: 'assets/css/[name].[contenthash:8].css',
       },
-    })
+    }),
   ],
 
   module: {
@@ -211,7 +211,7 @@ module.exports = {
       },
       {
         test: /\.(css|sass|scss)$/,
-        use: ['css-loader', 'sass-loader']
+        use: ['css-loader', 'sass-loader'],
       },
     ],
   },
@@ -1327,32 +1327,56 @@ dist/js/script.3010da09.js
 <a id="recipe-hmr" name="recipe-hmr" href="#recipe-hmr"></a>
 ### HMR live reload
 
-To enable live reload by changes any file add in the Webpack config following options:
+To enable live reload by changes any file add in the Webpack config the `devServer` option:
 ```js
-devServer: {
-  static: {
-    directory: path.join(__dirname, 'dist'),
-  },
-  watchFiles: {
-    paths: ['src/**/*.*'], 
-    options: {
-      usePolling: true,
+module.exports = {
+  // enable HMR with live reload
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    watchFiles: {
+      paths: ['src/**/*.*'],
+      options: {
+        usePolling: true,
+      },
     },
   },
-},
+};
 ```
 
 > **Note**
 >
 > Live reload works only if in Pug used a JS file.
-> If your Pug template has not a JS, then create one empty JS file and add it in Pug:
+> If your Pug template has not a JS, then create one empty JS file, e.g. `hmr.js` and add it in Pug for `development` mode only:
 > ```js
-> script(src=require('./dummy.js'))
+> if isDev
+>   script(src=require('./hmr.js'))
 > ```
-> Don't forget disable this dummy script for production build:
-> ```js
-> //- script(src=require('./dummy.js'))
-> ```
+> 
+> Where `isDev` is the passed variable from Webpack config.
+>
+To pass global variables into all Pug files, add a variable in the `data` option of `PugPlugin.loader`:
+```js
+const isDev = process.env.NODE_ENV === 'development';
+
+module.exports = {
+  mode: isDev ? 'development' : 'production',
+  module: {
+    rules: [
+      {
+        test: /\.pug$/,
+        loader: PugPlugin.loader,
+        options: {
+          data: {
+            isDev, // pass global variable into all Pug files
+          }
+        },
+      },
+    ],
+  },
+};
+```
 
 ---
 

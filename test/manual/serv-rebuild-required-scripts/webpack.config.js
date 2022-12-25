@@ -20,6 +20,7 @@ module.exports = {
   entry: {
     index: 'src/pages/index.pug',
     'pages/home': 'src/pages/home/index.pug',
+    'pages/news': 'src/pages/news/index.pug',
     'pages/about': 'src/pages/about/index.pug',
   },
 

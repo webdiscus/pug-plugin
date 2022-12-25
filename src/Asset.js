@@ -1,9 +1,6 @@
 const path = require('path');
 const { isWin, pathToPosix } = require('./Utils');
 
-/**
- * @singleton
- */
 class Asset {
   /**
    * The cache of resolved output asset filenames.
@@ -12,15 +9,15 @@ class Asset {
    *
    * @type {Map<string, string>}
    */
-  files = new Map();
+  static files = new Map();
 
   /**
    * Unique last index for each file with same name.
    * @type {Object<file: string, index: number>}
    */
-  fileIndex = {};
+  static fileIndex = {};
 
-  init({ outputPath, publicPath }) {
+  static init({ outputPath, publicPath }) {
     if (typeof publicPath === 'function') {
       publicPath = publicPath.call(null, {});
     }
@@ -46,7 +43,7 @@ class Asset {
    * Reset settings.
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
-  reset() {
+  static reset() {
     this.fileIndex = {};
     this.files.clear();
   }
@@ -57,7 +54,7 @@ class Asset {
    * @param issuer
    * @return {string|*|string}
    */
-  getPublicPath(issuer) {
+  static getPublicPath(issuer) {
     let isAutoRelative = false;
     if (issuer) {
       const [issuerFile] = issuer.split('?', 1);
@@ -84,7 +81,7 @@ class Asset {
    * @param {string} issuer
    * @return {string}
    */
-  getOutputFile(assetFile, issuer) {
+  static getOutputFile(assetFile, issuer) {
     let isAutoRelative = false;
     if (issuer) {
       const [issuerFile] = issuer.split('?', 1);
@@ -113,7 +110,7 @@ class Asset {
    * @param {string} sourceFile
    * @param {string} assetFile
    */
-  add(sourceFile, assetFile) {
+  static add(sourceFile, assetFile) {
     this.files.set(sourceFile, assetFile);
   }
 
@@ -123,7 +120,7 @@ class Asset {
    * @param {string} sourceFile The source file.
    * @return {string|null} The asset file.
    */
-  findAssetFile(sourceFile) {
+  static findAssetFile(sourceFile) {
     return this.files.get(sourceFile);
   }
 
@@ -132,7 +129,7 @@ class Asset {
    * @param {string} assetFile
    * @return {{isCached: boolean, filename: string}}
    */
-  getUniqueFilename(sourceFile, assetFile) {
+  static getUniqueFilename(sourceFile, assetFile) {
     if (this.files.has(sourceFile)) {
       return {
         isCached: true,
@@ -170,7 +167,7 @@ class Asset {
    *
    * @return {boolean}
    */
-  isStyle(module) {
+  static isStyle(module) {
     if (module.__isStyle == null) {
       module.__isStyle = module.loaders.find((item) => item.loader.indexOf('css-loader') > 0) != null;
     }
@@ -179,4 +176,4 @@ class Asset {
   }
 }
 
-module.exports = new Asset();
+module.exports = Asset;

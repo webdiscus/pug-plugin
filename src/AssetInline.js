@@ -40,12 +40,9 @@ const parseAttributes = (string, exclude = []) => {
   return attrs;
 };
 
-/**
- * @singleton
- */
 class AssetInline {
-  data = new Map();
-  inlineSvgIssueAssets = new Set();
+  static data = new Map();
+  static inlineSvgIssueAssets = new Set();
 
   /**
    * Whether the request is data-URL.
@@ -53,7 +50,7 @@ class AssetInline {
    * @param {string} request The request of asset.
    * @returns {boolean}
    */
-  isDataUrl(request) {
+  static isDataUrl(request) {
     return request.startsWith('data:');
   }
 
@@ -62,7 +59,7 @@ class AssetInline {
    * @param {string} issuer
    * @returns {boolean}
    */
-  isInlineSvg(sourceFile, issuer) {
+  static isInlineSvg(sourceFile, issuer) {
     const item = this.data.get(sourceFile);
     return item != null && item.cache != null && item.inlineSvg && item.inlineSvg.issuers.has(issuer);
   }
@@ -72,7 +69,7 @@ class AssetInline {
    * @param {string} ext
    * @returns {boolean}
    */
-  hasExt(request, ext) {
+  static hasExt(request, ext) {
     const [file] = request.split('?', 1);
     return file.endsWith(ext);
   }
@@ -82,7 +79,7 @@ class AssetInline {
    * @param {string} issuer
    * @returns {string|null}
    */
-  getDataUrl(sourceFile, issuer) {
+  static getDataUrl(sourceFile, issuer) {
     if (isWin) sourceFile = path.win32.normalize(sourceFile);
     const item = this.data.get(sourceFile);
 
@@ -93,7 +90,7 @@ class AssetInline {
    * @param {string} sourceFile The source filename of asset.
    * @param {string} issuer The output filename of the issuer.
    */
-  add(sourceFile, issuer) {
+  static add(sourceFile, issuer) {
     if (!this.data.has(sourceFile)) {
       this.data.set(sourceFile, {
         cache: null,
@@ -126,7 +123,7 @@ class AssetInline {
    * @param {CodeGenerationResults|Object} codeGenerationResults Code generation results of resource modules.
    * @param {string} issuerAssetFile The output filename of issuer.
    */
-  render({ module, chunk, codeGenerationResults, issuerAssetFile }) {
+  static render({ module, chunk, codeGenerationResults, issuerAssetFile }) {
     const sourceFile = module.resource;
     const item = this.data.get(sourceFile);
 
@@ -156,7 +153,7 @@ class AssetInline {
    * @param {string} svg The SVG content.
    * @return {{dataUrl: string, svgAttrs: Object<key:string, value:string>, innerSVG: string}}
    */
-  parseSvg(svg) {
+  static parseSvg(svg) {
     const svgOpenTag = '<svg';
     const svgCloseTag = '</svg>';
     const svgOpenTagStartPos = svg.indexOf(svgOpenTag);
@@ -209,7 +206,7 @@ class AssetInline {
    *
    * @param {Compilation} compilation The instance of the webpack compilation.
    */
-  insertInlineSvg(compilation) {
+  static insertInlineSvg(compilation) {
     if (this.inlineSvgIssueAssets.size === 0) return;
 
     const RawSource = compilation.compiler.webpack.sources.RawSource;
@@ -273,4 +270,4 @@ class AssetInline {
   }
 }
 
-module.exports = new AssetInline();
+module.exports = AssetInline;

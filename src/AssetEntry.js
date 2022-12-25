@@ -1,47 +1,34 @@
 const path = require('path');
 const { isFunction } = require('./Utils');
 
-/**
- * @singleton
- */
 class AssetEntry {
   /** @type {Map<string, AssetEntryOptions>} */
-  entryMap = new Map();
-  compilationEntryNames = new Set();
+  static entryMap = new Map();
+  static compilationEntryNames = new Set();
 
-  compilation = null;
-  EntryPlugin = null;
-
-  counter = 0;
+  static compilation = null;
+  static EntryPlugin = null;
 
   /**
    * @param {string} outputPath The Webpack output path.
    */
-  setWebpackOutputPath(outputPath) {
+  static setWebpackOutputPath(outputPath) {
     this.webpackOutputPath = outputPath;
   }
 
   /**
    * @param {Compilation} compilation The instance of the webpack compilation.
    */
-  setCompilation(compilation) {
+  static setCompilation(compilation) {
     this.compilation = compilation;
     this.EntryPlugin = compilation.compiler.webpack.EntryPlugin;
-  }
-
-  /**
-   * Clear caches.
-   * This method is called only once, when the plugin is applied.
-   */
-  clear() {
-    this.entryMap.clear();
   }
 
   /**
    * @param {string} name The entry name.
    * @returns {AssetEntryOptions}
    */
-  get(name) {
+  static get(name) {
     return this.entryMap.get(name);
   }
 
@@ -49,7 +36,7 @@ class AssetEntry {
    * @param {{}} entry The webpack entry object.
    * @param {AssetEntryOptions} assetEntryOptions
    */
-  add(entry, assetEntryOptions) {
+  static add(entry, assetEntryOptions) {
     const { name, outputPath, filenameTemplate } = assetEntryOptions;
     const relativeOutputPath = path.isAbsolute(outputPath)
       ? path.relative(this.webpackOutputPath, outputPath)
@@ -83,9 +70,9 @@ class AssetEntry {
    * @param {string} filenameTemplate
    * @param {string} context
    * @param {string} issuer
-   * @return {boolean}
+   * @return {boolean} Return true if new file was added, if a file exists then return false.
    */
-  addToCompilation({ name, importFile, filenameTemplate, context, issuer }) {
+  static addToCompilation({ name, importFile, filenameTemplate, context, issuer }) {
     // skip duplicate entries
     if (this.inEntry(name, importFile)) return false;
 
@@ -136,7 +123,7 @@ class AssetEntry {
    * @param {string} file The source file.
    * @return {boolean}
    */
-  isNotUnique(name, file) {
+  static isNotUnique(name, file) {
     const entry = this.entryMap.get(name);
     return entry && entry.importFile !== file;
   }
@@ -148,16 +135,24 @@ class AssetEntry {
    * @param {string} file The source file.
    * @return {boolean}
    */
-  inEntry(name, file) {
+  static inEntry(name, file) {
     const entry = this.entryMap.get(name);
     return entry && entry.importFile === file;
+  }
+
+  /**
+   * Clear caches.
+   * This method is called only once, when the plugin is applied.
+   */
+  static clear() {
+    this.entryMap.clear();
   }
 
   /**
    * Remove entries added not via webpack entry.
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
-  reset() {
+  static reset() {
     for (const entryName of this.compilationEntryNames) {
       this.entryMap.delete(entryName);
     }
@@ -165,4 +160,4 @@ class AssetEntry {
   }
 }
 
-module.exports = new AssetEntry();
+module.exports = AssetEntry;

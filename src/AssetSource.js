@@ -1,18 +1,18 @@
 class AssetSource {
-  data = new Map();
+  static data = new Map();
 
   /**
    * @param {string} file
    * @return {boolean}
    */
-  isInline(file) {
+  static isInline(file) {
     return this.data.has(file);
   }
 
   /**
    * @param {string} sourceFile
    */
-  add(sourceFile) {
+  static add(sourceFile) {
     if (!this.data.has(sourceFile)) {
       this.data.set(sourceFile, {
         issuers: new Map(),
@@ -25,7 +25,7 @@ class AssetSource {
    * @param {string} entryAsset
    * @param {string} source
    */
-  setSource(sourceFile, entryAsset, source) {
+  static setSource(sourceFile, entryAsset, source) {
     const item = this.data.get(sourceFile);
     if (!item) return;
 
@@ -36,7 +36,7 @@ class AssetSource {
   /**
    * @param {Compilation} compilation The instance of the webpack compilation.
    */
-  inlineSource(compilation) {
+  static inlineSource(compilation) {
     if (this.data.size === 0) return;
 
     const RawSource = compilation.compiler.webpack.sources.RawSource;
@@ -53,4 +53,4 @@ class AssetSource {
   }
 }
 
-module.exports = new AssetSource();
+module.exports = AssetSource;

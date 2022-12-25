@@ -114,8 +114,6 @@ const { optionModulesException, executeTemplateFunctionException, postprocessExc
  */
 
 const verboseList = new Set();
-let startTime = 0;
-let profilerTime = 0;
 
 /** @type RawSource This objects will be assigned by plugin initialisation. */
 let RawSource, HotUpdateChunk;
@@ -226,9 +224,6 @@ class PugPlugin {
    */
   apply(compiler) {
     if (!this.enabled) return;
-
-    // TODO: disable before commit, because works in node.js >= 16 only
-    // startTime = performance.now();
 
     const { webpack, options: webpackOptions } = compiler;
 
@@ -389,8 +384,9 @@ class PugPlugin {
 
       const scriptFile = AssetScript.resolveFile(request);
       if (scriptFile) {
+        const issuers = issuerCache.get(issuer);
         const name = AssetScript.getUniqueName(scriptFile);
-        const res = AssetEntry.addToCompilation({
+        const isAdded = AssetEntry.addToCompilation({
           name,
           importFile: scriptFile,
           filenameTemplate: this.webpackOutputFilename,
@@ -398,14 +394,12 @@ class PugPlugin {
           issuer,
         });
 
-        const issuers = issuerCache.get(issuer);
-        scriptStore.setName(name, scriptFile, issuers);
+        scriptStore.setName(scriptFile, issuers, name);
 
-        return res ? undefined : false;
+        return isAdded ? undefined : false;
       }
     }
 
-    //console.log('\n *** beforeResolve:\n', request, '\n', issuer, '\n', resolveData);
     if (resolveData.dependencyType === 'url') {
       UrlDependency.resolve(resolveData);
     }
@@ -868,10 +862,6 @@ class PugPlugin {
     AssetScript.reset();
     AssetTrash.reset();
     Resolver.reset();
-
-    // [profiling]
-    // profilerTime += performance.now() - startTime;
-    // console.log('\n === pug-plugin time :\n', profilerTime);
   }
 }
 

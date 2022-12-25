@@ -4,17 +4,14 @@ const AssetEntry = require('./AssetEntry');
 const { scriptStore } = require('./Modules');
 const { isWin, pathToPosix } = require('./Utils');
 
-/**
- * @singleton
- */
 class AssetScript {
-  index = {};
+  static index = {};
 
   /**
    * Clear cache.
    * This method is called only once, when the plugin is applied.
    */
-  clear() {
+  static clear() {
     this.index = {};
     scriptStore.clear();
   }
@@ -23,7 +20,7 @@ class AssetScript {
    * Reset settings.
    * This method is called before each compilation after changes by `webpack serv/watch`.
    */
-  reset() {
+  static reset() {
     this.index = {};
   }
 
@@ -35,7 +32,7 @@ class AssetScript {
    *
    * @return {boolean}
    */
-  isScript(module) {
+  static isScript(module) {
     if (module.__isScript == null) {
       let [scriptFile] = module.resource.split('?', 1);
       if (isWin) scriptFile = pathToPosix(scriptFile);
@@ -49,7 +46,7 @@ class AssetScript {
    * @param {string} file The source file of script.
    * @return {string } Return unique assetFile
    */
-  getUniqueName(file) {
+  static getUniqueName(file) {
     const { name } = path.parse(file);
     let uniqueName = name;
 
@@ -68,7 +65,7 @@ class AssetScript {
    * @param {string} issuer The source file of issuer of the required file.
    * @param {string} filename The asset filename of issuer.
    */
-  setIssuerFilename(issuer, filename) {
+  static setIssuerFilename(issuer, filename) {
     scriptStore.setIssuerFilename(issuer, filename);
   }
 
@@ -78,7 +75,7 @@ class AssetScript {
    * @param {string} request The asset request.
    * @return {string|null} Return null if the request is not a script required in Pug.
    */
-  resolveFile(request) {
+  static resolveFile(request) {
     const [resource] = request.split('?', 1);
     return scriptStore.has(resource) ? resource : null;
   }
@@ -89,13 +86,23 @@ class AssetScript {
    *
    * @param {Compilation} compilation The instance of the webpack compilation.
    */
-  replaceSourceFilesInCompilation(compilation) {
-    const RawSource = compilation.compiler.webpack.sources.RawSource;
+  static replaceSourceFilesInCompilation(compilation) {
+    const {
+      assets,
+      assetsInfo,
+      chunks,
+      namedChunkGroups,
+      compiler: {
+        webpack: {
+          sources: { RawSource },
+        },
+      },
+    } = compilation;
     const usedScripts = new Map();
     const realSplitFiles = new Set();
     const allSplitFiles = new Set();
 
-    for (let chunk of compilation.chunks) {
+    for (let chunk of chunks) {
       if (chunk.chunkReason && chunk.chunkReason.startsWith('split chunk')) {
         allSplitFiles.add(...chunk.files);
       }
@@ -105,7 +112,7 @@ class AssetScript {
     for (let asset of scriptStore.getAll()) {
       const issuerFile = asset.issuer.filename;
 
-      if (!compilation.assets.hasOwnProperty(issuerFile)) {
+      if (!assets.hasOwnProperty(issuerFile)) {
         // let's show an original error
         continue;
       }
@@ -116,18 +123,17 @@ class AssetScript {
       }
 
       const { name, file: sourceFile } = asset;
-      const chunkGroup = compilation.namedChunkGroups.get(name);
+      const chunkGroup = namedChunkGroups.get(name);
+
       if (!chunkGroup) {
         // prevent error when in HMR mode after removing a script in pug
         continue;
       }
 
-      const content = compilation.assets[issuerFile].source();
+      const chunkFiles = chunkGroup.getFiles().filter((file) => assetsInfo.get(file).hotModuleReplacement !== true);
+      const content = assets[issuerFile].source();
       let newContent = content;
-      let chunkFiles = chunkGroup.getFiles();
       let scriptTags = '';
-
-      chunkFiles = chunkFiles.filter((file) => compilation.assetsInfo.get(file).hotModuleReplacement !== true);
 
       // replace source filename with asset filename
       if (chunkFiles.length === 1) {
@@ -142,6 +148,7 @@ class AssetScript {
         let srcEndPos = srcStartPos + sourceFile.length;
         let tagStartPos = srcStartPos;
         let tagEndPos = srcEndPos;
+
         while (tagStartPos >= 0 && content.charAt(--tagStartPos) !== '<') {}
         tagEndPos = content.indexOf('</script>', tagEndPos) + 9;
 
@@ -155,6 +162,7 @@ class AssetScript {
           // happens when used optimisation.splitChunks
           if (!chunkScripts.has(chunkFile)) {
             const assetFile = Asset.getOutputFile(chunkFile, issuerFile);
+
             scriptTags += tmplScriptStart + assetFile + tmplScriptEnd;
             chunkScripts.add(chunkFile);
             realSplitFiles.add(chunkFile);
@@ -167,7 +175,8 @@ class AssetScript {
         }
       }
 
-      compilation.assets[issuerFile] = new RawSource(newContent);
+      // update compilation asset content
+      assets[issuerFile] = new RawSource(newContent);
     }
 
     // remove generated unused split files
@@ -179,4 +188,4 @@ class AssetScript {
   }
 }
 
-module.exports = new AssetScript();
+module.exports = AssetScript;

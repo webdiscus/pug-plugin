@@ -3,20 +3,17 @@ const { yellow, cyan, black } = require('ansis/colors');
 const { pluginName } = require('./config');
 const Resolver = require('./Resolver');
 
-/**
- * @singleton
- */
 class UrlDependency {
-  fs = null;
-  compilation = null;
-  maxDependencyDeep = 256;
-  dependencyDeep = 0;
+  static fs = null;
+  static compilation = null;
+  static maxDependencyDeep = 256;
+  static dependencyDeep = 0;
 
   /**
    * @param {fs: FileSystem} fs
    * @param {compilation: Compilation} compilation
    */
-  init({ fs, moduleGraph }) {
+  static init({ fs, moduleGraph }) {
     this.fs = fs;
     this.moduleGraph = moduleGraph;
   }
@@ -26,7 +23,7 @@ class UrlDependency {
    *
    * @param {{}} resolveData The callback parameter for the hooks beforeResolve of NormalModuleFactory.
    */
-  resolve(resolveData) {
+  static resolve(resolveData) {
     const fs = this.fs;
     const [resource, query] = resolveData.request.split('?');
 
@@ -55,7 +52,7 @@ class UrlDependency {
    * @param {string} resource The file to be resolved.
    * @return {null|{file: string, context: string}}
    */
-  resolveInSnapshot(snapshot, resource) {
+  static resolveInSnapshot(snapshot, resource) {
     const fs = this.fs;
     const cache = new Set();
     let files = [];
@@ -110,4 +107,4 @@ class UrlDependency {
   }
 }
 
-module.exports = new UrlDependency();
+module.exports = UrlDependency;

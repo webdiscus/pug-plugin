@@ -4,14 +4,11 @@ const Resolver = require('./Resolver');
 // supports for responsive-loader
 const ResponsiveLoader = require('./extras/ResponsiveLoader');
 
-/**
- * @singleton
- */
 class AssetResource {
   /**
    * @param {Object} compiler The webpack compiler object.
    */
-  init(compiler) {
+  static init(compiler) {
     // initialize responsible-loader module
     ResponsiveLoader.init(compiler);
   }
@@ -20,7 +17,7 @@ class AssetResource {
    * @param {Object} module The Webpack module.
    * @param {string} issuer The issuer of module resource.
    */
-  render(module, issuer) {
+  static render(module, issuer) {
     const { buildInfo, resource } = module;
     const assetFile = buildInfo.filename;
     // try to get asset file processed via responsive-loader
@@ -42,4 +39,4 @@ class AssetResource {
   }
 }
 
-module.exports = new AssetResource();
+module.exports = AssetResource;

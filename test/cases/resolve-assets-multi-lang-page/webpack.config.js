@@ -6,6 +6,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
+    filename: '[name].[contenthash:8].js',
   },
 
   resolve: {

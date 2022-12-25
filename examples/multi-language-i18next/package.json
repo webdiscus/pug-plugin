@@ -13,7 +13,7 @@
     "http-server": "^14.1.1",
     "i18next": "^21.10.0",
     "prismjs": "^1.29.0",
-    "pug-plugin": "^4.3.3",
+    "pug-plugin": "^4.5.1",
     "sass": "^1.55.0",
     "sass-loader": "^13.1.0",
     "webpack": "^5.74.0",
