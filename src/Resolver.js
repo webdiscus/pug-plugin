@@ -84,13 +84,13 @@ class Resolver {
   /**
    * Set the current source file, which is the issuer for assets when compiling the source code.
    *
-   * @param {string} file The issuer filename, w/o query.
-   * @param {string} request The issuer request.
+   * @param {string} issuer The issuer request.
    * @param {string} entryAsset The current entry point.
    */
-  static setIssuer(file, request, entryAsset) {
+  static setIssuer(issuer, entryAsset) {
+    const [file] = issuer.split('?', 1);
     this.issuerFile = file;
-    this.issuerRequest = request;
+    this.issuerRequest = issuer;
     this.context = path.dirname(file);
     this.entryAsset = entryAsset;
   }
@@ -293,7 +293,7 @@ class Resolver {
 
     if (sourceFile != null) {
       const isInline = AssetSource.isInline(issuerRequest);
-      const assetFile = this.resolveAsset(sourceFile, issuerFile, isInline ? entryAsset : null);
+      const assetFile = this.resolveAsset(sourceFile, issuerRequest, isInline ? entryAsset : null);
 
       if (assetFile != null) {
         if (assetFile.endsWith('.css') && this.isDuplicate(assetFile, issuerRequest)) {

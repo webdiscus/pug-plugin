@@ -1,5 +1,8 @@
 # Change log
 
+## 4.5.2 (2022-12-28)
+- fix: CSS output path when publicPath is auto
+
 ## 4.5.1 (2022-12-26)
 - fix: generate correct script asset filename by HMR after changes, sometimes filenames are mixed up between files
 - fix: passing `data` in loader option when the `self` loader option is true in compile method

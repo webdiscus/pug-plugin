@@ -365,6 +365,14 @@ describe('resolve assets in pug with url query', () => {
   test('resolve-assets-multi-lang-page', (done) => {
     compareFileListAndContent(PATHS, 'resolve-assets-multi-lang-page', done);
   });
+
+  test('resolve-css-in-diff-output-html', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-css-in-diff-output-html', done);
+  });
+
+  test('resolve-js-in-diff-output-html', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-js-in-diff-output-html', done);
+  });
 });
 
 describe('split chunks', () => {

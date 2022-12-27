@@ -34,14 +34,14 @@ const { optionModulesException, executeTemplateFunctionException, postprocessExc
 
 /** @typedef {import('webpack').Compiler} Compiler */
 /** @typedef {import('webpack').Compilation} Compilation */
-/** @typedef {import("webpack").ChunkGraph} ChunkGraph */
-/** @typedef {import("webpack").Chunk} Chunk */
-/** @typedef {import("webpack").Module} Module */
-/** @typedef {import("webpack").sources.Source} Source */
+/** @typedef {import('webpack').ChunkGraph} ChunkGraph */
+/** @typedef {import('webpack').Chunk} Chunk */
+/** @typedef {import('webpack').Module} Module */
+/** @typedef {import('webpack').sources.Source} Source */
 /** @typedef {import('webpack-sources').RawSource} RawSource */
-/** @typedef {import("webpack").Configuration} Configuration */
+/** @typedef {import('webpack').Configuration} Configuration */
 /** @typedef {import('webpack').PathData} PathData */
-/** @typedef {import("webpack").AssetInfo} AssetInfo */
+/** @typedef {import('webpack').AssetInfo} AssetInfo */
 
 /**
  * @typedef {Object} PugPluginOptions
@@ -509,14 +509,14 @@ class PugPlugin {
     AssetScript.setIssuerFilename(entry.request, entry.filename);
 
     for (const module of chunkModules) {
-      const { buildInfo, resource, resourceResolveData } = module;
+      const { buildInfo, resource: sourceRequest, resourceResolveData } = module;
       const resourceQuery = resourceResolveData ? resourceResolveData.query : null;
       const isInline = (resourceQuery && resourceQuery.startsWith('?inline')) || module.type === 'asset/source';
 
-      if (!resource || AssetInline.isDataUrl(resource)) continue;
+      if (!sourceRequest || AssetInline.isDataUrl(sourceRequest)) continue;
 
       const { issuer } = module.resourceResolveData.context;
-      const [sourceFile] = resource.split('?', 1);
+      const [sourceFile] = sourceRequest.split('?', 1);
       let issuerFile = !issuer || issuer.endsWith('.pug') ? entry.importFile : issuer;
 
       if (module.type === 'javascript/auto') {
@@ -531,7 +531,11 @@ class PugPlugin {
 
           const { filename: assetFile } = entry;
 
-          Asset.add(sourceFile, assetFile);
+          // Note: save full path with param queries because
+          // the Pug request in entry can be resolved with different output paths:
+          // - 'index':    './index.pug'         => dist/index.html
+          // - 'index/de': './index.pug?lang=de' => dist/de/index.html
+          Asset.add(sourceRequest, assetFile);
 
           if (verbose) {
             verboseList.add({
@@ -551,7 +555,7 @@ class PugPlugin {
             // renderContent arguments
             source,
             sourceFile,
-            resource,
+            sourceRequest,
             assetFile,
             pluginModule: entry,
             fileManifest: {
@@ -594,10 +598,10 @@ class PugPlugin {
         const assetPath = compilation.getAssetPath(filenameTemplate, pathOptions);
         const { isCached, filename: assetFile } = Asset.getUniqueFilename(sourceFile, assetPath);
 
-        Resolver.addAsset(resource, assetFile, issuerFile);
+        Resolver.addAsset(sourceRequest, assetFile, issuerFile);
 
         if (isInline) {
-          AssetSource.add(resource);
+          AssetSource.add(sourceRequest);
         }
 
         // skip already processed file assets, but all inline assets must be processed
@@ -628,7 +632,7 @@ class PugPlugin {
           // renderContent arguments
           source,
           sourceFile,
-          resource,
+          sourceRequest,
           assetFile,
           pluginModule,
           fileManifest: {
@@ -644,12 +648,12 @@ class PugPlugin {
         const pluginModule = this.getModule(sourceFile);
         if (pluginModule == null) continue;
 
-        AssetSource.add(resource);
+        AssetSource.add(sourceRequest);
 
         if (verbose) {
           verboseList.add({
             isAssetSource: true,
-            sourceFile: resource,
+            sourceFile: sourceRequest,
           });
         }
 
@@ -664,7 +668,7 @@ class PugPlugin {
           // renderContent arguments
           source: module.originalSource(),
           sourceFile,
-          resource,
+          sourceRequest,
           assetFile: null,
           pluginModule,
           fileManifest: {},
@@ -676,7 +680,7 @@ class PugPlugin {
         if (verbose) {
           verboseList.add({
             isAssetResource: true,
-            sourceFile: resource,
+            sourceFile: sourceRequest,
           });
         }
       } else if (module.type === 'asset/inline') {
@@ -685,7 +689,7 @@ class PugPlugin {
         if (verbose) {
           verboseList.add({
             isAssetInline: true,
-            sourceFile: resource,
+            sourceFile: sourceRequest,
           });
         }
       }
@@ -724,7 +728,7 @@ class PugPlugin {
    *
    * @param {string} code The source code.
    * @param {string} sourceFile The full path of source file w/o URL query.
-   * @param {string} resource The full path of source file with URL query.
+   * @param {string} sourceRequest The full path of source file with URL query.
    * @param {string} assetFile
    * @param {ModuleProps} pluginModule
    * @return {string|null} When return null then not emit file.
@@ -734,7 +738,7 @@ class PugPlugin {
     entryAsset,
     source,
     sourceFile,
-    resource,
+    sourceRequest,
     assetFile,
     isEntry,
     verbose,
@@ -745,7 +749,7 @@ class PugPlugin {
     let code = source.source();
 
     if (!code) {
-      // TODO: reproduce this error and write test
+      // TODO: reproduce this case and write test
       // the source is empty when webpack config contains an error
       return null;
     }
@@ -758,7 +762,7 @@ class PugPlugin {
       code = toCommonJS(code);
     }
 
-    Resolver.setIssuer(sourceFile, resource, entryAsset);
+    Resolver.setIssuer(sourceRequest, entryAsset);
 
     const contextOptions = {
       require: Resolver.require,
@@ -804,7 +808,7 @@ class PugPlugin {
     }
 
     if (isInline) {
-      AssetSource.setSource(resource, entryAsset, content);
+      AssetSource.setSource(sourceRequest, entryAsset, content);
       return null;
     }
 
