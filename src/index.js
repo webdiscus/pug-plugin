@@ -56,7 +56,8 @@ const { optionModulesException, executeTemplateFunctionException, postprocessExc
  *   Must be an absolute or a relative by the context path.
  * @property {function(string, ResourceInfo, Compilation): string|null} postprocess The post process for extracted content from entry.
  * @property {Array<ModuleOptions>} [modules = []]
- * @property {ModuleOptions|{}} extractCss The options for embedded plugin module to extract CSS.
+ * @property {ModuleOptions|{}} css The options for embedded plugin module to extract CSS.
+ * @property {ExtractJsOptions|{}} js The options for embedded plugin module to extract CSS.
  * @property {boolean} [`extractComments` = false] Whether comments shall be extracted to a separate file.
  *   If the original filename is foo.js, then the comments will be stored to foo.js.LICENSE.txt.
  *   This option enable/disable storing of *.LICENSE.txt file.
@@ -70,9 +71,15 @@ const { optionModulesException, executeTemplateFunctionException, postprocessExc
  * @property {boolean} [verbose = false] Show the information at processing entry files.
  * @property {string} [sourcePath = options.context] The absolute path to sources.
  * @property {string} [outputPath = options.output.path] The output directory for an asset.
- * @property {string|function(PathData, AssetInfo): string} [filename = '[name].html'] The file name of output file.
+ * @property {string|function(PathData, AssetInfo): string} filename The file name of output file.
  * @property {function(string, ResourceInfo, Compilation): string|null =} postprocess The post process for extracted content from entry.
  * @property {function(sourceMaps: string, assetFile: string, compilation: Compilation): string|null =} extract
+ */
+
+/**
+ * @typedef {Object} ExtractJsOptions
+ * @property {boolean} [verbose = false] Show the information at processing entry files.
+ * @property {string|function(PathData, AssetInfo): string} [filename = '[name].js'] The file name of output file.
  */
 
 /**
@@ -155,7 +162,6 @@ class PugPlugin {
   // webpack's options and modules
   webpackContext = '';
   webpackOutputPath = '';
-  webpackOutputFilename = '';
 
   /**
    * @param {PugPluginOptions|{}} options
@@ -184,7 +190,8 @@ class PugPlugin {
       optionModulesException(options.modules);
     }
 
-    let extractCssOptions = extractCss(options.extractCss);
+    // the `css` option is alias to `extractCss`
+    let extractCssOptions = extractCss(options.extractCss || options.css);
     const styleTestSource = extractCssOptions.test.source;
     const moduleExtractCssOptions = this.options.modules.find((item) => item.test.source === styleTestSource);
 
@@ -194,6 +201,9 @@ class PugPlugin {
       this.options.modules.unshift(extractCssOptions);
     }
     this.options.extractCss = extractCssOptions;
+
+    // options for extract js
+    this.options.extractJs = options.js || {};
 
     // let know pug-loader that pug-plugin is being used
     plugin.init(this.options);
@@ -233,7 +243,10 @@ class PugPlugin {
     // save using webpack options
     this.webpackContext = webpackOptions.context;
     this.webpackOutputPath = webpackOptions.output.path || path.join(__dirname, 'dist');
-    this.webpackOutputFilename = webpackOptions.output.filename || '[name].js';
+
+    if (!this.options.extractJs.filename) {
+      this.options.extractJs.filename = webpackOptions.output.filename || '[name].js';
+    }
 
     Asset.init({
       outputPath: this.webpackOutputPath,
@@ -389,7 +402,7 @@ class PugPlugin {
         const isAdded = AssetEntry.addToCompilation({
           name,
           importFile: scriptFile,
-          filenameTemplate: this.webpackOutputFilename,
+          filenameTemplate: this.options.extractJs.filename,
           context,
           issuer,
         });
@@ -870,6 +883,9 @@ class PugPlugin {
 }
 
 module.exports = PugPlugin;
+module.exports.loader = loader;
+
+// TODO: if used the extractCss or extractHtml modules, display deprecation.
+//   instead of these modules use options: css, html
 module.exports.extractCss = extractCss;
 module.exports.extractHtml = extractHtml;
-module.exports.loader = loader;

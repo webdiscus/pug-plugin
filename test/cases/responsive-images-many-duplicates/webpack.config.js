@@ -23,7 +23,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      extractCss: {
+      css: {
         filename: (PathData) => {
           // test auto publicPath for responsive images used in different scss files
           if (PathData.chunk.name === 'main2') {

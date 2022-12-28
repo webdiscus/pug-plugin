@@ -135,6 +135,10 @@ describe('options', () => {
   test('default webpack config', (done) => {
     compareFileListAndContent(PATHS, 'webpack-config-default', done);
   });
+
+  test('options-js-filename', (done) => {
+    compareFileListAndContent(PATHS, 'options-js-filename', done);
+  });
 });
 
 describe('source map', () => {
@@ -373,6 +377,11 @@ describe('resolve assets in pug with url query', () => {
   test('resolve-js-in-diff-output-html', (done) => {
     compareFileListAndContent(PATHS, 'resolve-js-in-diff-output-html', done);
   });
+
+  // TODO: optimize code to pass the test
+  // test('resolve-js-pug-same-name', (done) => {
+  //   compareFileListAndContent(PATHS, 'resolve-js-pug-same-name', done);
+  // });
 });
 
 describe('split chunks', () => {

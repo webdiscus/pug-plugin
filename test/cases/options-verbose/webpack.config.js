@@ -19,7 +19,7 @@ module.exports = {
     new PugPlugin({
       // test verbose option
       verbose: true,
-      extractCss: {
+      css: {
         verbose: true,
       },
       filename: (pathData, assetInfo) => {

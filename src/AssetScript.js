@@ -51,7 +51,7 @@ class AssetScript {
     let uniqueName = name;
 
     // the entrypoint name must be unique, if already exists then add an index: `main` => `main.1`, etc.
-    if (AssetEntry.isNotUnique(name, file)) {
+    if (!AssetEntry.isUnique(name, file)) {
       if (!this.index[name]) {
         this.index[name] = 1;
       }

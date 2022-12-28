@@ -31,8 +31,8 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      // test defaults options of extractCss, it is equivalent to:
-      // extractCss: {
+      // test defaults 'css' options, it is equivalent to:
+      // css: {
       //   filename: '[name].css',
       // },
     }),

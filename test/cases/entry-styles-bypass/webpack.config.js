@@ -33,7 +33,7 @@ module.exports = {
   plugins: [
     // extract pug/html only
     new PugPlugin({
-      extractCss: {
+      css: {
         enabled: false, // disable embedded extractCss module to bypass extracting via external plugin
       },
     }),

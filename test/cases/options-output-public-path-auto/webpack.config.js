@@ -26,7 +26,7 @@ module.exports = {
   plugins: [
     new PugPlugin({
       //verbose: true,
-      extractCss: {
+      css: {
         // output filename of styles
         filename: (pathInfo) => {
           // test auto publicPath for CSS url() from different paths

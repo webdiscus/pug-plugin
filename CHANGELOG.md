@@ -1,7 +1,29 @@
 # Change log
 
+## 4.6.0 (2022-12-28)
+- feat: added short option name `css` as alias for `extractCss` option.
+  Now use the new option name `css` instead of `extractCss`:
+  ```js
+  new PugPlugin({
+    css: {
+      filename: 'assets/css/[name].[contenthash].css',
+    },
+  }),
+  ```
+  Note: don't worry, the option name `extractCss` will be supported in the future for compatibility.
+- feat: added new `js` option with `filename` property as alias for Webpack `output.filename`.
+  ```js
+  new PugPlugin({
+    js: {
+      filename: 'assets/js/[name].[contenthash].js',
+    },
+  }),
+  ```
+  The `js.filename` option has prio over `output.filename` option.
+
+
 ## 4.5.2 (2022-12-28)
-- fix: CSS output path when publicPath is auto
+- fix: CSS output path when `publicPath` has `auto` value
 
 ## 4.5.1 (2022-12-26)
 - fix: generate correct script asset filename by HMR after changes, sometimes filenames are mixed up between files

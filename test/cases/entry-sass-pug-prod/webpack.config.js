@@ -19,7 +19,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      extractCss: {
+      css: {
         filename: isProduction ? '[name].[contenthash:8].css' : '[name].css',
       },
     }),

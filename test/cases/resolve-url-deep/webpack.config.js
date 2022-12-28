@@ -22,7 +22,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      extractCss: {
+      css: {
         // test conflict: Multiple chunks emit assets to the same filename
         filename: 'assets/css/[name].css',
       },

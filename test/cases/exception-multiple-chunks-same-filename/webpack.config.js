@@ -22,7 +22,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      extractCss: {
+      css: {
         filename: '[name].css', // error: multiple chunks with same filename
         //filename: '[name].[contenthash:8].css', // use a hash in filename to avoid the error
       },

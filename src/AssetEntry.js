@@ -117,15 +117,15 @@ class AssetEntry {
   }
 
   /**
-   * Whether the entry is not unique.
+   * Whether the entry is unique.
    *
    * @param {string} name The name of the entry.
    * @param {string} file The source file.
    * @return {boolean}
    */
-  static isNotUnique(name, file) {
+  static isUnique(name, file) {
     const entry = this.entryMap.get(name);
-    return entry && entry.importFile !== file;
+    return !entry || entry.importFile === file;
   }
 
   /**

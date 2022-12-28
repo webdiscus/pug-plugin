@@ -21,16 +21,14 @@
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 
 
-Pug Plugin enable to use Pug files in Webpack entry and generates HTML files that contain the hashed
-output JS and CSS filenames whose source files are specified in the Pug template.
+Pug Plugin enable to use Pug file as entry-point in Webpack. This plugin creates HTML files containing
+hashed output JS and CSS filenames whose source files are specified in the Pug template.
 
 💡 **Highlights**:
 
-- Pug file is the entry point for all scripts and styles.
+- Pug file is the entry-point for all scripts and styles.
 - Source scripts and styles should be specified directly in Pug.
 - All JS and CSS files will be extracted from their sources specified in Pug.
-- No longer need to define scripts and styles in the Webpack entry.
-- No longer need to import styles in JavaScript to inject them into HTML via additional plugins.
 - Pug loader has built-in filters: `:escape` `:code` `:highlight` `:markdown`.
 
 Specify the Pug files in the Webpack entry:
@@ -57,19 +55,13 @@ module.exports = {
 };
 ```
 
-> **Note**
-> 
-> The key of `entry` object is a relative output file w/o extension `.html` in output path.\
-> The default `output.path` is `path.join(__dirname, 'dist')`.\
-> The default `output.filename` is `[name].js`.
-
 Add source scripts and styles directly to Pug using `require()`:
 ```pug
 link(href=require('./styles.scss') rel='stylesheet')
 script(src=require('./main.js') defer='defer')
 ```
 
-Generated HTML contains hashed CSS and JS output filenames:
+The generated HTML contains hashed output CSS and JS filenames:
 ```html
 <link href="/assets/css/styles.05e4dd86.css" rel="stylesheet">
 <script src="/assets/js/main.f4b855d8.js" defer="defer"></script>
@@ -135,10 +127,11 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
 <a id="features" name="features" href="#features"></a>
 ## Features
 
-- specify Pug files in Webpack entry
-- specify source scripts and styles directly in Pug
+- Pug file is entry-point for all resources (styles, scripts)
+- compiles HTML files from Pug files defined in Webpack entry
+- extracts CSS and JS from source scripts and styles specified directly in Pug
 - generated HTML contains already hashed CSS and JS output filenames
-- resolves source files in CSS URL and extract resolved resources to output path\
+- resolves source files of URLs in CSS and extract resolved resources to output path\
   not need more additional plugin such as [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
 - support the `auto` publicPath
 - support the `pretty` formatting  of generated HTML
@@ -178,26 +171,25 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    // output filename of JS files
-    filename: 'assets/js/[name].[contenthash:8].js',
   },
 
   entry: {
-    // don't define scripts and styles in the Webpack entry,
-    // all scripts and styles must be specified in Pug
-
-    // define Pug files in entry:
-    index: './src/views/index.pug',       // output index.html
-    about: './src/views/about/index.pug', // output about.html
+    // define Pug files here
+    index: './src/views/index.pug', // => dist/index.html
+    'about/index': './src/views/about/index.pug', // => dist/about/index.html
+    'about/plugin': './src/views/about/plugin/index.pug', // => dist/about/plugin.html
     // ...
   },
 
   plugins: [
-    // enable using Pug files as entry point
     new PugPlugin({
-      pretty: true, // formatting HTML, should be used in development mode only
-      extractCss: {
-        // output filename of CSS files
+      pretty: true, // formatting HTML, should be used in development mode
+      js: {
+        // output filename of extracted JS file from source script
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
+      css: {
+        // output filename of extracted CSS file from source style
         filename: 'assets/css/[name].[contenthash:8].css',
       },
     }),
@@ -220,9 +212,13 @@ module.exports = {
 
 > **Note** 
 > 
-> The automatic public path is supported, but for faster compilation is recommended to use a fixed `publicPath` (e.g. `'/'`&nbsp;or `''`).
+> - The key of `entry` object is a relative output file w/o extension `.html` in output path.
+> - The default `output.path` is `path.join(__dirname, 'dist')`.
+> - The default `output.publicPath` is `auto`, but for faster compilation is recommended to use a fixed value e.g. `'/'`.
+> - The default JS output filename is `[name].js`, where the `[name]` is the filename of a source file.
+> - The default CSS output filename is `[name].css`, where the `[name]` is the filename of a source file.
 
-Pug template `src/views/index.pug`:
+Add source styles and scripts using `require()` directly in a Pug file, e.g. `src/views/index.pug`:
 ```pug
 html
   head
@@ -235,7 +231,7 @@ html
     script(src=require('./main.js'))
 ```
 
-Generated HTML:
+The generated HTML:
 ```html
 <html>
   <head>
@@ -250,9 +246,9 @@ Generated HTML:
 
 > **Warning**
 > 
-> - Don't define styles and JS files in entry. You can use `require()` for source files of JS and SCSS in Pug.
-> - Don't import styles in JS. Use `require()` for style files in Pug.
-> - Don't use `html-webpack-plugin` to render Pug files in HTML. The Pug plugin processes files from Webpack entry.
+> - Don't define scripts and styles in the Webpack entry. Use `require()` to load source files in Pug.
+> - Don't import styles in JavaScript.
+> - Don't use `html-webpack-plugin` to render Pug files in HTML. The Pug plugin compiles the files defined in the Webpack entry.
 > - Don't use `mini-css-extract-plugin` to extract CSS from styles. The Pug plugin extract CSS from styles required in Pug.
 
 <a id="plugin-options" name="plugin-options" href="#plugin-options"></a>
@@ -271,10 +267,6 @@ Type: `boolean` Default: `false`<br>
 Pretty formatting the resulting HTML. Use this option for debugging only. For production build should be disabled.
 This option only works for Pug files defined in the Webpack entry.
 
-> **Warning**️ 
-> 
-> The `pretty` option of the `pug-loader` is deprecated, therefore use the `pretty` option in `pug-plugin`.
-
 ```js
 const PugPlugin = require('pug-plugin');
 module.exports = {
@@ -285,6 +277,9 @@ module.exports = {
   ],
 };
 ```
+> **Warning**️
+>
+> The `pretty` option of the `pug-loader` is deprecated, therefore use the `pretty` option in `pug-plugin`.
 
 ### `test`
 Type: `RegExp` Default: `/\.pug$/`<br>
@@ -346,9 +341,9 @@ The description of `@property` see by Pug plugin options.
  */
 ```
 
-### `extractCss`
+### `css`
 Type: `ModuleOptions`\
-Default module options:
+Default properties:
 ```js
 {
   test: /\.(css|scss|sass|less|styl)$/,
@@ -360,7 +355,7 @@ Default module options:
 }
 ```
 
-The options for embedded `extractCss` module. This module extracts CSS from style sources specified in Pug using `require()`, e.g.:
+The option to extract CSS from style sources specified in Pug using `require()`, e.g.:
 ```pug
 link(href=require('./styles.scss') rel='stylesheet')
 ```
@@ -376,7 +371,7 @@ const PugPlugin = require('pug-plugin');
 module.exports = {
   plugins: [
     new PugPlugin({
-      extractCss: {
+      css: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },
     }),
@@ -386,16 +381,41 @@ module.exports = {
 
 The `name` is the filename of required style source.
 For example, if source file is `styles.scss`, then output filename will be `assets/css/styles.1234abcd.css`.\
-If you want to have a different output filename, you can use the `filename` options as the [function](https://webpack.js.org/configuration/output/#outputfilename). 
-
-> **Note** 
-> 
-> Since version `3.0.0` the module `extractCss` is enabled by default.
+If you want to have a different output filename, you can use the `filename` options as the [function](https://webpack.js.org/configuration/output/#outputfilename).
 
 > **Warning**
 > 
 > Don't use `mini-css-extract-plugin` or `style-loader`, they are not required more.\
-> The `extractCss` module extracts CSS much faster than other plugins and resolves all asset URLs in CSS, therefore the `resolve-url-loader` is redundant too.
+> The `pug-plugin` extracts CSS much faster than other plugins and resolves all asset URLs in CSS, therefore the `resolve-url-loader` is redundant too.
+
+### `js`
+Type: `Object`\
+Default properties:
+```js
+{
+  filename: '[name].js',
+}
+```
+
+The option to extract JS from script sources specified in Pug using `require()`, e.g.:
+```pug
+script(src=require('./main.js'))
+```
+
+The default JS output filename is `[name].js`. You can specify your own filename using [webpack filename substitutions](https://webpack.js.org/configuration/output/#outputfilename):
+
+```js
+const PugPlugin = require('pug-plugin');
+module.exports = {
+  plugins: [
+    new PugPlugin({
+      js: {
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
+    }),
+  ],
+};
+```
 
 ### `extractComments`
 Type: `boolean` Default: `false`<br>
@@ -528,15 +548,13 @@ The Webpack config:
 const PugPlugin = require('pug-plugin');
 module.exports = {
   entry: {
-    index: './src/pages/home/index.pug', // one entry point for all assets
-    // ... here can be defined many Pug templates
+    // define all Pug files here
+    index: './src/pages/home/index.pug',
   },
 
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    // output filename of JS files
-    filename: 'assets/js/[name].[contenthash:8].js'
   },
   
   resolve: {
@@ -549,9 +567,13 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      extractCss: {
-        // output filename of CSS files
-        filename: 'assets/css/[name].[contenthash:8].css'
+      js: {
+        // output filename of extracted JS file from source script
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
+      css: {
+        // output filename of extracted CSS file from source style
+        filename: 'assets/css/[name].[contenthash:8].css',
       },
     }),
   ],
@@ -703,13 +725,16 @@ const PugPlugin = require('pug-plugin');
 module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: '[name].[contenthash:8].js',
   },
   entry: {
-    index: './src/index.pug' // Pug plugin generates dist/index.html
+    index: './src/index.pug' // => dist/index.html
   },
   plugins: [
-    new PugPlugin(),
+    new PugPlugin({
+      js: {
+        filename: '[name].[contenthash:8].js',
+      },
+    }),
   ],
   module: {
     rules: [
@@ -785,13 +810,16 @@ const PugPlugin = require('pug-plugin');
 module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: '[name].[contenthash:8].js',
   },
   entry: {
-    index: './src/index.pug' // Pug plugin generates dist/index.html
+    index: './src/index.pug' // => dist/index.html
   },
   plugins: [
-    new PugPlugin(),
+    new PugPlugin({
+      js: {
+        filename: '[name].[contenthash:8].js',
+      },
+    }),
   ],
   module: {
     rules: [
@@ -1288,11 +1316,20 @@ import _, { map } from 'underscore';
 
 Then, use the `name` as following function:
 ```js
+const path = require('path');
+const PugPlugin = require('pug-plugin');
+
 module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: 'js/[name].[contenthash:8].js', // output filename of JS files
   },
+  plugins: [
+    new PugPlugin({
+      js: {
+        filename: 'js/[name].[contenthash:8].js',
+      },
+    }),
+  ],
   optimization: {
     runtimeChunk: 'single',
     splitChunks: {

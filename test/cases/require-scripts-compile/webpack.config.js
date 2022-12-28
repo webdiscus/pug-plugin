@@ -17,7 +17,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      extractCss: {
+      css: {
         filename: '[name].[contenthash:8].css',
       },
     }),
