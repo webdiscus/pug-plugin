@@ -18,14 +18,19 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: '[name].[contenthash:8].js',
   },
 
   entry: {
     'home/index': path.join(srcPath, 'views/index.pug'),
   },
 
-  plugins: [new PugPlugin()],
+  plugins: [
+    new PugPlugin({
+      js: {
+        filename: '[name].[contenthash:8].js',
+      },
+    }),
+  ],
 
   module: {
     rules: [

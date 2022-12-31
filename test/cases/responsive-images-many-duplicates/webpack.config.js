@@ -14,7 +14,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: 'assets/js/[name].[contenthash:8].js',
   },
 
   entry: {
@@ -23,6 +22,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
+      js: {
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
       css: {
         filename: (PathData) => {
           // test auto publicPath for responsive images used in different scss files

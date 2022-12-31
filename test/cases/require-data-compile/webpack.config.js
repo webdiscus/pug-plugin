@@ -10,7 +10,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
   },
 
   entry: {
@@ -18,7 +17,13 @@ module.exports = {
     about: './src/views/about.pug',
   },
 
-  plugins: [new PugPlugin()],
+  plugins: [
+    new PugPlugin({
+      js: {
+        filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
+      },
+    }),
+  ],
 
   module: {
     rules: [

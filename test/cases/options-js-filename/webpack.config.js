@@ -6,6 +6,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
+    filename: 'js-override/[name].[contenthash:8].js',
   },
 
   resolve: {
@@ -22,6 +23,7 @@ module.exports = {
   plugins: [
     new PugPlugin({
       js: {
+        // this option must override the output.filename
         filename: 'js/[name].[contenthash:8].js',
       },
     }),

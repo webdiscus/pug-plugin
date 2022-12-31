@@ -72,6 +72,10 @@ describe('options', () => {
     compareFileListAndContent(PATHS, 'options-output-public-path-function', done);
   });
 
+  test('output.filename', (done) => {
+    compareFileListAndContent(PATHS, 'options-output-filename', done);
+  });
+
   test('options.enabled = false', (done) => {
     compareFileListAndContent(PATHS, 'options-enabled', done);
   });
@@ -112,8 +116,16 @@ describe('options', () => {
     compareFileListAndContent(PATHS, 'options-postprocess', done);
   });
 
-  test('options.outputPath', (done) => {
-    compareFileListAndContent(PATHS, 'options-output-path', done);
+  test('options module pug outputPath', (done) => {
+    compareFileListAndContent(PATHS, 'options-pug-outputPath', done);
+  });
+
+  test('options modules js, css outputPath relative', (done) => {
+    compareFileListAndContent(PATHS, 'options-js-css-outputPath-relative', done);
+  });
+
+  test('options modules js, css outputPath absolute', (done) => {
+    compareFileListAndContent(PATHS, 'options-js-css-outputPath-absolute', done);
   });
 
   test('options.pretty', (done) => {

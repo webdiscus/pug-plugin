@@ -31,6 +31,7 @@ const {
 } = require('./Verbose');
 
 const { optionModulesException, executeTemplateFunctionException, postprocessException } = require('./Exceptions');
+const { re } = require('@babel/core/lib/vendor/import-meta-resolve');
 
 /** @typedef {import('webpack').Compiler} Compiler */
 /** @typedef {import('webpack').Compilation} Compilation */
@@ -192,17 +193,17 @@ class PugPlugin {
 
     // the `css` option is alias to `extractCss`
     let extractCssOptions = extractCss(options.extractCss || options.css);
-    const styleTestSource = extractCssOptions.test.source;
-    const moduleExtractCssOptions = this.options.modules.find((item) => item.test.source === styleTestSource);
+    const moduleExtractCssOptions = this.options.modules.find(
+      (item) => item.test.source === extractCssOptions.test.source
+    );
 
     if (moduleExtractCssOptions) {
       extractCssOptions = moduleExtractCssOptions;
     } else {
       this.options.modules.unshift(extractCssOptions);
     }
-    this.options.extractCss = extractCssOptions;
 
-    // options for extract js
+    this.options.extractCss = extractCssOptions;
     this.options.extractJs = options.js || {};
 
     // let know pug-loader that pug-plugin is being used
@@ -235,22 +236,41 @@ class PugPlugin {
   apply(compiler) {
     if (!this.enabled) return;
 
-    const { webpack, options: webpackOptions } = compiler;
+    const { webpack, options } = compiler;
+    const webpackOutput = options.output;
+    const { extractJs } = this.options;
 
     RawSource = webpack.sources.RawSource;
     HotUpdateChunk = webpack.HotUpdateChunk;
 
     // save using webpack options
-    this.webpackContext = webpackOptions.context;
-    this.webpackOutputPath = webpackOptions.output.path || path.join(__dirname, 'dist');
+    this.webpackContext = options.context;
+    this.webpackOutputPath = webpackOutput.path || path.join(__dirname, 'dist');
 
-    if (!this.options.extractJs.filename) {
-      this.options.extractJs.filename = webpackOptions.output.filename || '[name].js';
+    // define js output filename
+    if (!webpackOutput.filename) {
+      webpackOutput.filename = '[name].js';
+    }
+    if (extractJs.filename) {
+      webpackOutput.filename = extractJs.filename;
+    } else {
+      extractJs.filename = webpackOutput.filename;
+    }
+
+    // resolve js filename by outputPath
+    if (extractJs.outputPath) {
+      const filename = extractJs.filename;
+
+      extractJs.filename = isFunction(filename)
+        ? (pathData, assetInfo) => this.resolveOutputFilename(filename(pathData, assetInfo), extractJs.outputPath)
+        : this.resolveOutputFilename(extractJs.filename, extractJs.outputPath);
+
+      webpackOutput.filename = extractJs.filename;
     }
 
     Asset.init({
       outputPath: this.webpackOutputPath,
-      publicPath: webpackOptions.output.publicPath,
+      publicPath: webpackOutput.publicPath,
     });
     AssetResource.init(compiler);
     AssetEntry.setWebpackOutputPath(this.webpackOutputPath);
@@ -262,8 +282,8 @@ class PugPlugin {
 
     // enable library type
     const libraryType = this.entryLibrary.type;
-    if (webpackOptions.output.enabledLibraryTypes.indexOf(libraryType) < 0) {
-      webpackOptions.output.enabledLibraryTypes.push(libraryType);
+    if (webpackOutput.enabledLibraryTypes.indexOf(libraryType) < 0) {
+      webpackOutput.enabledLibraryTypes.push(libraryType);
     }
 
     if (!this.options.sourcePath) this.options.sourcePath = this.webpackContext;
@@ -534,7 +554,18 @@ class PugPlugin {
 
       if (module.type === 'javascript/auto') {
         // do nothing for scripts because webpack itself compiles and extracts JS files from scripts
-        if (AssetScript.isScript(module)) continue;
+        if (AssetScript.isScript(module)) {
+          if (this.options.extractJs.verbose && issuerFile !== sourceFile) {
+            verboseList.add({
+              isScript: true,
+              header: 'Extract JS',
+              issuerFile,
+              sourceFile,
+              outputPath: this.options.extractJs.outputPath || this.webpackOutputPath,
+            });
+          }
+          continue;
+        }
 
         // entry point
         if (sourceFile === entry.importFile) {
@@ -598,7 +629,7 @@ class PugPlugin {
         const filenameTemplate = pluginModule.filename ? pluginModule.filename : entry.filenameTemplate;
 
         /** @type {PathData} The data to generate an asset path by filenameTemplate. */
-        const pathOptions = {
+        const pathData = {
           contentHash: hash,
           chunk: {
             chunkId: chunk.id,
@@ -606,10 +637,17 @@ class PugPlugin {
             name,
             hash,
           },
+          filename: sourceFile,
         };
 
-        const assetPath = compilation.getAssetPath(filenameTemplate, pathOptions);
-        const { isCached, filename: assetFile } = Asset.getUniqueFilename(sourceFile, assetPath);
+        const assetPath = compilation.getAssetPath(filenameTemplate, pathData);
+        const { isCached, filename } = Asset.getUniqueFilename(sourceFile, assetPath);
+        let assetFile = filename;
+
+        // apply outputPath option for plugin module, e.g. for 'css'
+        if (pluginModule.test.test(sourceFile)) {
+          assetFile = this.resolveOutputFilename(assetFile, pluginModule.outputPath);
+        }
 
         Resolver.addAsset(sourceRequest, assetFile, issuerFile);
 
@@ -838,10 +876,28 @@ class PugPlugin {
     // display verbose after rendering of all modules
     if (verboseList.size > 0) {
       for (let item of verboseList) {
-        const { isEntry, isModule, isAssetResource, isAssetSource, isAssetInline, sourceFile } = item;
+        const {
+          isEntry,
+          isModule,
+          isScript,
+          isAssetResource,
+          isAssetSource,
+          isAssetInline,
+          issuerFile,
+          sourceFile,
+          outputPath,
+        } = item;
         if (isEntry) {
           const entry = AssetEntry.get(item.name);
           verboseEntry(entry);
+        } else if (isScript) {
+          verboseExtractModule({
+            sourceFile,
+            assetFile: scriptStore.files.find(({ file }) => file === sourceFile).chunkFiles,
+            issuers: [issuerFile],
+            outputPath,
+            header: item.header,
+          });
         } else if (isModule) {
           const data = Resolver.data.get(sourceFile);
           verboseExtractModule({
@@ -879,6 +935,25 @@ class PugPlugin {
     AssetScript.reset();
     AssetTrash.reset();
     Resolver.reset();
+  }
+
+  /**
+   * @param {string} filename The output filename.
+   * @param {string | null} outputPath The output path.
+   * @return {string}
+   */
+  resolveOutputFilename(filename, outputPath) {
+    if (!outputPath) return filename;
+
+    const relativeOutputPath = path.isAbsolute(outputPath)
+      ? path.relative(this.webpackOutputPath, outputPath)
+      : outputPath;
+
+    if (relativeOutputPath) {
+      filename = path.posix.join(relativeOutputPath, filename);
+    }
+
+    return filename;
   }
 }
 

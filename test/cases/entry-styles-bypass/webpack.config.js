@@ -5,8 +5,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const isProduction = true;
 
 module.exports = {
-  mode: isProduction ? 'production' : 'development',
-  devtool: isProduction ? false : 'source-map',
+  mode: 'production',
+  devtool: false,
 
   resolve: {
     // aliases used in the pug template
@@ -19,9 +19,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-
-    // determines the output filename for js
-    filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
   },
 
   entry: {

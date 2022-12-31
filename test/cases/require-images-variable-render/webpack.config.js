@@ -13,7 +13,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    filename: '[name].[contenthash:8].js',
   },
 
   entry: {
@@ -21,8 +20,11 @@ module.exports = {
   },
 
   plugins: [
-    // zero config
-    new PugPlugin(),
+    new PugPlugin({
+      js: {
+        filename: '[name].[contenthash:8].js',
+      },
+    }),
   ],
 
   module: {

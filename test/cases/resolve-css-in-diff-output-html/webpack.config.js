@@ -8,8 +8,6 @@ module.exports = {
     path: path.join(__dirname, 'dist/'),
     // test auto path
     publicPath: 'auto',
-    // test output hashed js filename
-    filename: 'js/[name].[contenthash:8].js',
   },
 
   resolve: {
@@ -27,6 +25,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
+      js: {
+        filename: 'js/[name].[contenthash:8].js',
+      },
       css: {
         filename: 'css/[name].[contenthash:8].css',
       },

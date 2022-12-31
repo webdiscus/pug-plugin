@@ -8,14 +8,19 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    filename: 'js/[name].js',
   },
 
   entry: {
     index: './src/index.pug',
   },
 
-  plugins: [new PugPlugin()],
+  plugins: [
+    new PugPlugin({
+      js: {
+        filename: 'js/[name].js',
+      },
+    }),
+  ],
 
   module: {
     rules: [

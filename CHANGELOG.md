@@ -1,7 +1,25 @@
 # Change log
 
+## 4.7.0 (2022-12-31)
+- feat: add the `js.verbose` option to display extract info
+- feat: add the `js.outputPath` option
+  ```js
+  new PugPlugin({
+    js: {
+      verbose: true,
+      filename: '[name].[contenthash].js',
+      outputPath: 'assets/js/',
+    },
+  }),
+  ```
+- fix: resolving the `js.filename` option when used split chunk
+- fix: resolving the asset path when used the `css.outputPath` option
+- fix: when `css.filename` is a function, pass the `pathData.filename` property as a source file
+- test: optimize test for new options 
+- docs: update readme
+
 ## 4.6.0 (2022-12-28)
-- feat: added short option name `css` as alias for `extractCss` option.
+- feat: add short option name `css` as alias for `extractCss` option.
   Now use the new option name `css` instead of `extractCss`:
   ```js
   new PugPlugin({
@@ -11,7 +29,7 @@
   }),
   ```
   Note: don't worry, the option name `extractCss` will be supported in the future for compatibility.
-- feat: added new `js` option with `filename` property as alias for Webpack `output.filename`.
+- feat: add new `js` option with `filename` property as alias for Webpack `output.filename`.
   ```js
   new PugPlugin({
     js: {
@@ -346,16 +364,16 @@ new PugPlugin({
 - test: add tests for module types `asset/inline` and `asset`
 
 ## 2.2.0 (2022-04-21)
-- feat: added the `pretty` option to format the resulting HTML
+- feat: add the `pretty` option to format the resulting HTML
 
 ## 2.1.1 (2022-04-20)
 - fix: issue of resolving the js split chunks in generated html
-- test: added new test for usage the pug plugin with the `responsive-loader`
+- test: add new test for usage the pug plugin with the `responsive-loader`
 - refactor: code refactoring
 - docs: update readme
 
 ## 2.1.0 (2022-04-18)
-- feat: added supports the `responsive-loader`
+- feat: add supports the `responsive-loader`
 - feat: caching of an already processed asset when the same asset is required in different issuer files
 - fix: conflict of multiple styles with the same filename
 - fix: resolving url() in styles required in pug
@@ -368,7 +386,7 @@ new PugPlugin({
 - docs: update readme
 
 ## 2.0.0 (2022-04-01)
-- feat: added supports the require() of the javascript source files directly in pug.\
+- feat: add supports the require() of the javascript source files directly in pug.\
   It is no longer necessary to define a js file in webpack entry-point.\
   For example, using the `pug-plugin` now is possible usage of source js files in pug:
   ```pug

@@ -7,7 +7,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     //publicPath: 'auto', // undefined publicPath is auto publicPath
-    filename: 'assets/js/[name].js',
   },
 
   resolve: {
@@ -26,6 +25,9 @@ module.exports = {
   plugins: [
     new PugPlugin({
       //verbose: true,
+      js: {
+        filename: 'assets/js/[name].js',
+      },
       css: {
         // output filename of styles
         filename: (pathInfo) => {

@@ -142,6 +142,9 @@ class AssetScript {
 
         newContent = content.replace(sourceFile, assetFile);
         realSplitFiles.add(chunkFile);
+
+        // add verbose info
+        asset.chunkFiles = assetFile;
       } else {
         // extract original script tag with all attributes for usage it as template for chunks
         let srcStartPos = content.indexOf(sourceFile);
@@ -173,6 +176,9 @@ class AssetScript {
         if (scriptTags) {
           newContent = content.slice(0, tagStartPos) + scriptTags + content.slice(tagEndPos);
         }
+
+        // add verbose info
+        asset.chunkFiles = chunkFiles;
       }
 
       // update compilation asset content

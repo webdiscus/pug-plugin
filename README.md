@@ -260,7 +260,7 @@ Enable/disable the plugin.
 
 ### `verbose`
 Type: `boolean` Default: `false`<br>
-Show the file information at processing of entry.
+Display the file information at processing.
 
 ### `pretty`
 Type: `boolean` Default: `false`<br>
@@ -305,10 +305,12 @@ module.exports = {
 Type: `string` Default: `webpack.options.context`<br>
 The absolute path to sources.
 
+<a id="plugin-option-outputPath" name="plugin-option-outputPath" href="#plugin-option-outputPath"></a>
 ### `outputPath`
 Type: `string` Default: `webpack.options.output.path`<br>
-The output directory for processed entries. This directory can be relative by `webpack.options.output.path` or absolute.
+The output directory for processed file. This directory can be relative by `webpack.options.output.path` or absolute.
 
+<a id="plugin-option-filename" name="plugin-option-filename" href="#plugin-option-filename"></a>
 ### `filename`
 Type: `string | Function` Default: `webpack.output.filename || '[name].html'`<br>
 The name of output file.
@@ -350,10 +352,11 @@ Default properties:
   enabled: true,
   verbose: false,
   filename: '[name].css',
-  sourcePath: null,
   outputPath: null,
 }
 ```
+The `filename` property see by [filename option](#plugin-option-filename).
+The `outputPath` property see by [outputPath option](#plugin-option-outputPath).
 
 The option to extract CSS from style sources specified in Pug using `require()`, e.g.:
 ```pug
@@ -393,9 +396,18 @@ Type: `Object`\
 Default properties:
 ```js
 {
-  filename: '[name].js',
+  verbose: false,
+  filename: '[name].js', 
+  outputPath: null,
 }
 ```
+The `filename` property see by [filename option](#plugin-option-filename).
+The `outputPath` property see by [outputPath option](#plugin-option-outputPath).
+
+> **Note**
+> 
+> - the extract `js` module is always enabled
+> - the `test` property not exist because all required scripts are automatically detected
 
 The option to extract JS from script sources specified in Pug using `require()`, e.g.:
 ```pug

@@ -12,7 +12,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: 'assets/js/[name].[contenthash:8].js',
     //chunkFilename: 'assets/js/[id].js',
   },
 
@@ -28,6 +27,9 @@ module.exports = {
   plugins: [
     new PugPlugin({
       //pretty: true,
+      js: {
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
       css: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },

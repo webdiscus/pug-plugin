@@ -7,7 +7,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: 'auto',
-    filename: '[name].[contenthash:8].js',
   },
 
   entry: {
@@ -19,6 +18,9 @@ module.exports = {
     new PugPlugin({
       // test verbose option
       verbose: true,
+      js: {
+        filename: '[name].[contenthash:8].js',
+      },
       css: {
         verbose: true,
       },

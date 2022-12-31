@@ -17,7 +17,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
   },
 
   entry: {
@@ -28,6 +27,10 @@ module.exports = {
   plugins: [
     new PugPlugin({
       //verbose: true,
+
+      js: {
+        filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
+      },
       css: {
         filename: isProduction ? 'assets/css/[name].[contenthash:8].css' : 'assets/css/[name].css',
       },

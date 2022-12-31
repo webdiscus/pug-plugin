@@ -12,7 +12,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: 'assets/js/[name].[contenthash:8].js',
+    // TODO: add chunkFilename option to pugPlugin js option
     //chunkFilename: 'assets/js/[id].js',
   },
 
@@ -27,6 +27,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
+      js: {
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
       css: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },

@@ -6,7 +6,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: '[name].[contenthash:8].js',
   },
 
   resolve: {
@@ -21,7 +20,13 @@ module.exports = {
     'de/index': './src/index.pug?lang=de',
   },
 
-  plugins: [new PugPlugin()],
+  plugins: [
+    new PugPlugin({
+      js: {
+        filename: '[name].[contenthash:8].js',
+      },
+    }),
+  ],
 
   module: {
     rules: [

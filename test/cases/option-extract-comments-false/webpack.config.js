@@ -11,7 +11,6 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist/'),
     publicPath: '/',
-    filename: 'assets/js/[name].[contenthash:8].js',
   },
 
   optimization: {
@@ -29,6 +28,9 @@ module.exports = {
   plugins: [
     new PugPlugin({
       extractComments: false, // disable extracting license into separate file *.LICENSE.txt
+      js: {
+        filename: 'assets/js/[name].[contenthash:8].js',
+      },
     }),
   ],
 

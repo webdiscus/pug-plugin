@@ -12,7 +12,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: '[name].[contenthash:8].js',
     publicPath: '', // test url() in CSS with relative public path
   },
 
@@ -22,6 +21,9 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
+      js: {
+        filename: '[name].[contenthash:8].js',
+      },
       css: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },

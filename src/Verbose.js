@@ -1,6 +1,6 @@
 const { pluginName } = require('./config');
 const { outToConsole, isFunction } = require('./Utils');
-const { green, greenBright, cyan, cyanBright, magenta, yellowBright, black, ansi } = require('ansis/colors');
+const { green, greenBright, cyan, cyanBright, magenta, yellowBright, black, gray, ansi } = require('ansis/colors');
 const grayBright = ansi(245);
 
 // width of labels in first column
@@ -51,21 +51,31 @@ const verboseExtractResource = ({ issuers, sourceFile, outputPath, assetFile }) 
  * @param {string} header
  */
 const verboseExtractModule = ({ issuers, sourceFile, outputPath, assetFile, header }) => {
-  const issuerFiles = Array.from(issuers.keys());
+  const issuerFiles = Array.isArray(issuers) ? issuers : Array.from(issuers.keys());
 
   if (!header) header = 'Extract Module';
 
+  const assetsStr = !Array.isArray(assetFile)
+    ? 'asset: '.padStart(padWidth) + `${cyanBright(assetFile)}`
+    : 'asset chunks: '.padStart(padWidth) +
+      '\n' +
+      magenta('- '.padStart(padWidth) + assetFile.join('\n' + '- '.padStart(padWidth)));
+
+  const issuersStr =
+    issuerFiles.length === 1
+      ? magenta(issuerFiles[0])
+      : '\n' + magenta('- '.padStart(padWidth) + issuerFiles.join('\n' + '- '.padStart(padWidth)));
+
   outToConsole(
     `${black.bgGreen`[${pluginName}]`}${black.bgWhite` ${header} `}\n` +
-      'asset: '.padStart(padWidth) +
-      `${cyanBright(assetFile)}\n` +
+      assetsStr +
+      '\n' +
       'to: '.padStart(padWidth) +
       `${cyanBright(outputPath)}\n` +
       'source: '.padStart(padWidth) +
       `${cyan(sourceFile)}\n` +
       'from: '.padStart(padWidth) +
-      '\n' +
-      magenta('- '.padStart(padWidth) + issuerFiles.join('\n' + '- '.padStart(padWidth))) +
+      issuersStr +
       '\n'
   );
 };
