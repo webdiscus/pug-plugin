@@ -1,5 +1,14 @@
 # Change log
 
+## 4.8.0 (2023-01-03)
+- feat: resolve required resources in attribute blocks:
+  ```pug
+  img&attributes({
+    src: require('./image.png'),
+    srcset: `${require('./image1.png')} 80w, ${require('./image2.png')} 90w`,
+  })
+  ```
+
 ## 4.7.0 (2022-12-31)
 - feat: add the `js.verbose` option to display extract info
 - feat: add the `js.outputPath` option
