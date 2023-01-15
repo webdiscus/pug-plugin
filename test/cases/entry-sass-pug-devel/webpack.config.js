@@ -11,7 +11,7 @@ module.exports = {
   },
 
   entry: {
-    styles: './src/assets/main.scss',
+    style: './src/assets/main.scss',
     index: './src/index.pug',
   },
 

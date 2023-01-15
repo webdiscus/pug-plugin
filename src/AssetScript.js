@@ -73,7 +73,7 @@ class AssetScript {
    * Resolve script file from request.
    *
    * @param {string} request The asset request.
-   * @return {string|null} Return null if the request is not a script required in Pug.
+   * @return {string|null} Return null if the request is not a script required in the template.
    */
   static resolveFile(request) {
     const [resource] = request.split('?', 1);
@@ -101,6 +101,7 @@ class AssetScript {
     const usedScripts = new Map();
     const realSplitFiles = new Set();
     const allSplitFiles = new Set();
+    const trashFiles = new Set();
 
     for (let chunk of chunks) {
       if (chunk.chunkReason && chunk.chunkReason.startsWith('split chunk')) {
@@ -126,7 +127,7 @@ class AssetScript {
       const chunkGroup = namedChunkGroups.get(name);
 
       if (!chunkGroup) {
-        // prevent error when in HMR mode after removing a script in pug
+        // prevent error when in HMR mode after removing a script in the template
         continue;
       }
 
@@ -140,8 +141,14 @@ class AssetScript {
         const chunkFile = chunkFiles.values().next().value;
         const assetFile = Asset.getOutputFile(chunkFile, issuerFile);
 
-        newContent = content.replace(sourceFile, assetFile);
-        realSplitFiles.add(chunkFile);
+        if (asset.inline === true) {
+          const source = assets[assetFile].source();
+          newContent = content.replace(sourceFile, source);
+          trashFiles.add(assetFile);
+        } else {
+          newContent = content.replace(sourceFile, assetFile);
+          realSplitFiles.add(chunkFile);
+        }
 
         // add verbose info
         asset.chunkFiles = assetFile;
@@ -161,7 +168,7 @@ class AssetScript {
         // generate additional scripts of chunks
         const chunkScripts = usedScripts.get(issuerFile);
         for (let chunkFile of chunkFiles) {
-          // avoid generate a script of the same split chunk used in different js files required in one pug file,
+          // avoid generate a script of the same split chunk used in different js files required in one template file,
           // happens when used optimisation.splitChunks
           if (!chunkScripts.has(chunkFile)) {
             const assetFile = Asset.getOutputFile(chunkFile, issuerFile);
@@ -190,6 +197,11 @@ class AssetScript {
       if (!realSplitFiles.has(file)) {
         compilation.deleteAsset(file);
       }
+    }
+
+    // remove trash files
+    for (let file of trashFiles) {
+      compilation.deleteAsset(file);
     }
   }
 }

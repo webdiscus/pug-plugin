@@ -23,10 +23,10 @@ module.exports = {
     'assets/css/styles': './src/views/index.css',
 
     about: './src/views/about/index.pug',
-    'assets/css/about': './src/views/about/styles.css',
+    'assets/css/about': './src/views/about/style.css',
 
     'pages/home': './src/views/home/index.pug',
-    'assets/css/home': './src/views/home/styles.css',
+    'assets/css/home': './src/views/home/style.css',
   },
 
   plugins: [

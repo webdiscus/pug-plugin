@@ -1,6 +1,5 @@
 const path = require('path');
 const PugPlugin = require('../../../');
-//const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   output: {
@@ -9,7 +8,6 @@ module.exports = {
 
   entry: {
     index: './src/views/index.pug',
-    //styles: './src/views/styles.scss',
   },
 
   plugins: [
@@ -29,7 +27,6 @@ module.exports = {
       {
         test: /\.(css|sass|scss)$/,
         use: ['css-loader', 'sass-loader'],
-        //use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(png|jpg|jpeg|ico)/,

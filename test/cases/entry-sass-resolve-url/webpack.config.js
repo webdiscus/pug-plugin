@@ -18,7 +18,7 @@ module.exports = {
 
   entry: {
     // test import scss via entry point
-    vendor: './src/vendor/styles.scss',
+    vendor: './src/vendor/style.scss',
     index: './src/views/index.pug',
   },
 

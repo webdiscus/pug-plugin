@@ -17,6 +17,11 @@ class Asset {
    */
   static fileIndex = {};
 
+  /**
+   *
+   * @param {string} outputPath
+   * @param {string | undefined} publicPath
+   */
   static init({ outputPath, publicPath }) {
     if (typeof publicPath === 'function') {
       publicPath = publicPath.call(null, {});
@@ -51,21 +56,17 @@ class Asset {
   /**
    * Get the publicPath.
    *
-   * @param issuer
-   * @return {string|*|string}
+   * @param {string | null} assetFile The output asset filename relative by output path.
+   * @return {string}
    */
-  static getPublicPath(issuer) {
-    let isAutoRelative = false;
-    if (issuer) {
-      const [issuerFile] = issuer.split('?', 1);
-      isAutoRelative = this.isRelativePublicPath && !issuerFile.endsWith('.pug');
-    }
+  static getPublicPath(assetFile = null) {
+    let isAutoRelative = assetFile && this.isRelativePublicPath && !assetFile.endsWith('.html');
 
     if (this.isAutoPublicPath || isAutoRelative) {
-      if (!issuer) return '';
+      if (!assetFile) return '';
 
-      const issuerFullFilename = path.resolve(this.outputPath, issuer);
-      const context = path.dirname(issuerFullFilename);
+      const fullFilename = path.resolve(this.outputPath, assetFile);
+      const context = path.dirname(fullFilename);
       const publicPath = path.relative(context, this.outputPath) + '/';
 
       return isWin ? pathToPosix(publicPath) : publicPath;
@@ -77,18 +78,14 @@ class Asset {
   /**
    * Get the output asset file regards the publicPath.
    *
-   * @param {string} assetFile
-   * @param {string} issuer
+   * @param {string} assetFile The output asset filename relative by output path.
+   * @param {string} issuer The output issuer filename relative by output path.
    * @return {string}
    */
   static getOutputFile(assetFile, issuer) {
-    let isAutoRelative = false;
-    if (issuer) {
-      const [issuerFile] = issuer.split('?', 1);
-      isAutoRelative = this.isRelativePublicPath && !issuerFile.endsWith('.pug');
-    }
+    let isAutoRelative = issuer && this.isRelativePublicPath && !issuer.endsWith('.html');
 
-    // if public path is relative, then all resource required not in Pug file must be auto resolved
+    // if public path is relative, then a resource using not in the template file must be auto resolved
     if (this.isAutoPublicPath || isAutoRelative) {
       if (!issuer) return assetFile;
 
@@ -173,6 +170,22 @@ class Asset {
     }
 
     return module.__isStyle;
+  }
+
+  /**
+   * Whether request contains the `inline` URL query param.
+   *
+   * TODO: compare perf with url parse.
+   *
+   * @param {string} request
+   * @return {boolean}
+   */
+  static isInline(request) {
+    if (!request) return false;
+
+    const [, query] = request.split('?', 2);
+
+    return query != null && /(?:^|&)inline(?:$|&)/.test(query);
   }
 }
 

@@ -37,10 +37,10 @@ module.exports = {
                 // Static resource URL from public web path should not be parsed.
                 // Leave as is:
                 //   img(src='/assets/image.png')
-                //   link(rel='stylesheet' href='assets/styles.css')
+                //   link(rel='stylesheet' href='assets/style.css')
                 // Must be processed:
                 //   img(src=require('./image.png'))
-                //   link(rel='stylesheet' href=require('./styles.css'))
+                //   link(rel='stylesheet' href=require('./style.css'))
                 urlFilter: (attribute, value) => path.isAbsolute(value) && fs.existsSync(value),
               },
             },

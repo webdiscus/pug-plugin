@@ -1,4 +1,5 @@
 import path from 'path';
+import ansis from 'ansis';
 import { readDirRecursiveSync, readTextFileSync } from './file';
 import { compile } from './webpack';
 
@@ -59,7 +60,7 @@ export const stdoutContain = function (PATHS, relTestCasePath, containString, do
 
   compile(PATHS, relTestCasePath, {}).then(() => {
     const { calls } = stdout.mock;
-    const output = calls.length > 0 ? calls[0][0] : '';
+    const output = calls.length > 0 ? ansis.strip(calls[0][0]) : '';
 
     stdout.mockClear();
     stdout.mockRestore();

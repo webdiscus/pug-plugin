@@ -2,7 +2,7 @@ const AssetTrash = require('./AssetTrash');
 const Resolver = require('./Resolver');
 
 // supports for responsive-loader
-const ResponsiveLoader = require('./extras/ResponsiveLoader');
+const ResponsiveLoader = require('./Extras/ResponsiveLoader');
 
 class AssetResource {
   /**

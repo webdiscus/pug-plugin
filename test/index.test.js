@@ -1,6 +1,6 @@
 import path from 'path';
 import { compareFileListAndContent, exceptionContain, stdoutContain } from './utils/helpers';
-import { PugPluginError, PugPluginException } from '../src/Exceptions';
+import { PluginError, PluginException } from '../src/Messages/Exception';
 import { parseQuery } from '../src/Utils';
 import AssetEntry from '../src/AssetEntry';
 
@@ -168,7 +168,7 @@ describe('source map', () => {
 });
 
 describe('integration tests', () => {
-  test('Hello World! Zero config.', (done) => {
+  test('Hello World!', (done) => {
     compareFileListAndContent(PATHS, 'hello-world', done);
   });
 
@@ -226,10 +226,6 @@ describe('integration tests', () => {
 });
 
 describe('extract css', () => {
-  test('entry: css data-url', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-data-url', done);
-  });
-
   test('entry: css font-face src', (done) => {
     compareFileListAndContent(PATHS, 'entry-sass-font-face-src', done);
   });
@@ -251,12 +247,12 @@ describe('extract css', () => {
     compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
   });
 
-  test('@import url() in SCSS', (done) => {
-    compareFileListAndContent(PATHS, 'extract-css-import-url', done);
+  test('@import url() in CSS', (done) => {
+    compareFileListAndContent(PATHS, 'import-url-in-css', done);
   });
 
-  test('@import url() in CSS', (done) => {
-    compareFileListAndContent(PATHS, 'import-url-css', done);
+  test('@import url() in SCSS', (done) => {
+    compareFileListAndContent(PATHS, 'import-url-in-scss', done);
   });
 });
 
@@ -323,10 +319,6 @@ describe('require assets', () => {
     compareFileListAndContent(PATHS, 'require-and-entry-styles', done);
   });
 
-  test('require css in pug and resolve in css the url(image), method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-css-image-render', done);
-  });
-
   test('require same asset with different raw request', (done) => {
     compareFileListAndContent(PATHS, 'require-assets-same-pug-scss', done);
   });
@@ -335,31 +327,35 @@ describe('require assets', () => {
     compareFileListAndContent(PATHS, 'multiple-chunks-same-filename', done);
   });
 
+  test('resolve the url(image) in CSS, method render', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-url-in-css-render', done);
+  });
+
   // TODO: fix the issue
-  // test('require css in pug and resolve in css the url(image), method html', (done) => {
-  //   compareFileListAndContent(PATHS, 'require-css-image-html', done);
+  // test('resolve the url(image) in CSS, method html', (done) => {
+  //   compareFileListAndContent(PATHS, 'resolve-url-in-css-html', done);
   // });
 });
 
-describe('inline', () => {
-  test('require inline style', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-inline', done);
+describe('inline style & script', () => {
+  test('inline script using URL query `?inline`', (done) => {
+    compareFileListAndContent(PATHS, 'inline-script-query', done);
   });
 
-  test('require inline style with source-map', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-inline-source-map', done);
+  test('inline style using URL query `?inline` and resolve url() in CSS', (done) => {
+    compareFileListAndContent(PATHS, 'inline-style-query-with-resolve-url', done);
   });
 
-  test('require inline style with inline-source-map', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-inline-source-map-inline', done);
+  test('inline style using asset/source', (done) => {
+    compareFileListAndContent(PATHS, 'inline-style-asset-source', done);
   });
 
-  test('require inline style and style as file', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-inline-and-file', done);
+  test('inline style using asset/source with source-map', (done) => {
+    compareFileListAndContent(PATHS, 'inline-style-asset-source-with-source-map', done);
   });
 
-  test('resolve URL', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-inline-resolve-url', done);
+  test('inline style using asset/source and style as file', (done) => {
+    compareFileListAndContent(PATHS, 'inline-style-asset-source-as-inline-and-file', done);
   });
 });
 
@@ -459,6 +455,10 @@ describe('responsive images', () => {
 });
 
 describe('inline assets', () => {
+  test('inline-asset-bypass-data-url', (done) => {
+    compareFileListAndContent(PATHS, 'inline-asset-bypass-data-url', done);
+  });
+
   test('query ?inline, method render', (done) => {
     compareFileListAndContent(PATHS, 'inline-asset-query', done);
   });
@@ -520,10 +520,10 @@ describe('exception tests', () => {
     const containString = 'previous error';
 
     try {
-      PugPluginError('previous error');
+      PluginError('previous error');
     } catch (error) {
       try {
-        PugPluginError('last error', error);
+        PluginError('last error', error);
       } catch (error) {
         expect(error.toString()).toContain(containString);
         done();
@@ -534,12 +534,12 @@ describe('exception tests', () => {
   test('exception test: nested exceptions', (done) => {
     const containString = 'last error';
 
-    const originalError = new PugPluginException('original error');
+    const originalError = new PluginException('original error');
     try {
-      PugPluginError('previous error', originalError);
+      PluginError('previous error', originalError);
     } catch (error) {
       try {
-        PugPluginError('last error', error);
+        PluginError('last error', error);
       } catch (error) {
         expect(error.toString()).toContain(containString);
         done();
@@ -575,5 +575,12 @@ describe('exception tests', () => {
   test('exception: multiple chunks with same filename', (done) => {
     const containString = 'Multiple chunks emit assets to the same filename';
     exceptionContain(PATHS, 'exception-multiple-chunks-same-filename', containString, done);
+  });
+});
+
+describe('DEPRECATE tests', () => {
+  test('deprecate-option-extractCss', (done) => {
+    const containString = `Use the 'css' option name instead of 'extractCss'`;
+    stdoutContain(PATHS, 'deprecate-option-extractCss', containString, done);
   });
 });

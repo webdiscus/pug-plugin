@@ -19,13 +19,7 @@ module.exports = {
     index: './src/views/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      js: {
-        filename: '[name].[contenthash:8].js',
-      },
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
@@ -42,7 +36,10 @@ module.exports = {
         test: /\.(svg)$/i,
         resourceQuery: /inline/,
         type: 'asset/inline',
-        loader: 'svgo-loader', // test svg processed via loader
+        // test of processing via svgo-loader
+        // warning by `npm i svgo-loader`:
+        // npm WARN deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated
+        loader: 'svgo-loader',
       },
     ],
   },

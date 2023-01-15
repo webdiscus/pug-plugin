@@ -1,5 +1,33 @@
 # Change log
 
+## 4.9.0 (2023-01-15)
+- DEPRECATE: use the `css` option name instead of the `extractCss`
+- DEPRECATE: the outdated syntax of CSS option is deprecated and in next version will be removed:
+  ```
+  new PugPlugin({
+    modules: [
+      PugPlugin.extractCss({
+        filename: 'assets/css/[name].[contenthash].css',
+      }),
+    ],
+  }),
+  ```
+  Use the new syntax, since `v4.6.0`:
+  ```
+  new PugPlugin({
+    css: {
+      filename: 'assets/css/[name].[contenthash].css',
+    },
+  }),
+  ```
+- feat: add support of inline script using the `?inline` query
+- fix: resolving inlined styles on windows
+- refactor: optimize code and messages output
+- test: refactor tests
+- test: add test for inline JS
+- chore: update dev packages
+- docs: update readme
+
 ## 4.8.0 (2023-01-03)
 - feat: resolve required resources in attribute blocks:
   ```pug
@@ -37,7 +65,6 @@
     },
   }),
   ```
-  Note: don't worry, the option name `extractCss` will be supported in the future for compatibility.
 - feat: add new `js` option with `filename` property as alias for Webpack `output.filename`.
   ```js
   new PugPlugin({

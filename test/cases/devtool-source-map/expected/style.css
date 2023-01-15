@@ -1,0 +1,2 @@
+body{color:#b22222;font-size:40px}h1{color:#191970;font-size:40px}.test::before{content:"Schöne Grüße"}.test-2::before{content:"✓"}.test-3::before{content:"♠"}@supports not (display: grid){div{float:right}}@supports(display: flex){@media screen and (min-width: 900px){article{display:flex}}}@layer base, special;@layer special{.item{color:#639}}@layer base{.item{color:green}}
+/*# sourceMappingURL=style.css.map */

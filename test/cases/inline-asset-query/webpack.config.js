@@ -20,13 +20,7 @@ module.exports = {
     index: './src/views/index.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      js: {
-        filename: '[name].[contenthash:8].js',
-      },
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [

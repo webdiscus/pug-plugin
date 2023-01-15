@@ -3,15 +3,17 @@ html
     link(rel='icon' href=require('~Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
     link(rel='icon' href=require('~Images/favicons/favicon-32px.png') type='image/png' sizes='32x32')
 
-    link(rel='stylesheet' href=require('../assets/scss/styles.scss'))
+    link(rel='stylesheet' href=require('../assets/styles/style.scss'))
   body
     //- Test of caching of the same resources used in another file.
 
     h1 Home
     //- size < 2K, data-URL
     img.inline(src=require('~Images/icons/iphone.png'))
+
+    //- size < 2K, inline SVG
     img.inline(src=require('~Images/icons/iphone.svg'))
 
-    //- size > 2K than resource file
+    //- size > 2K then resource file
     img.file(src=require('~Images/pug-logo.png'))
     img.file(src=require('~Images/pug-logo.svg'))

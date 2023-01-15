@@ -106,7 +106,7 @@ class AssetEntry {
     this.add(entry, assetEntryOptions);
     this.compilationEntryNames.add(name);
 
-    // adds the entry of the script from pug to the compilation
+    // adds the entry of the script from the template to the compilation
     // see reference: node_modules/webpack/lib/EntryPlugin.js
     const entryDependency = this.EntryPlugin.createDependency(importFile, { name });
     this.compilation.addEntry(context, entryDependency, entry, (err) => {

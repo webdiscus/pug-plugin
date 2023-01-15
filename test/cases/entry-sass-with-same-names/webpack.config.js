@@ -13,8 +13,8 @@ module.exports = {
   entry: {
     index: './src/views/index.pug',
     main: './src/assets/main.scss', // with same name is required the style in pug
-    'page/about': './src/views/about/styles.scss',
-    'page/contact': './src/views/contact/styles.scss',
+    'page/about': './src/views/about/style.scss',
+    'page/contact': './src/views/contact/style.scss',
   },
 
   plugins: [
@@ -22,7 +22,7 @@ module.exports = {
       css: {
         // Note:
         //   - the [name] for a style in entry is the complete entry name, e.g.:
-        //     for `'assets/css/about' : './src/views/about/styles.scss'` the filename is `/somepath/assets/css/about.1234abcd.css`
+        //     for `'assets/css/about' : './src/views/about/style.scss'` the filename is `/somepath/assets/css/about.1234abcd.css`
         //   - the [name] for required file in pug is basename of the file, e.g.:
         //     for `require('../assets/main.scss')` the filename is `/somepath/main.1234abcd.css`
         //

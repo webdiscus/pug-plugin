@@ -1,0 +1,9 @@
+html
+  head
+    title Test
+    //- load script as file
+    script(src=require('Scripts/main.js') defer='defer')
+    //- inline script
+    script=require('Scripts/inline-main.js?inline')
+  body
+    h1 Home

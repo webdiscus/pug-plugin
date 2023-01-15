@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "4.8.0",
+  "version": "4.9.0",
   "description": "Pug plugin for webpack compiles Pug files to HTML, extracts CSS and JS from their sources specified in Pug.",
   "keywords": [
     "pug",
@@ -8,9 +8,11 @@
     "loader",
     "webpack",
     "html",
+    "css",
+    "js",
     "scss",
     "style",
-    "js",
+    "script",
     "svg",
     "responsive",
     "image",
@@ -61,13 +63,13 @@
     "webpack": ">=5.32.0"
   },
   "dependencies": {
-    "@webdiscus/pug-loader": "2.10.0",
+    "@webdiscus/pug-loader": "2.10.2",
     "ansis": "1.5.5",
     "json5": "^2.2.2",
     "js-beautify": "^1.14.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.7",
+    "@babel/core": "^7.20.12",
     "@babel/preset-env": "^7.20.2",
     "@test-fixtures/lorem": "0.0.2",
     "@test-fixtures/js": "0.0.2",
@@ -80,7 +82,7 @@
     "cssnano": "^5.1.14",
     "normalize.css": "^8.0.1",
     "postcss-loader": "^7.0.2",
-    "prettier": "^2.8.1",
+    "prettier": "^2.8.2",
     "responsive-loader": "^3.1.2",
     "sass": "^1.57.1",
     "sass-loader": "^13.2.0",

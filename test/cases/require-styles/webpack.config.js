@@ -1,5 +1,6 @@
 const path = require('path');
 const PugPlugin = require('../../../');
+const extractCss = require('../../../src/Modules/extractCss');
 
 const isProduction = true;
 
@@ -28,7 +29,9 @@ module.exports = {
       js: {
         filename: '[name].[contenthash:8].js',
       },
-      css: {
+      // test deprecation message
+      // TODO: replace the `extractCss` with `css` in v5.0
+      extractCss: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },
     }),

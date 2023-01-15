@@ -66,12 +66,11 @@ class AssetInline {
 
   /**
    * @param {string} request
-   * @param {string} ext
-   * @returns {boolean}
+   * @return {boolean}
    */
-  static hasExt(request, ext) {
+  static isSvgFile(request) {
     const [file] = request.split('?', 1);
-    return file.endsWith(ext);
+    return file.endsWith('.svg');
   }
 
   /**
@@ -89,8 +88,9 @@ class AssetInline {
   /**
    * @param {string} sourceFile The source filename of asset.
    * @param {string} issuer The output filename of the issuer.
+   * @param {boolean} isEntry Whether the issuer is an entry file.
    */
-  static add(sourceFile, issuer) {
+  static add(sourceFile, issuer, isEntry) {
     if (!this.data.has(sourceFile)) {
       this.data.set(sourceFile, {
         cache: null,
@@ -98,8 +98,8 @@ class AssetInline {
     }
     const item = this.data.get(sourceFile);
 
-    if (this.hasExt(sourceFile, 'svg') && this.hasExt(issuer, 'pug')) {
-      // svg can be inline in pug file only, in css is as data URL
+    if (isEntry && this.isSvgFile(sourceFile)) {
+      // SVG can only be inlined in HTML, in CSS it's a data URL
       if (!item.inlineSvg) {
         item.inlineSvg = {
           issuers: new Set(),
@@ -129,7 +129,7 @@ class AssetInline {
 
     if (!item) return;
 
-    if (this.hasExt(sourceFile, 'svg')) {
+    if (this.isSvgFile(sourceFile)) {
       // extract SVG content from processed source via a loader like svgo-loader
       const svg = module.originalSource().source().toString();
 
@@ -171,7 +171,7 @@ class AssetInline {
     const svgAttrs = parseAttributes(svgAttrsString, ['id', 'version', 'xml', 'xmlns']);
     const innerSVG = svg.slice(svgAttrsEndPos + 1, svgCloseTagPos - svgOpenTagStartPos);
 
-    // encode reserved chars in data URL for IE 9-11 (enable as needed)
+    // encode reserved chars in data URL for IE 9-11 (enable if needed)
     //const reservedChars = /["#%{}<>]/g;
     // const charReplacements = {
     //   '"': "'",

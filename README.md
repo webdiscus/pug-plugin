@@ -57,13 +57,13 @@ module.exports = {
 
 Add source scripts and styles directly to Pug using `require()`:
 ```pug
-link(href=require('./styles.scss') rel='stylesheet')
+link(href=require('./style.scss') rel='stylesheet')
 script(src=require('./main.js') defer='defer')
 ```
 
 The generated HTML contains hashed output CSS and JS filenames:
 ```html
-<link href="/assets/css/styles.05e4dd86.css" rel="stylesheet">
+<link href="/assets/css/style.05e4dd86.css" rel="stylesheet">
 <script src="/assets/js/main.f4b855d8.js" defer="defer"></script>
 ```
 
@@ -106,12 +106,13 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
    - [Using Pug in JavaScript with `render` method](#example-pug-in-js-render)
    - [Using Pug in JavaScript with `compile` method](#example-pug-in-js-compile)
 6. [Recipes](#recipes)
+   - [How to inline CSS in HTML](#recipe-inline-css)
+   - [How to inline JS in HTML](#recipe-inline-js)
    - [How to keep the source folder structure in output directory for individual Pug files](#recipe-keep-individual-pug-dirs)
    - [How to keep the source folder structure in output directory for all Pug files](#recipe-keep-all-pug-dirs)
    - [How to keep the source folder structure in output directory for all resources like fonts](#recipe-keep-all-resource-dirs)
    - [How to load JS and CSS for browser from `node_modules` in Pug](#recipe-default-script-style-from-module)
    - [How to import style from `node_module` in SCSS](#recipe-import-style-from-module)
-   - [How to inline CSS in HTML](#recipe-inline-css)
    - [How to use @import url() in CSS](#recipe-import-url-in-css)
    - [How to config `splitChunks`](#recipe-split-chunks)
    - [How to split multiple node modules under their own names](#recipe-split-many-modules)
@@ -129,16 +130,17 @@ The fundamental difference between `mini-css-extract-plugin` and `pug-plugin`:
 
 - Pug file is entry-point for all resources (styles, scripts)
 - compiles HTML files from Pug files defined in Webpack entry
-- extracts CSS and JS from source scripts and styles specified directly in Pug
-- generated HTML contains already hashed CSS and JS output filenames
+- extracts CSS from source style loaded in Pug via a `link` tag
+- extracts JS from source script loaded in Pug via a `script` tag
+- generated HTML contains hashed CSS and JS output filenames
 - resolves source files of URLs in CSS and extract resolved resources to output path\
   not need more additional plugin such as [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
 - support the `auto` publicPath
 - support the `pretty` formatting  of generated HTML
+- support the `inline CSS` in HTML from processed source style
 - support the module types `asset/resource` `asset/inline` `asset`
-- support the `base64 encoding` of binary images as data-URL in HTML and CSS
-- support the `inline CSS` in HTML
-- support the `inline SVG` in HTML
+- support the `inline image` as `base64 encoding` of binary images (png, jpg, etc.) in HTML and CSS
+- support the `inline SVG` as SVG tag in HTML
 - support the `inline SVG` as data-URL in CSS
   ```scss
   background: url('./icons/iphone.svg') // CSS: url("data:image/svg+xml,<svg>...</svg>")
@@ -176,14 +178,13 @@ module.exports = {
   entry: {
     // define Pug files here
     index: './src/views/index.pug', // => dist/index.html
-    'about/index': './src/views/about/index.pug', // => dist/about/index.html
-    'about/plugin': './src/views/about/plugin/index.pug', // => dist/about/plugin.html
+    'pages/about': './src/views/about/index.pug', // => dist/pages/about.html
     // ...
   },
 
   plugins: [
     new PugPlugin({
-      pretty: true, // formatting HTML, should be used in development mode
+      pretty: true, // formatting HTML, useful for development mode
       js: {
         // output filename of extracted JS file from source script
         filename: 'assets/js/[name].[contenthash:8].js',
@@ -199,7 +200,7 @@ module.exports = {
     rules: [
       {
         test: /\.pug$/,
-        loader: PugPlugin.loader, // the Pug loader
+        loader: PugPlugin.loader, // Pug loader
       },
       {
         test: /\.(css|sass|scss)$/,
@@ -215,15 +216,15 @@ module.exports = {
 > - The key of `entry` object is a relative output file w/o extension `.html` in output path.
 > - The default `output.path` is `path.join(__dirname, 'dist')`.
 > - The default `output.publicPath` is `auto`, but for faster compilation is recommended to use a fixed value e.g. `'/'`.
-> - The default JS output filename is `[name].js`, where the `[name]` is the filename of a source file.
-> - The default CSS output filename is `[name].css`, where the `[name]` is the filename of a source file.
+> - The default JS output filename is `[name].js`, where the `[name]` is the base filename of a source file.
+> - The default CSS output filename is `[name].css`, where the `[name]` is the base filename of a source file.
 
 Add source styles and scripts using `require()` directly in a Pug file, e.g. `src/views/index.pug`:
 ```pug
 html
   head
     //- add styles in head
-    link(href=require('./styles.scss') rel='stylesheet')
+    link(href=require('./style.scss') rel='stylesheet')
   body
     h1 Hello Pug!
     
@@ -235,7 +236,7 @@ The generated HTML:
 ```html
 <html>
   <head>
-    <link href="/assets/css/styles.f57966f4.css" rel="stylesheet">
+    <link href="/assets/css/style.f57966f4.css" rel="stylesheet">
   </head>
   <body>
     <h1>Hello Pug!</h1>
@@ -358,14 +359,14 @@ Default properties:
 The `filename` property see by [filename option](#plugin-option-filename).
 The `outputPath` property see by [outputPath option](#plugin-option-outputPath).
 
-The option to extract CSS from style sources specified in Pug using `require()`, e.g.:
+The option to extract CSS from a style source file loaded in the Pug tag `link` using `require()`:
 ```pug
-link(href=require('./styles.scss') rel='stylesheet')
+link(href=require('./style.scss') rel='stylesheet')
 ```
 
 > **Warning**
 >
-> Don't import source styles in JavaScript! Styles must be specified directly in Pug.
+> Don't import source styles in JavaScript! Styles must be loaded directly in Pug.
 
 The default CSS output filename is `[name].css`. You can specify your own filename using [webpack filename substitutions](https://webpack.js.org/configuration/output/#outputfilename):
 
@@ -382,8 +383,8 @@ module.exports = {
 };
 ```
 
-The `name` is the filename of required style source.
-For example, if source file is `styles.scss`, then output filename will be `assets/css/styles.1234abcd.css`.\
+The `[name]` is the base filename of a loaded style.
+For example, if source file is `style.scss`, then output filename will be `assets/css/style.1234abcd.css`.\
 If you want to have a different output filename, you can use the `filename` options as the [function](https://webpack.js.org/configuration/output/#outputfilename).
 
 > **Warning**
@@ -409,7 +410,7 @@ The `outputPath` property see by [outputPath option](#plugin-option-outputPath).
 > - the extract `js` module is always enabled
 > - the `test` property not exist because all required scripts are automatically detected
 
-The option to extract JS from script sources specified in Pug using `require()`, e.g.:
+The option to extract JS from a script source file loaded in the Pug tag `script` using `require()`:
 ```pug
 script(src=require('./main.js'))
 ```
@@ -428,6 +429,11 @@ module.exports = {
   ],
 };
 ```
+
+The `[name]` is the base filename of a loaded script.
+For example, if source file is `main.js`, then output filename will be `assets/js/main.1234abcd.js`.\
+If you want to have a different output filename, you can use the `filename` options as the [function](https://webpack.js.org/configuration/output/#outputfilename).
+
 
 ### `extractComments`
 Type: `boolean` Default: `false`<br>
@@ -626,7 +632,7 @@ The Pug template `./src/pages/home/index.pug`:
 html
   head
     link(rel="icon" type="image/png" href=require('Images/favicon.png'))
-    link(href=require('./styles.scss') rel='stylesheet')
+    link(href=require('./style.scss') rel='stylesheet')
   body
     .header Here is the header with background image
     h1 Hello Pug!
@@ -639,7 +645,7 @@ The source script `./src/pages/home/main.js`
 console.log('Hello Pug!');
 ```
 
-The source styles `./src/pages/home/styles.scss`
+The source styles `./src/pages/home/style.scss`
 ```scss
 // Pug plugin can resolve styles in node_modules. 
 // The package 'material-icons' must be installed in packages.json.
@@ -666,7 +672,7 @@ body {
 > 
 > The Pug plugin can resolve an url (as relative path, with alias, from node_modules) without requiring `source-maps`. Do not need additional loader such as `resolve-url-loader`.
 
-The generated CSS `dist/assets/css/styles.f57966f4.css`:
+The generated CSS `dist/assets/css/style.f57966f4.css`:
 ```css
 /*
  * All styles of npm package 'material-icons' are included here.
@@ -711,7 +717,7 @@ The generated HTML `dist/index.html` contains the hashed output filenames of the
 ```html
 <html>
   <head>
-    <link rel="stylesheet" href="/assets/css/styles.f57966f4.css">
+    <link rel="stylesheet" href="/assets/css/style.f57966f4.css">
   </head>
   <body>
     <div class="header">Here is the header with background image</div>
@@ -1122,13 +1128,11 @@ Example how to import the style theme `tomorrow` of the [prismjs](https://github
 
 > **Note**
 >
-> use the `@use` instead of `@import`, because it is [deprecated](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
+> Use the `@use` instead of `@import`, because it is [deprecated](https://github.com/sass/sass/blob/main/accepted/module-system.md#timeline).
 
 
 <a id="recipe-inline-css" name="recipe-inline-css" href="#recipe-inline-css"></a>
 ### Inline CSS in HTML
-
-To inline CSS extracted from style source in HTML use the `?inline` URL query.
 
 _Webpack config rule for styles_
 ```js
@@ -1138,7 +1142,7 @@ _Webpack config rule for styles_
 },
 ```
 
-_styles.scss_
+For example, the _style.scss_
 ```scss
 $color: crimson;
 h1 {
@@ -1146,28 +1150,24 @@ h1 {
 }
 ```
 
-_Pug_
+Add the `?inline` query to the source filename which you want to inline:
 
 ```pug
 html
   head
-    // load CSS as file
+    //- load style as file
     link(href=require('./main.scss') rel='stylesheet')
-    
-    // inline CSS from styles.scss
-    style=require('./styles.scss?inline')
+    //- inline style
+    style=require('./style.scss?inline')
   body
     h1 Hello World!
 ```
 
-_Generated HTML_
+The generated HTML contains inline CSS already processed via Webpack:
 ```html
 <html>
   <head>
-    <!-- load CSS as file -->
     <link href="assets/css/main.05e4dd86.css" rel="stylesheet">
-
-    <!-- inline CSS from styles.scss -->
     <style>
       h1 {
         color: crimson;
@@ -1178,7 +1178,48 @@ _Generated HTML_
     <h1>Hello Pug!</h1>
   </body>
 </html>
+```
 
+> **Note**
+>
+> To enable source map in inline CSS set the Webpack option `devtool: 'source-map'`.
+
+
+<a id="recipe-inline-js" name="recipe-inline-js" href="#recipe-inline-js"></a>
+## How to inline JS in HTML
+
+For example, the _main.js_:
+```js
+console.log('Hello JS!');
+```
+
+Add the `?inline` query to the source filename which you want to inline:
+
+```pug
+html
+  head
+    //- load script as file
+    script(src=require('./main.js'))
+    //- inline script
+    script=require('./main.js?inline')
+  body
+    h1 Hello World!
+```
+
+The generated HTML contains inline JS already compiled via Webpack:
+
+```html
+<html>
+  <head>
+    <script src="assets/js/main.992ba657.js" defer="defer"></script>
+    <script>
+      (()=>{"use strict";console.log("Hello JS!")})();
+    </script>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+  </body>
+</html>
 ```
 
 <a id="recipe-import-url-in-css" name="recipe-import-url-in-css" href="#recipe-import-url-in-css"></a>
@@ -1284,7 +1325,7 @@ module.exports = {
 > Splitting CSS to many chunk is principal impossible. Splitting works only for JS files.
 > If you use vendor styles in your style file, e.g.: 
 > 
-> _styles.scss_
+> _style.scss_
 > ```scss
 > @use "bootstrap/scss/bootstrap";
 > body {
@@ -1308,7 +1349,7 @@ module.exports = {
 >     //- require module styles separately:
 >     link(href=require('bootstrap/dist/css/bootstrap.min.css') rel='stylesheet')
 >     //- require your styles separately:
->     link(href=require('./styles.scss') rel='stylesheet')
+>     link(href=require('./style.scss') rel='stylesheet')
 >   body
 >     h1 Hello Pug!
 >     script(src=require('./main.js'))
@@ -1437,7 +1478,7 @@ module.exports = {
 ## Also See
 
 - more examples of usages see in [test cases](https://github.com/webdiscus/pug-plugin/tree/master/test/cases)
-- [ansis][ansis] - ANSI color styling of text in terminal
+- [ansis][ansis] - The Node.js lib for ANSI color styling of text in terminal
 - [pug-loader][pug-loader] see here configuration options for `PugPlugin.loader`
 - [pug-loader `:highlight` filter][pug-filter-highlight] highlights code syntax
 - [pug-loader `:markdown` filter][pug-filter-markdown] transform markdown to HTML and highlights code syntax
