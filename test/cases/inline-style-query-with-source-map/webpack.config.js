@@ -3,30 +3,26 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
-  devtool: false,
+  devtool: 'source-map',
+
+  output: {
+    path: path.join(__dirname, 'dist/'),
+  },
 
   resolve: {
     alias: {
       Images: path.join(__dirname, 'src/assets/images/'),
+      Styles: path.join(__dirname, 'src/assets/styles/'),
     },
-  },
-
-  output: {
-    path: path.join(__dirname, 'dist/'),
-    publicPath: '/',
   },
 
   entry: {
     index: './src/views/index.pug',
-    about: './src/views/about.pug?title=about', // test import file with query
+    'pages/about': './src/views/about.pug', // test same inline CSS from different paths
   },
 
   plugins: [
     new PugPlugin({
-      //verbose: true,
-      js: {
-        filename: '[name].[contenthash:8].js',
-      },
       css: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },
@@ -48,16 +44,9 @@ module.exports = {
         use: ['css-loader', 'sass-loader'],
       },
 
-      // images
       {
-        test: /\.(png|svg|jpe?g|webp)$/i,
-        // auto inline by image size
-        type: 'asset',
-        parser: {
-          dataUrlCondition: {
-            maxSize: 1024,
-          },
-        },
+        test: /\.(png|jpg)/,
+        type: 'asset/resource',
         generator: {
           filename: 'assets/img/[name].[hash:8][ext]',
         },

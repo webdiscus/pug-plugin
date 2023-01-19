@@ -1,5 +1,10 @@
 # Change log
 
+## 4.9.1 (2023-01-19)
+- fix: resolving inline script when the `pretty` option is true
+- fix: inline SVG in link tag as data-URL
+- refactor: improve processing of inline SVG
+
 ## 4.9.0 (2023-01-15)
 - DEPRECATE: use the `css` option name instead of the `extractCss`
 - DEPRECATE: the outdated syntax of CSS option is deprecated and in next version will be removed:

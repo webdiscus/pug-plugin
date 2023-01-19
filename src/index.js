@@ -62,17 +62,17 @@ class Plugin extends AssetCompiler {
   /**
    * Override abstract method.
    *
-   * @param {string} content
+   * @param {Compilation} compilation The instance of the webpack compilation.
    * @param {string} sourceFile
-   * @return {string}
+   * @param {string} assetFile
+   * @param {string} source
+   * @return {string|undefined}
    */
-  afterCompile(content, sourceFile) {
+  afterProcess(compilation, { sourceFile, assetFile, source }) {
     // pretty format HTML
-    if (this.options.pretty === true && this.isEntry(sourceFile) && typeof content === 'string') {
-      content = Pretty.format(content);
+    if (this.options.pretty === true && sourceFile && this.isEntry(sourceFile) && typeof source === 'string') {
+      return Pretty.format(source);
     }
-
-    return content;
   }
 }
 

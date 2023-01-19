@@ -343,7 +343,11 @@ describe('inline style & script', () => {
   });
 
   test('inline style using URL query `?inline` and resolve url() in CSS', (done) => {
-    compareFileListAndContent(PATHS, 'inline-style-query-with-resolve-url', done);
+    compareFileListAndContent(PATHS, 'inline-style-query', done);
+  });
+
+  test('inline style with source map using URL query `?inline`', (done) => {
+    compareFileListAndContent(PATHS, 'inline-style-query-with-source-map', done);
   });
 
   test('inline style using asset/source', (done) => {

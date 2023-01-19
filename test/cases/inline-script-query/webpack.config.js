@@ -20,6 +20,7 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
+      pretty: true, // test inline script with pretty
       js: {
         filename: 'assets/js/[name].[contenthash:8].js',
       },
