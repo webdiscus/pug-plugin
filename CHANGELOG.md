@@ -1,5 +1,9 @@
 # Change log
 
+## 4.9.2 (2023-01-20)
+- fix: automatic publicPath must be empty string when used HMR
+- fix: corrupted inline JS code when code contains '$$' chars chain
+
 ## 4.9.1 (2023-01-19)
 - fix: resolving inline script when the `pretty` option is true
 - fix: inline SVG in link tag as data-URL

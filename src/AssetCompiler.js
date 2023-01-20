@@ -265,6 +265,16 @@ class AssetCompiler {
     // entry options
     compiler.hooks.entryOption.tap(pluginName, this.afterProcessEntry);
 
+    // executes by watch/serve only, before the compilation
+    compiler.hooks.watchRun.tap(pluginName, (compiler) => {
+      const { publicPath } = compiler.options.output;
+      if (publicPath == null || publicPath === 'auto') {
+        // By using watch/serve browsers not support an automatic publicPath in HMR script injected into inlined JS,
+        // the output.publicPath must be an empty string.
+        compiler.options.output.publicPath = '';
+      }
+    });
+
     // this compilation
     compiler.hooks.thisCompilation.tap(pluginName, (compilation, { normalModuleFactory, contextModuleFactory }) => {
       this.compilation = compilation;

@@ -154,9 +154,13 @@ class AssetScript {
         const assetFile = Asset.getOutputFile(chunkFile, issuerFile);
 
         if (asset.inline === true) {
-          const source = assets[assetFile].source();
-          newContent = content.replace(sourceFile, source);
-          trashFiles.add(assetFile);
+          const source = assets[chunkFile].source();
+          const pos = content.indexOf(sourceFile);
+          if (pos > -1) {
+            // note: the str.replace(searchValue, replaceValue) is buggy when the replaceValue contains chars chain '$$'
+            newContent = content.slice(0, pos) + source + content.slice(pos + sourceFile.length);
+            trashFiles.add(assetFile);
+          }
         } else {
           newContent = content.replace(sourceFile, assetFile);
           realSplitFiles.add(chunkFile);
