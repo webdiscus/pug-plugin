@@ -235,8 +235,9 @@ class AssetInline {
    * Replacing a tag containing the svg source file with the svg element.
    *
    * @param {Compilation} compilation The instance of the webpack compilation.
+   * @param {boolean} pretty Pretty formatting SVG inserts.
    */
-  static insertInlineSvg(compilation) {
+  static insertInlineSvg(compilation, pretty) {
     if (this.inlineSvgIssueAssets.size === 0) return;
 
     const RawSource = compilation.compiler.webpack.sources.RawSource;
@@ -278,7 +279,11 @@ class AssetInline {
           const [filename] = path.basename(value).split('?', 1);
           const titleStr = 'title' in attrs ? attrs['title'] : 'alt' in attrs ? attrs['alt'] : null;
           const title = titleStr ? `<title>${titleStr}</title>` : '';
-          const inlineSvg = `${NL}<!-- inline: ${filename} -->${NL}<svg${attrsString}>${title}${cache.innerSVG}</svg>${NL}`;
+          
+          let inlineSvg = `<svg${attrsString}>${title}${cache.innerSVG}</svg>`;
+          if (pretty) {
+            inlineSvg = `${NL}<!-- inline: ${filename} -->${NL}${inlineSvg}${NL}`
+          }
 
           output += html.slice(pos, tagStartPos) + inlineSvg;
           pos = tagEndPos;

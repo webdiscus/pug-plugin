@@ -753,7 +753,7 @@ class AssetCompiler {
     }
 
     AssetScript.replaceSourceFilesInCompilation(compilation);
-    AssetInline.insertInlineSvg(compilation);
+    AssetInline.insertInlineSvg(compilation, this.options.pretty);
     AssetSource.inlineSource(compilation);
 
     for (const assetFile in compilation.assets) {
