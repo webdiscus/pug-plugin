@@ -1,15 +1,15 @@
 <div align="center">
-    <h1>
-        <a href="https://pugjs.org">
-            <img height="135" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
-        </a>
-        <a href="https://github.com/webpack/webpack">
-            <img height="120" src="https://webpack.js.org/assets/icon-square-big.svg">
-        </a>
-        <a href="https://github.com/webdiscus/pug-plugin"><br>
-        Pug Plugin
-        </a>
-    </h1>
+  <h1>
+    <a href="https://pugjs.org">
+      <img height="135" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
+    </a>
+    <a href="https://github.com/webpack/webpack">
+      <img height="120" src="https://webpack.js.org/assets/icon-square-big.svg">
+    </a>
+    <a href="https://github.com/webdiscus/pug-plugin"><br>
+    Pug Plugin
+    </a>
+  </h1>
   <div>Pug plugin for Webpack compiles Pug files to HTML, extracts CSS and JS from their sources specified in Pug</div>
 </div>
 
@@ -204,9 +204,9 @@ module.exports = {
 
 > **Note** 
 > 
-> - The key of `entry` object is a relative output file w/o extension `.html` in output path.
+> - The key of `entry` object is an output file w/o extension `.html`, relative by output path.
 > - The default `output.path` is `path.join(__dirname, 'dist')`.
-> - The default `output.publicPath` is `auto`, but for faster compilation is recommended to use a fixed value e.g. `'/'`.
+> - The default `output.publicPath` is `auto`, recommended to use the server-relative `'/'` path.
 > - The default JS output filename is `[name].js`, where the `[name]` is the base filename of a source file.
 > - The default CSS output filename is `[name].css`, where the `[name]` is the base filename of a source file.
 
@@ -275,7 +275,7 @@ module.exports = {
 
 ### `test`
 Type: `RegExp` Default: `/\.pug$/`<br>
-Use the `test` to match module options by source filename of a resource.\
+The `test` option allows то handel only those resources that match their source filename.
 For example, save all extracted  `svg` files from `fonts/` to the separate output directory:
 ```js
 const PugPlugin = require('pug-plugin');
@@ -380,8 +380,8 @@ If you want to have a different output filename, you can use the `filename` opti
 
 > **Warning**
 > 
-> Don't use `mini-css-extract-plugin` or `style-loader`, they are not required more.\
-> The `pug-plugin` extracts CSS much faster than other plugins and resolves all asset URLs in CSS, therefore the `resolve-url-loader` is redundant too.
+> Don't use `mini-css-extract-plugin`, `style-loader`, `resolve-url-loader`, they are not required more.\
+> The `pug-plugin` resolves all resource URLs in CSS and extracts CSS much faster than others.
 
 ### `js`
 Type: `Object`\
@@ -430,10 +430,10 @@ If you want to have a different output filename, you can use the `filename` opti
 Type: `boolean` Default: `false`<br>
 Enable / disable extraction of comments to `*.LICENSE.txt` file.
 
-When used `splitChunks` optimization for node modules that contains comments, 
-then Webpack will extract this comments in separate text file. 
-Defaults, Pug plugin prevent to create such needless files.
-But if you want to extract files like `*.LICENSE.txt` then set this option to `true`:
+When using `splitChunks` optimization for node modules containing comments,
+Webpack extracts those comments into a separate text file.
+By default, the plugin don't create such unwanted text files.
+But if you want to extract files like `*.LICENSE.txt`, set this option to `true`:
 
 ```js
 const PugPlugin = require('pug-plugin');
@@ -1473,6 +1473,7 @@ module.exports = {
 - [pug-loader][pug-loader] see here configuration options for `PugPlugin.loader`
 - [pug-loader `:highlight` filter][pug-filter-highlight] highlights code syntax
 - [pug-loader `:markdown` filter][pug-filter-markdown] transform markdown to HTML and highlights code syntax
+- [html-bundler-webpack-plugin][html-bundler-webpack-plugin] - The plugin handles HTML template as entry point, extracts CSS, JS, images from their sources loaded directly in HTML
 
 ## License
 
@@ -1482,3 +1483,4 @@ module.exports = {
 [pug-loader]: https://github.com/webdiscus/pug-loader
 [pug-filter-highlight]: https://webdiscus.github.io/pug-loader/pug-filters/highlight.html
 [pug-filter-markdown]: https://webdiscus.github.io/pug-loader/pug-filters/markdown.html
+[html-bundler-webpack-plugin]: https://github.com/webdiscus/html-bundler-webpack-plugin

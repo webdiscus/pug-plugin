@@ -64,76 +64,92 @@ describe('AssetEntry tests', () => {
 });
 
 describe('options', () => {
+  test('default webpack config', (done) => {
+    compareFileListAndContent(PATHS, 'webpack-config-default', done);
+  });
+
   test('output.publicPath = auto', (done) => {
-    compareFileListAndContent(PATHS, 'options-output-public-path-auto', done);
+    compareFileListAndContent(PATHS, 'option-output-public-path-auto', done);
   });
 
   test('output.publicPath = function', (done) => {
-    compareFileListAndContent(PATHS, 'options-output-public-path-function', done);
+    compareFileListAndContent(PATHS, 'option-output-public-path-function', done);
+  });
+
+  test('output.publicPath = ""', (done) => {
+    compareFileListAndContent(PATHS, 'option-output-public-path-empty', done);
+  });
+
+  test('output.publicPath = "/"', (done) => {
+    compareFileListAndContent(PATHS, 'option-output-public-path-root', done);
   });
 
   test('output.filename', (done) => {
-    compareFileListAndContent(PATHS, 'options-output-filename', done);
+    compareFileListAndContent(PATHS, 'option-output-filename', done);
   });
 
   test('options.enabled = false', (done) => {
-    compareFileListAndContent(PATHS, 'options-enabled', done);
+    compareFileListAndContent(PATHS, 'option-enabled', done);
   });
 
   test('options.test (extensions)', (done) => {
-    compareFileListAndContent(PATHS, 'options-extension-test', done);
+    compareFileListAndContent(PATHS, 'option-extension-test', done);
   });
 
   test('options.filename as template', (done) => {
-    compareFileListAndContent(PATHS, 'options-filename-template', done);
+    compareFileListAndContent(PATHS, 'option-filename-template', done);
   });
 
   test('options.filename as function', (done) => {
-    compareFileListAndContent(PATHS, 'options-filename-function', done);
+    compareFileListAndContent(PATHS, 'option-filename-function', done);
   });
 
   test('options.filename as function for separate assets', (done) => {
-    compareFileListAndContent(PATHS, 'options-filename-separate-assets', done);
+    compareFileListAndContent(PATHS, 'option-filename-separate-assets', done);
   });
 
   test('options.sourcePath and options.outputPath (default)', (done) => {
-    compareFileListAndContent(PATHS, 'options-default-path', done);
+    compareFileListAndContent(PATHS, 'option-default-path', done);
   });
 
   test('options.sourcePath and options.outputPath', (done) => {
-    compareFileListAndContent(PATHS, 'options-custom-path', done);
+    compareFileListAndContent(PATHS, 'option-custom-path', done);
   });
 
   test('options.modules (extractCss)', (done) => {
-    compareFileListAndContent(PATHS, 'options-modules-css', done);
+    compareFileListAndContent(PATHS, 'option-modules-css', done);
   });
 
-  test('options.modules.postprocess', (done) => {
-    compareFileListAndContent(PATHS, 'options-modules-postprocess', done);
+  test('option module pug outputPath', (done) => {
+    compareFileListAndContent(PATHS, 'option-pug-outputPath', done);
   });
 
-  test('options.postprocess', (done) => {
-    compareFileListAndContent(PATHS, 'options-postprocess', done);
+  test('option js.filename', (done) => {
+    compareFileListAndContent(PATHS, 'option-js-filename', done);
   });
 
-  test('options module pug outputPath', (done) => {
-    compareFileListAndContent(PATHS, 'options-pug-outputPath', done);
+  test('options js, css outputPath absolute', (done) => {
+    compareFileListAndContent(PATHS, 'option-js-css-outputPath-absolute', done);
   });
 
-  test('options modules js, css outputPath relative', (done) => {
-    compareFileListAndContent(PATHS, 'options-js-css-outputPath-relative', done);
-  });
-
-  test('options modules js, css outputPath absolute', (done) => {
-    compareFileListAndContent(PATHS, 'options-js-css-outputPath-absolute', done);
+  test('options js, css outputPath relative', (done) => {
+    compareFileListAndContent(PATHS, 'option-js-css-outputPath-relative', done);
   });
 
   test('options.pretty', (done) => {
-    compareFileListAndContent(PATHS, 'options-pretty', done);
+    compareFileListAndContent(PATHS, 'option-pretty', done);
   });
 
   test('options.verbose', (done) => {
-    compareFileListAndContent(PATHS, 'options-verbose', done);
+    compareFileListAndContent(PATHS, 'option-verbose', done);
+  });
+
+  test('options.modules.postprocess', (done) => {
+    compareFileListAndContent(PATHS, 'option-modules-postprocess', done);
+  });
+
+  test('options.postprocess', (done) => {
+    compareFileListAndContent(PATHS, 'option-postprocess', done);
   });
 
   test('options.extractComments = false', (done) => {
@@ -142,14 +158,6 @@ describe('options', () => {
 
   test('options.extractComments = true', (done) => {
     compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
-  });
-
-  test('default webpack config', (done) => {
-    compareFileListAndContent(PATHS, 'webpack-config-default', done);
-  });
-
-  test('options-js-filename', (done) => {
-    compareFileListAndContent(PATHS, 'options-js-filename', done);
   });
 });
 
@@ -295,24 +303,24 @@ describe('require assets', () => {
     compareFileListAndContent(PATHS, 'require-assets-html', done);
   });
 
-  test('require styles in pug', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles', done);
+  test('resolve styles in pug', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-styles', done);
   });
 
-  test('require styles in pug from node_modules', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-from-module', done);
+  test('resolve styles in pug from node_modules', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-styles-from-module', done);
   });
 
-  test('require styles in pug from node_modules with .ext in module name', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-from-module.ext', done);
+  test('resolve styles in pug from node_modules with .ext in module name', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-styles-from-module.ext', done);
   });
 
-  test('require styles with same name', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-with-same-name', done);
+  test('resolve styles with same name', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-styles-with-same-name', done);
   });
 
-  test('require styles with same name, hash', (done) => {
-    compareFileListAndContent(PATHS, 'require-styles-with-same-name-hash', done);
+  test('resolve styles with same name, hash', (done) => {
+    compareFileListAndContent(PATHS, 'resolve-styles-with-same-name-hash', done);
   });
 
   test('require styles in pug and use compiled styles from webpack entry', (done) => {
@@ -397,6 +405,18 @@ describe('resolve assets in pug with url query', () => {
 });
 
 describe('split chunks', () => {
+  test('extract css and js w/o runtime code of css-loader', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-css-js', done);
+  });
+
+  test('import source scripts and styles from many node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
+  });
+
+  test('import source scripts and styles from node module', (done) => {
+    compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
+  });
+
   test('resolve assets when used split chunk, development', (done) => {
     compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-dev', done);
   });
@@ -405,20 +425,8 @@ describe('split chunks', () => {
     compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-prod', done);
   });
 
-  test('import source scripts and styles from node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
-  });
-
-  test('import source scripts and styles from many node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
-  });
-
   test('load vendor scripts from node module', (done) => {
     compareFileListAndContent(PATHS, 'split-chunk-vendor', done);
-  });
-
-  test('extract css and js w/o runtime code of css-loader', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-css-js', done);
   });
 });
 
@@ -441,20 +449,6 @@ describe('resolve url in style', () => {
 
   test('resolve-url-deep', (done) => {
     compareFileListAndContent(PATHS, 'resolve-url-deep', done);
-  });
-});
-
-describe('responsive images', () => {
-  test('require images in pug', (done) => {
-    compareFileListAndContent(PATHS, 'responsive-images', done);
-  });
-
-  test('require many duplicate images in pug and styles', (done) => {
-    compareFileListAndContent(PATHS, 'responsive-images-many-duplicates', done);
-  });
-
-  test('require images in pug and in style', (done) => {
-    compareFileListAndContent(PATHS, 'responsive-images-pug-scss', done);
   });
 });
 
@@ -502,20 +496,36 @@ describe('require in script tag', () => {
   });
 });
 
+describe('extras: responsive images', () => {
+  test('responsive images in template', (done) => {
+    compareFileListAndContent(PATHS, 'responsive-images', done);
+  });
+
+  test('require images in pug and in style', (done) => {
+    compareFileListAndContent(PATHS, 'responsive-images-pug-scss', done);
+  });
+
+  test('require many duplicate images in pug and styles', (done) => {
+    compareFileListAndContent(PATHS, 'responsive-images-many-duplicates', done);
+  });
+});
+
+// Test Messages
+
 describe('warning tests', () => {
   test('duplicate scripts', (done) => {
     const containString = 'Duplicate scripts are not allowed';
-    stdoutContain(PATHS, 'warning-duplicate-scripts', containString, done);
+    stdoutContain(PATHS, 'msg-warning-duplicate-scripts', containString, done);
   });
 
   test('duplicate scripts using alias', (done) => {
     const containString = 'Duplicate scripts are not allowed';
-    stdoutContain(PATHS, 'warning-duplicate-scripts-alias', containString, done);
+    stdoutContain(PATHS, 'msg-warning-duplicate-scripts-alias', containString, done);
   });
 
   test('duplicate styles', (done) => {
     const containString = 'Duplicate styles are not allowed';
-    stdoutContain(PATHS, 'warning-duplicate-styles', containString, done);
+    stdoutContain(PATHS, 'msg-warning-duplicate-styles', containString, done);
   });
 });
 
@@ -553,38 +563,38 @@ describe('exception tests', () => {
 
   test('exception: execute template function', (done) => {
     const containString = 'Failed to execute the template function';
-    exceptionContain(PATHS, 'exception-execute-template', containString, done);
+    exceptionContain(PATHS, 'msg-exception-execute-template', containString, done);
   });
 
   test('exception: resolve required file', (done) => {
     const containString = `Can't resolve the file`;
-    exceptionContain(PATHS, 'exception-resolve-file', containString, done);
+    exceptionContain(PATHS, 'msg-exception-resolve-file', containString, done);
   });
 
   test('exception: @import CSS is not supported', (done) => {
     const containString = `Disable the 'import' option in 'css-loader'`;
-    exceptionContain(PATHS, 'exception-import-css-rule', containString, done);
+    exceptionContain(PATHS, 'msg-exception-import-css-rule', containString, done);
   });
 
   test('exception: option modules', (done) => {
     const containString = 'must be the array of';
-    exceptionContain(PATHS, 'exception-option-modules', containString, done);
+    exceptionContain(PATHS, 'msg-exception-option-modules', containString, done);
   });
 
   test('exception: execute postprocess', (done) => {
     const containString = 'Postprocess is failed';
-    exceptionContain(PATHS, 'exception-execute-postprocess', containString, done);
+    exceptionContain(PATHS, 'msg-exception-execute-postprocess', containString, done);
   });
 
   test('exception: multiple chunks with same filename', (done) => {
     const containString = 'Multiple chunks emit assets to the same filename';
-    exceptionContain(PATHS, 'exception-multiple-chunks-same-filename', containString, done);
+    exceptionContain(PATHS, 'msg-exception-multiple-chunks-same-filename', containString, done);
   });
 });
 
 describe('DEPRECATE tests', () => {
   test('deprecate-option-extractCss', (done) => {
     const containString = `Use the 'css' option name instead of 'extractCss'`;
-    stdoutContain(PATHS, 'deprecate-option-extractCss', containString, done);
+    stdoutContain(PATHS, 'msg-deprecate-option-extractCss', containString, done);
   });
 });

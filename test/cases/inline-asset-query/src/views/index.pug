@@ -8,6 +8,7 @@ html
       include ~Images/icons/imac.svg
 
     //- test merging the svg attributes with img attributes into resulting inline svg
+    // inline: imac.svg
     img#logo.inline(src=require('~Images/icons/imac.svg?inline') style='width: 32px;' aria-hidden='true' stroke="red")
 
     //- src must be output filename
@@ -15,6 +16,9 @@ html
     img.file(src=require('~Images/icons/imac.png'))
 
     //- test replace all same assets with inline svg in one file
+    // inline: imac.svg
     img.inline(src=require('~Images/icons/imac.svg?inline'))
+
     //- test inline not svg image
+    // inline: imac.png
     img.inline(src=require('~Images/icons/imac.png?inline'))

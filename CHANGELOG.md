@@ -1,5 +1,13 @@
 # Change log
 
+## 4.9.4 (2023-02-03)
+- fix: remove info comments before inlined SVG
+- chore: update dev packages
+- test: update tests
+
+## 4.9.3 (2023-01-26)
+- fix: error after process when in the template are no scripts
+
 ## 4.9.2 (2023-01-20)
 - fix: automatic publicPath must be empty string when used HMR
 - fix: corrupted inline JS code when code contains '$$' chars chain
@@ -93,7 +101,7 @@
 - fix: passing `data` in loader option when the `self` loader option is true in compile method
 - refactor: optimize code
 - docs: update readme
-- chore: update github workflows
+- chore: update GitHub workflows
 
 ## 4.5.0 (2022-10-20)
 - feat: add resolving url() in inlined CSS using the `?inline` query\
@@ -103,11 +111,9 @@
   //- to inline CSS use exact the `?inline` query
   style=require('./styles.scss?inline')
   ```
-  _Webpack config_
+  _use Webpack config without the type `asset/source`_
   ```js
   {
-    // resourceQuery: /inline/, // <= the `?inline` query is already hard coded in plugin
-    // type: 'asset/source', // <= to resolve url() in inlined CSS don't use this module type
     test: /\.(css|sass|scss)$/,
     use: ['css-loader', 'sass-loader'],
   }
@@ -116,19 +122,7 @@
 - docs: update readme
 
 ## 4.4.0 (2022-10-17)
-- feat: add support the `asset/source` module type to inline CSS/SCSS w/o url():\
-  _Pug template_
-  ```pug
-  style=require('./styles.scss?inline')
-  ```
-  _Webpack config_
-  ```js
-  {
-    resourceQuery: /inline/,
-    type: 'asset/source',
-    use: ['css-loader', 'sass-loader'],
-  }
-  ```
+- feat: add support the inline CSS w/o supporting of url()
 
 ## 4.3.4 (2022-10-13)
 - fix: set default value of `output.path` as `path.join(__dirname, 'dist')`
@@ -365,7 +359,7 @@ new PugPlugin({
 - fix: add supports for webpack resolve modules
 - fix: encode reserved chars for resource query
 - fix: parse require() value with complex interpolation
-- refactor: optimized working with [responsible-loader](https://github.com/dazuaz/responsive-loader)
+- refactor: optimized working with [responsible-loader](https://GitHub.com/dazuaz/responsive-loader)
 - docs: add the documentation: How to use responsive images with Pug
 
 ## 2.7.1 (2022-06-06)
@@ -431,7 +425,7 @@ new PugPlugin({
 - docs: update readme
 
 ## 2.0.0 (2022-04-01)
-- feat: add supports the require() of the javascript source files directly in pug.\
+- feat: add supports the `require()` of the javascript source files directly in pug.\
   It is no longer necessary to define a js file in webpack entry-point.\
   For example, using the `pug-plugin` now is possible usage of source js files in pug:
   ```pug
@@ -480,7 +474,7 @@ new PugPlugin({
     ],
   }),
   ```
-  For mode details see [plugin options](https://github.com/webdiscus/pug-plugin#plugin-options).
+  For mode details see [plugin options](https://GitHub.com/webdiscus/pug-plugin#plugin-options).
 
 - feat: add resolving url in CSS and export resolved resource to output path 
 - feat: add caching of already resolved resources by enhanced resolver
@@ -499,7 +493,7 @@ new PugPlugin({
 ## 1.3.0 (2022-02-07)
 - feat: add extraction of source map for CSS in separate file
 - fix: no extract source map for CSS in node <=14
-- chore: replace console.log with process.stdout by output in terminal
+- chore: replace console.log with `process.stdout` by output in terminal
 - chore: update the pug-loader to new version
 - docs: update readme: remove unsupported substitutions `[base]` `[path]` `[ext]` by the option filename 
 

@@ -94,7 +94,7 @@ const {
 /**
  * @typedef {Object} ResourceInfo
  * @property {boolean} isEntry True if is the asset from entry, false if asset is required from template.
- * @property {boolean} [verbose = false] Whether information should be displayed.
+ * @property {boolean} verbose Whether information should be displayed.
  * @property {string|(function(PathData, AssetInfo): string)} filename The filename template or function.
  * @property {string} sourceFile The absolute path to source file.
  * @property {string} outputPath The absolute path to output directory of asset.
@@ -473,6 +473,7 @@ class AssetCompiler {
 
   /**
    * Called before a module build has started.
+   *
    * @param {Object} module
    */
   beforeBuildModule(module) {
@@ -539,7 +540,7 @@ class AssetCompiler {
         if (AssetScript.isScript(module)) {
           if (this.options.extractJs.verbose && issuerFile !== sourceFile) {
             verboseList.add({
-              isScript: true,
+              type: 'script',
               header: 'Extract JS',
               issuerFile,
               sourceFile,
@@ -565,7 +566,7 @@ class AssetCompiler {
 
           if (verbose) {
             verboseList.add({
-              isEntry: true,
+              type: 'entry',
               name: chunk.name,
             });
           }
@@ -573,7 +574,7 @@ class AssetCompiler {
           assetModules.add({
             inline,
             entryAsset: null,
-            // postprocessInfo
+            // resourceInfo
             isEntry: true,
             verbose: entry.verbose,
             outputPath: entry.outputPath,
@@ -647,7 +648,7 @@ class AssetCompiler {
 
         if (moduleVerbose) {
           verboseList.add({
-            isModule: true,
+            type: 'module',
             header: pluginModule.verboseHeader,
             sourceFile,
             outputPath: moduleOutputPath,
@@ -657,7 +658,7 @@ class AssetCompiler {
         assetModules.add({
           inline,
           entryAsset: entry.filename,
-          // postprocessInfo
+          // resourceInfo
           isEntry: false,
           verbose: moduleVerbose,
           outputPath: moduleOutputPath,
@@ -674,6 +675,25 @@ class AssetCompiler {
             hash,
           },
         });
+      } else if (module.type === 'asset/resource') {
+        // resource required in the template or in the CSS via url()
+        AssetResource.render(module, issuerFile);
+
+        if (verbose) {
+          verboseList.add({
+            type: module.type,
+            sourceFile: sourceRequest,
+          });
+        }
+      } else if (module.type === 'asset/inline') {
+        AssetInline.render({ module, chunk, codeGenerationResults, issuerAssetFile: entry.filename });
+
+        if (verbose) {
+          verboseList.add({
+            type: module.type,
+            sourceFile: sourceRequest,
+          });
+        }
       } else if (module.type === 'asset/source') {
         // TODO: remove in v5.0 the usage of 'asset/source' to inline CSS,
         //  because this type not support url() in inline CSS
@@ -685,7 +705,7 @@ class AssetCompiler {
 
         if (verbose) {
           verboseList.add({
-            isAssetSource: true,
+            type: module.type,
             sourceFile: sourceRequest,
           });
         }
@@ -706,25 +726,6 @@ class AssetCompiler {
           pluginModule,
           fileManifest: {},
         });
-      } else if (module.type === 'asset/resource') {
-        // resource required in the template or in the CSS via url()
-        AssetResource.render(module, issuerFile);
-
-        if (verbose) {
-          verboseList.add({
-            isAssetResource: true,
-            sourceFile: sourceRequest,
-          });
-        }
-      } else if (module.type === 'asset/inline') {
-        AssetInline.render({ module, chunk, codeGenerationResults, issuerAssetFile: entry.filename });
-
-        if (verbose) {
-          verboseList.add({
-            isAssetInline: true,
-            sourceFile: sourceRequest,
-          });
-        }
       }
     }
 
@@ -842,7 +843,7 @@ class AssetCompiler {
         content = pluginModule.extract(content, assetFile, this.compilation);
       }
       if (pluginModule.postprocess) {
-        const postprocessInfo = {
+        const resourceInfo = {
           isEntry,
           verbose,
           outputPath,
@@ -851,9 +852,9 @@ class AssetCompiler {
           filename: filenameTemplate,
         };
         try {
-          content = pluginModule.postprocess(content, postprocessInfo, this.compilation);
+          content = pluginModule.postprocess(content, resourceInfo, this.compilation);
         } catch (error) {
-          postprocessException(error, postprocessInfo);
+          postprocessException(error, resourceInfo);
         }
       }
     }
@@ -876,56 +877,54 @@ class AssetCompiler {
     // display verbose after rendering of all modules
     if (verboseList.size > 0) {
       for (let item of verboseList) {
-        const {
-          isEntry,
-          isModule,
-          isScript,
-          isAssetResource,
-          isAssetSource,
-          isAssetInline,
-          issuerFile,
-          sourceFile,
-          outputPath,
-        } = item;
+        const { type, issuerFile, sourceFile, outputPath } = item;
 
-        if (isEntry) {
-          const entry = AssetEntry.get(item.name);
-          verboseEntry(entry);
-        } else if (isScript) {
-          const posixSourceFile = isWin ? pathToPosix(sourceFile) : sourceFile;
-          const assetFile = scriptStore.files.find(({ file }) => file === posixSourceFile)?.chunkFiles;
-          verboseExtractModule({
-            sourceFile,
-            assetFile,
-            issuers: [issuerFile],
-            outputPath,
-            header: item.header,
-          });
-        } else if (isModule) {
-          const data = Resolver.data.get(sourceFile);
-          verboseExtractModule({
-            sourceFile,
-            assetFile: data.originalAssetFile,
-            issuers: data.issuers,
-            outputPath: item.outputPath,
-            header: item.header,
-          });
-        } else if (isAssetResource) {
-          const data = Resolver.data.get(sourceFile);
-          verboseExtractResource({
-            sourceFile,
-            assetFile: data.originalAssetFile,
-            issuers: data.issuers,
-            outputPath: this.webpackOutputPath,
-          });
-        } else if (isAssetSource) {
-          // TODO: implement
-        } else if (isAssetInline) {
-          const data = AssetInline.data.get(sourceFile);
-          verboseExtractInlineResource({
-            sourceFile,
-            data,
-          });
+        switch (type) {
+          case 'entry': {
+            const entry = AssetEntry.get(item.name);
+            verboseEntry(entry);
+            break;
+          }
+          case 'module': {
+            const { originalAssetFile, issuers } = Resolver.data.get(sourceFile);
+            verboseExtractModule({
+              sourceFile,
+              assetFile: originalAssetFile,
+              issuers: issuers,
+              outputPath,
+              header: item.header,
+            });
+            break;
+          }
+          case 'script': {
+            const posixSourceFile = isWin ? pathToPosix(sourceFile) : sourceFile;
+            const assetFile = scriptStore.files.find(({ file }) => file === posixSourceFile)?.chunkFiles;
+            verboseExtractModule({
+              sourceFile,
+              assetFile,
+              issuers: [issuerFile],
+              outputPath,
+              header: item.header,
+            });
+            break;
+          }
+          case 'asset/resource': {
+            const { originalAssetFile, issuers } = Resolver.data.get(sourceFile);
+            verboseExtractResource({
+              sourceFile,
+              assetFile: originalAssetFile,
+              issuers,
+              outputPath: this.webpackOutputPath,
+            });
+            break;
+          }
+          case 'asset/inline':
+            verboseExtractInlineResource({
+              sourceFile,
+              data: AssetInline.data.get(sourceFile),
+            });
+            break;
+          // no default
         }
       }
     }
