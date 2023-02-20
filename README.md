@@ -90,7 +90,7 @@ The generated HTML contains hashed output CSS and JS filenames:
    - [How to import style from `node_module` in SCSS](#recipe-import-style-from-module)
    - [How to use @import url() in CSS](#recipe-import-url-in-css)
    - [How to config `splitChunks`](#recipe-split-chunks)
-   - [How to split multiple node modules under their own names](#recipe-split-many-modules)
+   - [How to split multiple node modules and save under own names](#recipe-split-many-modules)
    - [How to use HMR live reload](#recipe-hmr)
 7. Demo sites
    - [Hello World!](https://webdiscus.github.io/pug-plugin/hello-world/) ([source](https://github.com/webdiscus/pug-plugin/tree/master/examples/hello-world))
@@ -1251,11 +1251,9 @@ To avoid this problem add the `import: false` option to `css-loader` to disable 
 
 
 <a id="recipe-split-chunks" name="recipe-split-chunks" href="#recipe-split-chunks"></a>
-### Configuration of `splitChunks`
+### How to config `splitChunks`
 
-Defaults, Webpack will split every entry module.
-Because the entry point is Pug files, Webpack tries to split those files too, 
-which completely breaks the compilation process in pug-plugin.
+Webpack tries to split every entry file, include template files, which completely breaks the compilation process in the plugin.
 
 To avoid this issue, you must specify which scripts should be split, using `optimization.splitChunks.cacheGroups`:
 
@@ -1271,7 +1269,6 @@ module.exports = {
       },
     },
   },
-  // ...
 };
 ```
 
@@ -1281,7 +1278,7 @@ module.exports = {
 
 See details by [splitChunks.cacheGroups](https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups).
 
-When used splitChunks optimization for script and style node modules specified in Pug, for example:
+For example, in a template are used the scripts and styles from `node_modules`:
 ```pug
 html
   head
@@ -1307,7 +1304,6 @@ module.exports = {
       },
     },
   },
-  // ...
 };
 ```
 
@@ -1325,7 +1321,7 @@ module.exports = {
 > ```
 > 
 > Then vendor styles will not be saved to a separate file, because `sass-loader` generates one CSS bundle code.
-> Therefore vendor styles should be loaded in Pug separately.
+> Therefore vendor styles should be loaded in a template separately.
 
 > **Warning**
 >
@@ -1333,7 +1329,7 @@ module.exports = {
 > then Webpack concatenates JS code together with CSS in one file, 
 > because Webpack can't differentiate CSS module from JS module, therefore you MUST match only JS files.
 >
-> If you want save module styles separate from your styles, then load them in Pug separately:
+> If you want save module styles separate from your styles, then load them in a template separately:
 > ```Pug
 > html
 >   head
@@ -1347,18 +1343,18 @@ module.exports = {
 > ```
 
 <a id="recipe-split-many-modules" name="recipe-split-many-modules" href="#recipe-split-many-modules"></a>
-### Split multiple node modules under their own names
+### How to split multiple node modules and save under own names
 
 If you use many node modules and want save each module to separate file then use `optimization.cacheGroups.{cacheGroup}.name` as function.
 
-For example, you imports many node modules in the `script.js`:
+For example, many node modules are imported in the `script.js`:
 ```js
 import { Button } from 'bootstrap';
 import _, { map } from 'underscore';
-// ..
+// ...
 ```
 
-Then, use the `name` as following function:
+Then, use the `optimization.splitChunks.cacheGroups.{cacheGroup}.name` as following function:
 ```js
 const path = require('path');
 const PugPlugin = require('pug-plugin');
@@ -1382,16 +1378,15 @@ module.exports = {
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // split JS only, ignore CSS modules
-          // save node module under own name
-          name(module) {
-            const name = module.resourceResolveData.descriptionFileData.name.replace('@', '');
-            return `npm.${name}`;
+          // save chunk under a name
+          name(module, chunks, groupName) {
+            const moduleName = module.resourceResolveData.descriptionFileData.name.replace('@', '');
+            return `${groupName}.${moduleName}`;
           },
         },
       },
     },
   },
-  // ...
 };
 ```
 

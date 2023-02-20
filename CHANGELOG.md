@@ -1,5 +1,11 @@
 # Change log
 
+## 4.9.5 (2023-02-20)
+- chore: bump dev packages
+- test: fix testing helpers for exceptions in some cases
+- test: add base test template for new issues
+- docs: update readme
+
 ## 4.9.4 (2023-02-03)
 - fix: remove info comments before inlined SVG
 - chore: update dev packages

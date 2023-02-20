@@ -4,26 +4,11 @@ import { PluginError, PluginException } from '../src/Messages/Exception';
 import { parseQuery } from '../src/Utils';
 import AssetEntry from '../src/AssetEntry';
 
-const PATHS = {
-  base: __dirname,
-  testSource: path.join(__dirname, 'cases'),
-  // relative path in the test directory to web root dir name, same as by a web server (e.g. nginx)
-  //webRoot: '/public/',
-  webRoot: '/dist/',
-  // relative path in the test directory to expected files for test
-  expected: '/expected/',
-  // relative path in the public directory
-  output: '/assets/',
-};
-
-const testTimeout = 5000;
+import { PATHS } from './config';
 
 beforeAll(() => {});
 
-beforeEach(() => {
-  // on linux/macOS not work set the testTimeout in jest.config.js
-  jest.setTimeout(testTimeout);
-});
+beforeEach(() => {});
 
 describe('unit tests', () => {
   test('parseQuery array', (done) => {
