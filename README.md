@@ -80,6 +80,7 @@ The generated HTML contains hashed output CSS and JS filenames:
    - [Using JS, SCSS, images and fonts with Pug](#example-pug-js-scss-img-font)
    - [Using Pug in JavaScript with `render` method](#example-pug-in-js-render)
    - [Using Pug in JavaScript with `compile` method](#example-pug-in-js-compile)
+   - [Simple multiple pages](https://github.com/webdiscus/pug-plugin/tree/master/examples/simple-multipage) (source code)
 6. [Recipes](#recipes)
    - [How to inline CSS in HTML](#recipe-inline-css)
    - [How to inline JS in HTML](#recipe-inline-js)

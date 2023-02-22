@@ -1,4 +1,3 @@
-import path from 'path';
 import { compareFileListAndContent, exceptionContain, stdoutContain } from './utils/helpers';
 import { PluginError, PluginException } from '../src/Messages/Exception';
 import { parseQuery } from '../src/Utils';
