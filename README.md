@@ -1,14 +1,13 @@
 <div align="center">
   <h1>
     <a href="https://pugjs.org">
-      <img height="135" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
+      <img height="120" src="https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-colour-128.svg">
     </a>
     <a href="https://github.com/webpack/webpack">
       <img height="120" src="https://webpack.js.org/assets/icon-square-big.svg">
     </a>
-    <a href="https://github.com/webdiscus/pug-plugin"><br>
-    Pug Plugin
-    </a>
+    <br>
+    <a href="https://github.com/webdiscus/pug-plugin">Pug Plugin</a>
   </h1>
   <div>Pug plugin for Webpack compiles Pug files to HTML, extracts CSS and JS from their sources specified in Pug</div>
 </div>
@@ -17,6 +16,7 @@
 [![npm](https://img.shields.io/npm/v/pug-plugin?logo=npm&color=brightgreen "npm package")](https://www.npmjs.com/package/pug-plugin "download npm package")
 [![node](https://img.shields.io/node/v/pug-plugin)](https://nodejs.org)
 [![node](https://img.shields.io/github/package-json/dependency-version/webdiscus/pug-plugin/peer/webpack)](https://webpack.js.org/)
+[![Test](https://github.com/webdiscus/pug-plugin/actions/workflows/test.yml/badge.svg)](https://github.com/webdiscus/pug-plugin/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/webdiscus/pug-plugin/branch/master/graph/badge.svg?token=Q6YMEN536M)](https://codecov.io/gh/webdiscus/pug-plugin)
 [![node](https://img.shields.io/npm/dm/pug-plugin)](https://www.npmjs.com/package/pug-plugin)
 

@@ -1,5 +1,8 @@
 # Change log
 
+## 4.9.6 (2023-03-04)
+- fix: correct loader export when template contain CRLF line separators
+
 ## 4.9.5 (2023-02-20)
 - chore: bump dev packages
 - test: fix testing helpers for exceptions in some cases

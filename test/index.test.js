@@ -5,10 +5,6 @@ import AssetEntry from '../src/AssetEntry';
 
 import { PATHS } from './config';
 
-beforeAll(() => {});
-
-beforeEach(() => {});
-
 describe('unit tests', () => {
   test('parseQuery array', (done) => {
     const received = parseQuery('file.pug?key=val&arr[]=a&arr[]=1');
