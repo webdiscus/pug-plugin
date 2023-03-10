@@ -7,7 +7,7 @@ const JavascriptGenerator = require('webpack/lib/javascript/JavascriptGenerator'
 const { pluginName } = require('./config');
 const { isWin, pathToPosix, isFunction, toCommonJS } = require('./Utils');
 
-const { plugin, scriptStore } = require('./Modules');
+const { plugin, ScriptCollection } = require('./Modules');
 const extractCss = require('./Modules/extractCss');
 
 const Resolver = require('./Resolver');
@@ -24,6 +24,7 @@ const AssetTrash = require('./AssetTrash');
 const {
   verboseEntry,
   verboseExtractModule,
+  verboseExtractScript,
   verboseExtractResource,
   verboseExtractInlineResource,
 } = require('./Messages/Info');
@@ -148,6 +149,7 @@ class AssetCompiler {
     this.options = options;
     this.enabled = this.options.enabled !== false;
     this.verbose = this.options.verbose === true;
+    this.watchMode = false;
 
     if (options.modules && !Array.isArray(options.modules)) {
       optionModulesException(options.modules);
@@ -265,8 +267,18 @@ class AssetCompiler {
     // entry options
     compiler.hooks.entryOption.tap(pluginName, this.afterProcessEntry);
 
+    // after rebuild add missing dependencies from cache
+    compiler.hooks.make.tapAsync(pluginName, (compilation, callback) => {
+      if (this.watchMode) {
+        AssetScript.optimizeDependencies();
+      }
+      callback();
+    });
+
     // executes by watch/serve only, before the compilation
     compiler.hooks.watchRun.tap(pluginName, (compiler) => {
+      this.watchMode = true;
+
       const { publicPath } = compiler.options.output;
       if (publicPath == null || publicPath === 'auto') {
         // By using watch/serve browsers not support an automatic publicPath in HMR script injected into inlined JS,
@@ -399,20 +411,14 @@ class AssetCompiler {
       }
 
       const scriptFile = AssetScript.resolveFile(request);
+
       if (scriptFile) {
-        const issuers = issuerCache.get(issuer);
-        const name = AssetScript.getUniqueName(scriptFile);
-        const isAdded = AssetEntry.addToCompilation({
-          name,
-          importFile: scriptFile,
-          filenameTemplate: this.options.extractJs.filename,
+        return AssetScript.addDependency({
+          scriptFile,
           context,
           issuer,
+          filenameTemplate: this.options.extractJs.filename,
         });
-
-        scriptStore.setName(scriptFile, issuers, name);
-
-        return isAdded ? undefined : false;
       }
     }
 
@@ -530,7 +536,7 @@ class AssetCompiler {
 
       if (!sourceRequest || AssetInline.isDataUrl(sourceRequest)) continue;
 
-      const inline = Asset.isInline(resourceResolveData.query) || module.type === 'asset/source';
+      const inline = Asset.isInline(sourceRequest) || module.type === 'asset/source';
       const { issuer } = resourceResolveData.context;
       const [sourceFile] = sourceRequest.split('?', 1);
       let issuerFile = !issuer || this.isEntry(issuer) ? entry.importFile : issuer;
@@ -753,7 +759,7 @@ class AssetCompiler {
       AssetTrash.removeComments(compilation);
     }
 
-    AssetScript.replaceSourceFilesInCompilation(compilation);
+    AssetScript.substituteOutputFilenames(compilation);
     AssetInline.insertInlineSvg(compilation);
     AssetSource.inlineSource(compilation);
 
@@ -766,6 +772,9 @@ class AssetCompiler {
         compilation.updateAsset(assetFile, new RawSource(result));
       }
     }
+
+    // remove all unused assets from compilation
+    AssetTrash.clearCompilation(compilation);
   }
 
   /**
@@ -898,13 +907,10 @@ class AssetCompiler {
           }
           case 'script': {
             const posixSourceFile = isWin ? pathToPosix(sourceFile) : sourceFile;
-            const assetFile = scriptStore.files.find(({ file }) => file === posixSourceFile)?.chunkFiles;
-            verboseExtractModule({
-              sourceFile,
-              assetFile,
-              issuers: [issuerFile],
+            const entity = ScriptCollection.getEntity(posixSourceFile);
+            verboseExtractScript({
+              entity,
               outputPath,
-              header: item.header,
             });
             break;
           }

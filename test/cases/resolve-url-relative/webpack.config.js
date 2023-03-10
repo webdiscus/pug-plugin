@@ -3,7 +3,7 @@ const PugPlugin = require('../../../');
 
 module.exports = {
   mode: 'production',
-  //devtool: 'source-map',
+  stats: 'minimal',
 
   output: {
     path: path.join(__dirname, 'dist/'),

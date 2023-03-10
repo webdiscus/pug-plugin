@@ -1,0 +1,21 @@
+html
+  head
+    title Test
+    link(rel="icon" href=require("apple.png"))
+    link(href=require("bootstrap") rel="stylesheet")
+    link(href=require("./style.css") rel="stylesheet")
+    script(src="https://code.jquery.com/jquery-1.12.4.min.js" defer="defer")
+    script(src=require("bootstrap") defer="defer")
+    script(src=require("./main.js") defer="defer")
+
+body
+  include ./partials/header.pug
+  h1 Hello World!
+  img(src=require("apple.png"))
+  p
+    button(type="button" class="btn-modal btn btn-primary" data-toggle="modal" data-target="#exampleModal") Open modal
+  include ./partials/footer
+  include ./partials/modal.pug
+
+  script(src=require("./app.js"))
+  script(src=require("@test-fixtures/js"))

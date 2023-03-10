@@ -1,5 +1,11 @@
 # Change log
 
+## 4.9.7 (2023-03-10)
+- fix: add missing node modules to compilation after rebuild, #65
+- fix: correct inline JS when used split chunks
+- refactor: optimize code for script processing
+- test: add manually test for missing node modules after rebuild
+
 ## 4.9.6 (2023-03-04)
 - fix: correct loader export when template contain CRLF line separators
 

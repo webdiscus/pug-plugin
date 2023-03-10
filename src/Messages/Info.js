@@ -1,6 +1,17 @@
 const { pluginName } = require('../config');
-const { outToConsole, isFunction } = require('../Utils');
-const { green, greenBright, cyan, cyanBright, magenta, yellowBright, black, gray, ansi } = require('ansis/colors');
+const { pathRelativeByPwd, outToConsole, isFunction } = require('../Utils');
+const {
+  green,
+  greenBright,
+  cyan,
+  cyanBright,
+  magenta,
+  yellowBright,
+  black,
+  gray,
+  ansi,
+  yellow,
+} = require('ansis/colors');
 const grayBright = ansi(245);
 
 const header = black.bgGreen`[${pluginName}]`;
@@ -83,6 +94,42 @@ const verboseExtractModule = ({ issuers, sourceFile, outputPath, assetFile, titl
 };
 
 /**
+ * @param {Object} entity
+ * @param {string} outputPath
+ */
+const verboseExtractScript = ({ entity, outputPath }) => {
+  const title = 'Extract JS';
+  let { file, inline, issuers } = entity;
+  let str = `${header}${black.bgWhite` ${title} `}\n`;
+
+  file = pathRelativeByPwd(file);
+  outputPath = pathRelativeByPwd(outputPath);
+
+  if (inline) {
+    str += `inline: `.padStart(padWidth) + `${greenBright`yes`}` + '\n';
+  }
+
+  str += 'source: '.padStart(padWidth) + `${cyan(file)}` + '\n';
+  if (!inline) {
+    str += 'output dir: '.padStart(padWidth) + `${cyanBright(outputPath)}` + '\n';
+  }
+
+  for (let { request, assets } of issuers) {
+    request = pathRelativeByPwd(request);
+    str += `template: `.padStart(padWidth) + `${magenta(request)}` + '\n';
+
+    assets.forEach((assetFiles, htmlFile) => {
+      str += `-> `.padStart(padWidth) + `${green(htmlFile)}` + '\n';
+      assetFiles.forEach((jsFile) => {
+        str += `- `.padStart(padWidth + 2) + `${yellow(jsFile)}` + '\n';
+      });
+    });
+  }
+
+  outToConsole(str);
+};
+
+/**
  * @param {Map<string, string>} issuers
  * @param {string} sourceFile
  */
@@ -158,6 +205,7 @@ const verboseExtractInlineResource = ({ sourceFile, data }) => {
 module.exports = {
   verboseEntry,
   verboseExtractModule,
+  verboseExtractScript,
   verboseExtractResource,
   verboseExtractInlineResource,
 };
