@@ -1,0 +1,1 @@
+(()=>{"use strict";console.log(">> main","assets/img/image.697ef306.png")})();

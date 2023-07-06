@@ -64,6 +64,10 @@ describe('options', () => {
     compareFileListAndContent(PATHS, 'option-output-public-path-root', done);
   });
 
+  test('publicPath = "http://localhost:8080"', (done) => {
+    compareFileListAndContent(PATHS, 'option-output-public-path-url', done);
+  });
+
   test('output.filename', (done) => {
     compareFileListAndContent(PATHS, 'option-output-filename', done);
   });
@@ -487,6 +491,21 @@ describe('extras: responsive images', () => {
 
   test('require many duplicate images in pug and styles', (done) => {
     compareFileListAndContent(PATHS, 'responsive-images-many-duplicates', done);
+  });
+});
+
+describe('special cases', () => {
+  // TODO: fix it. Note: in html bundler plugin it is already fixed.
+  // test('resolve manifest.json', (done) => {
+  //   compareFileListAndContent(PATHS, 'resolve-manifest.json', done);
+  // });
+
+  test('require-esm-script', (done) => {
+    compareFileListAndContent(PATHS, 'require-esm-script', done);
+  });
+
+  test('js-import-image', (done) => {
+    compareFileListAndContent(PATHS, 'js-import-image', done);
   });
 });
 

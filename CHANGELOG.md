@@ -1,10 +1,14 @@
 # Change log
 
+## 4.9.8 (2023-07-06)
+- fix: missing slash in output filename when publicPath is an url
+- test: add test for bugfix with missing slash in output filename
+
 ## 4.9.7 (2023-03-10)
 - fix: add missing node modules to compilation after rebuild, #65
 - fix: correct inline JS when used split chunks
 - refactor: optimize code for script processing
-- test: add manually test for missing node modules after rebuild
+- test: add manual test for missing node modules after rebuild
 
 ## 4.9.6 (2023-03-04)
 - fix: correct loader export when template contain CRLF line separators
@@ -21,20 +25,20 @@
 - test: update tests
 
 ## 4.9.3 (2023-01-26)
-- fix: error after process when in the template are no scripts
+- fix: error after the process when in the template are no scripts
 
 ## 4.9.2 (2023-01-20)
 - fix: automatic publicPath must be empty string when used HMR
 - fix: corrupted inline JS code when code contains '$$' chars chain
 
 ## 4.9.1 (2023-01-19)
-- fix: resolving inline script when the `pretty` option is true
+- fix: resolving an inline script when the `pretty` option is true
 - fix: inline SVG in link tag as data-URL
 - refactor: improve processing of inline SVG
 
 ## 4.9.0 (2023-01-15)
 - DEPRECATE: use the `css` option name instead of the `extractCss`
-- DEPRECATE: the outdated syntax of CSS option is deprecated and in next version will be removed:
+- DEPRECATE: the outdated syntax of CSS option is deprecated, and in next version will be removed:
   ```
   new PugPlugin({
     modules: [
@@ -52,9 +56,9 @@
     },
   }),
   ```
-- feat: add support of inline script using the `?inline` query
+- feat: add support of an inline script using the `?inline` query
 - fix: resolving inlined styles on windows
-- refactor: optimize code and messages output
+- refactor: optimize code and message output
 - test: refactor tests
 - test: add test for inline JS
 - chore: update dev packages
@@ -113,7 +117,7 @@
 
 ## 4.5.1 (2022-12-26)
 - fix: generate correct script asset filename by HMR after changes, sometimes filenames are mixed up between files
-- fix: passing `data` in loader option when the `self` loader option is true in compile method
+- fix: passing `data` in loader option when the `self` loader option is true in the `compile` method
 - refactor: optimize code
 - docs: update readme
 - chore: update GitHub workflows
@@ -137,14 +141,14 @@
 - docs: update readme
 
 ## 4.4.0 (2022-10-17)
-- feat: add support the inline CSS w/o supporting of url()
+- feat: add support for the inline CSS w/o supporting of url()
 
 ## 4.3.4 (2022-10-13)
 - fix: set default value of `output.path` as `path.join(__dirname, 'dist')`
 - fix: set default value of `output.filename` as `[name].js`
 
 ## 4.3.3 (2022-10-11)
-- fix: resolving of assets in pug templates with url query
+- fix: resolving of assets in pug templates with an url query
 - chore: add example for usage multi-language pages with i18next
 - chore: update pug-loader
 - chore: update dev dependencies
@@ -168,9 +172,9 @@
 
 ## 4.2.1 (2022-08-24)
 - fix: correct resolve output path of url() in CSS with relative public path,\
-       if public path is relative, then output path of asset required not in Pug file
+       if the public path is relative, then an output path of asset required not in Pug file
        will be auto resolved relative to the issuer
-- test: add test case for correct import CSS node module contained the '.css' extension in module name, e.g. 'normalize.css'
+- test: add the test case for correct import CSS node module contained the '.css' extension in module name, e.g. 'normalize.css'
 
 ## 4.2.0 (2022-08-22)
 - feat: display details verbose data for extracted CSS, images, data-URL, inline SVG, etc.
@@ -185,7 +189,7 @@
 
 ## 4.1.1 (2022-08-12)
 - fix: resolve style in Pug from node_modules by module name, e.g.: `link(href=require('bootstrap') rel='stylesheet')`
-- fix: avoids generate a needless runtime code of css-loader in user js file when specified both style and script with using splitChunks
+- fix: avoids generating a needless runtime code of css-loader in user js file when specified both style and script with using splitChunks
 - chore: update pug-loader
 - test: reduce test fixtures size and test time
 - docs: update readme
@@ -221,12 +225,12 @@ new PugPlugin({
 }),
 ```
 - feat: add resolving of file alias for scripts and styles
-- feat: improve resolving of script files specified w/o extension
+- feat: improve resolving of script files specified w/o an extension
 - feat: improve performance
 - feat: update verbose output format to display output path and asset file separately
 - feat: update pug-loader to last version optimized for using with pug-plugin
-- fix: allow to use url query in script source file
-- fix: resolving of absolute path using root context
+- fix: allow using url query in script source file
+- fix: resolving of an absolute path using root context
 - fix: resolving of alias to file using root context
 - refactor: optimize code
 - docs: update readme with usage examples for `render` and `compile` methods
@@ -237,13 +241,13 @@ new PugPlugin({
 - fix: verbose outputs data when asset is data URL
 
 ## 3.1.2 (2022-07-23)
-- feat(experimental): display a warning when used duplicate scripts or styles in same Pug file
+- feat(experimental): display a warning when using duplicate scripts or styles in the same Pug file
 - fix: resolving of duplicate assets in difference style files processed via responsive-loader
 - fix: auto publicPath for assets processed via responsive-loader
 
 ## 3.1.1 (2022-07-21)
 - fix: resolving issues on Windows
-- fix: resolving issues by assets with root path using context
+- fix: resolving issues by assets with the root path using context
 - fix: issue by split chunks from some node modules
 - docs: update readme for correct usage of split chunks configuration
 
@@ -263,7 +267,7 @@ new PugPlugin({
   - Node 12 is End-of-Life.
   - Actual version of `sass-loader` 13.x requires Node 14.
 
-- Defaults the embedded CSS extractor module is now enabled.
+- By default, the embedded CSS extractor module is now enabled.
   For compatibility with external extractor, you can disable extractCss module:
 ```js
 new PugPlugin({
@@ -365,7 +369,7 @@ new PugPlugin({
 - fix: missing script attributes after re-compiling with HMR, #21
 
 ## 2.7.4 (2022-06-16)
-- fix: issue by usage webpack context with webpack alias as relative path
+- fix: issue by usage webpack context with webpack alias as a relative path
 
 ## 2.7.3 (2022-06-15)
 - fix: issue with responsive-loader under Win10
@@ -382,12 +386,12 @@ new PugPlugin({
 - chore: code cleanup, remove unused modules
 
 ## 2.7.0 (2022-06-04)
-- feat: add support the resolving an alias as full path to a file in `include`
+- feat: add support the resolving an alias as a full path to a file in `include`
 - chore: update modules
 
 ## 2.6.0 (2022-06-02)
 - feat: add `watchFiles` loader option to watch for file changes in resolved dependencies
-- fix: in `:markdown` filter enable HTML tags in markdown source
+- fix: in `:markdown` filter enable HTML tags in the markdown source
 - chore: add example - preview README.md
 
 ## 2.5.2 (2022-05-23)
@@ -433,7 +437,7 @@ new PugPlugin({
 - fix: resolving url() in styles required in pug
 - fix: missing js file after rebuild by webpack serv
 - fix: potential collision when resolving resources for `compile` method
-- test: caching for styles required with same name
+- test: caching for styles required with the same name
 
 ## 2.0.1 (2022-04-03)
 - fix: incorrect output directory for a module if the option `outputPath` was relative
@@ -441,7 +445,7 @@ new PugPlugin({
 
 ## 2.0.0 (2022-04-01)
 - feat: add supports the `require()` of the javascript source files directly in pug.\
-  It is no longer necessary to define a js file in webpack entry-point.\
+  It is no longer necessary to define a js file in webpack entrypoint.\
   For example, using the `pug-plugin` now is possible usage of source js files in pug:
   ```pug
   script(src=require('./main.js'))
@@ -461,7 +465,7 @@ new PugPlugin({
 - chore: update pug-loader to the latest version
 
 ## 1.4.2 (2022-02-19)
-- fix: update pug-loader to fix collision with local variables passed in template function for compile method
+- fix: update pug-loader to fix collision with local variables passed in template function for the `compile` method
 
 ## 1.4.1 (2022-02-19)
 - fix: update pug-loader to fix path error in Windows when watching dependencies 
@@ -491,7 +495,7 @@ new PugPlugin({
   ```
   For mode details see [plugin options](https://GitHub.com/webdiscus/pug-plugin#plugin-options).
 
-- feat: add resolving url in CSS and export resolved resource to output path 
+- feat: add resolving url in CSS and export resolved resource to the output path 
 - feat: add caching of already resolved resources by enhanced resolver
 - feat: improved html and css extraction
 - refactor: complete refactoring of all code
@@ -503,31 +507,31 @@ new PugPlugin({
 - fix: update pug-loader to the latest version with fixed issues
 
 ## 1.3.1 (2022-02-10)
-- test: add test case for @font-face src
+- test: add the test case for @font-face src
 
 ## 1.3.0 (2022-02-07)
-- feat: add extraction of source map for CSS in separate file
+- feat: add extraction of the source map for CSS in separate file
 - fix: no extract source map for CSS in node <=14
 - chore: replace console.log with `process.stdout` by output in terminal
-- chore: update the pug-loader to new version
+- chore: update the pug-loader to the new version
 - docs: update readme: remove unsupported substitutions `[base]` `[path]` `[ext]` by the option filename 
 
 ## 1.2.5 (2022-01-31)
 - feat: update the pug-loader to the latest version supported the `htmlWebpackPlugin.options` in pug template
-- test: add test case for require fonts in pug template
+- test: add the test case for require fonts in pug template
 - refactor: tests
 - docs: update readme
 
 ## 1.2.4 (2022-01-28)
 - fix: issue by output info with enabled verbose and filename as a function
 - fix: issue by usage a query string in entry filename
-- fix: issue when same asset file is defined webpack entry-point and required in pug
+- fix: issue when the same asset file is defined webpack entry-point and required in pug
 - refactor: exceptions
 - chore: update npm packages
 - docs: update readme
 
 ## 1.2.3 (2022-01-21)
-- fix: issue with path in windows
+- fix: issue with a path in windows
 - chore: update npm packages
 
 ## 1.2.2 (2022-01-20)
@@ -541,7 +545,7 @@ new PugPlugin({
 
 ## 1.2.0 (2022-01-11)
 - feat: add support for `webpack serve`
-- feat: add support for require of style source directly in pug
+- feat: add support for require of the style source directly in pug
 - feat: add ansi styling by console output
 - refactor: code optimisation
 - perf: improve performance
@@ -552,7 +556,7 @@ new PugPlugin({
 ## 1.1.0 (2021-12-07)
 - feat: add option `enabled` for enable/disable the plugin
 - feat: add option `verbose` for show the compilation information
-- feat: add option `sourcePath` as absolute path to sources
+- feat: add option `sourcePath` as the absolute path to sources
 - feat: add option `outputPath` as output directory for assets
 - feat: add option `filename` as file name of output file, can be a template string or function 
 - feat: add option `modules` for processing different types of entries separately

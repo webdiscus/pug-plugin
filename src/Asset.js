@@ -85,7 +85,7 @@ class Asset {
   static getOutputFile(assetFile, issuer) {
     let isAutoRelative = issuer && this.isRelativePublicPath && !issuer.endsWith('.html');
 
-    // if public path is relative, then a resource using not in the template file must be auto resolved
+    // if the public path is relative, then a resource using not in the template file must be auto resolved
     if (this.isAutoPublicPath || isAutoRelative) {
       if (!issuer) return assetFile;
 
@@ -95,6 +95,11 @@ class Asset {
       const outputFilename = path.relative(context, file);
 
       return isWin ? pathToPosix(outputFilename) : outputFilename;
+    }
+
+    if (this.isUrlPublicPath) {
+      const url = new URL(assetFile, this.publicPath);
+      return url.href;
     }
 
     return path.posix.join(this.publicPath, assetFile);

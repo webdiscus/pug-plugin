@@ -29,7 +29,6 @@ module.exports = {
         filename: 'assets/js/[name].js',
       },
       css: {
-        // output filename of styles
         filename: (pathInfo) => {
           // test auto publicPath for CSS url() from different paths
           if (pathInfo.chunk.name === 'common') {
