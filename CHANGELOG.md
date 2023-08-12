@@ -1,5 +1,12 @@
 # Change log
 
+## 4.9.9 (2023-08-12)
+- fix: resolve filename containing a URI fragment, e.g.:
+  ```pug
+  use(href=require("./icons.svg#home"))
+  ```
+- chore: update npm packages
+
 ## 4.9.8 (2023-07-06)
 - fix: missing slash in output filename when publicPath is an url
 - test: add test for bugfix with missing slash in output filename

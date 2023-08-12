@@ -272,6 +272,14 @@ describe('require images', () => {
   test('require image variable in pug, method html', (done) => {
     compareFileListAndContent(PATHS, 'require-images-variable-html', done);
   });
+
+  test('svg with fragment', (done) => {
+    compareFileListAndContent(PATHS, 'require-img-svg-fragment', done);
+  });
+
+  test('svg href with fragment, filename', (done) => {
+    compareFileListAndContent(PATHS, 'require-img-svg-fragment-filename', done);
+  });
 });
 
 describe('require assets', () => {
