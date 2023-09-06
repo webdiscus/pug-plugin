@@ -86,6 +86,8 @@
     "svgo-loader": "^4.0.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "webpack": "^5.88.2",
-    "webpack-merge": "^5.9.0"
+    "webpack-merge": "^5.9.0",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "^4.15.1"
   }
 }

@@ -11,10 +11,8 @@ module.exports = {
   },
 
   output: {
-    path: path.join(__dirname, 'public'),
+    path: path.join(__dirname, 'dist'),
     publicPath: '/',
-    //filename: 'assets/js/[name].js',
-    filename: 'assets/js/[name].[contenthash:4].js',
   },
 
   entry: {
@@ -26,7 +24,11 @@ module.exports = {
 
   plugins: [
     new PugPlugin({
-      extractCss: {
+      js: {
+        // output name of a generated JS file
+        filename: 'assets/js/[name].[contenthash:4].js',
+      },
+      css: {
         filename: 'assets/css/[name].[contenthash:4].css',
       },
     }),
@@ -50,9 +52,8 @@ module.exports = {
 
   devServer: {
     static: {
-      directory: path.join(__dirname, 'public'),
+      directory: path.join(__dirname, 'dist'),
     },
-    port: 8080,
     https: false,
     compress: true,
 

@@ -13,7 +13,7 @@
     "css-loader": "^6.7.1",
     "http-server": "^14.1.1",
     "prismjs": "^1.28.0",
-    "pug-plugin": "^4.5.1",
+    "pug-plugin": "^4.9.9",
     "responsive-loader": "^3.0.4",
     "sass": "^1.54.1",
     "sass-loader": "^13.0.2",

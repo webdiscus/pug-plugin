@@ -32,8 +32,6 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, 'dist'),
       publicPath: 'auto',
-      // output filename of scripts
-      filename: 'assets/js/[name].[contenthash:8].js',
       clean: true,
     },
 
@@ -51,7 +49,11 @@ module.exports = (env, argv) => {
       // enable processing of Pug files from entry
       new PugPlugin({
         pretty: !isProd, // formatting of HTML
-        extractCss: {
+        js: {
+          // output name of a generated JS file
+          filename: 'assets/js/[name].[contenthash:8].js',
+        },
+        css: {
           // output filename of styles
           filename: 'assets/css/[name].[contenthash:8].css',
         },
