@@ -515,6 +515,10 @@ describe('special cases', () => {
   test('js-import-image', (done) => {
     compareFileListAndContent(PATHS, 'js-import-image', done);
   });
+
+  test('compile template function in js', (done) => {
+    compareFileListAndContent(PATHS, 'js-tmpl-entry-js', done);
+  });
 });
 
 // Test Messages
