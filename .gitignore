@@ -8,4 +8,5 @@ node_modules
 public
 dist
 test/output/
-**/package-lock.json
+/examples/**/package-lock.json
+/test/**/package-lock.json
