@@ -1,5 +1,4 @@
-import { compareFileListAndContent } from './utils/helpers';
-import { PATHS } from './config';
+import { compareFiles } from './utils/helpers';
 
 describe('issue tests', () => {
   // - create new test based on the base or advanced template
@@ -9,9 +8,7 @@ describe('issue tests', () => {
   // - the 2nd attribute is the directory name of your test case under `./test/cases/`
   // - run test: `npm run test:issue`
 
-  test('issue base template', (done) => {
-    compareFileListAndContent(PATHS, 'issue-0-base-template', done);
-  });
+  test('issue base template', () => compareFiles('issue-0-base-template'));
 
   // add your issue test here
 });

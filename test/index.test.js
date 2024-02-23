@@ -1,9 +1,13 @@
-import { compareFileListAndContent, exceptionContain, stdoutContain } from './utils/helpers';
+import { compareFiles, exceptionContain, stdoutContain } from './utils/helpers';
 import { PluginError, PluginException } from '../src/Messages/Exception';
+
 import { parseQuery } from '../src/Utils';
 import AssetEntry from '../src/AssetEntry';
 
-import { PATHS } from './config';
+beforeAll(() => {
+  // important: the environment constant is used in code
+  process.env.NODE_ENV_TEST = 'true';
+});
 
 describe('unit tests', () => {
   test('parseQuery array', (done) => {
@@ -44,499 +48,180 @@ describe('AssetEntry tests', () => {
 });
 
 describe('options', () => {
-  test('default webpack config', (done) => {
-    compareFileListAndContent(PATHS, 'webpack-config-default', done);
-  });
-
-  test('output.publicPath = auto', (done) => {
-    compareFileListAndContent(PATHS, 'option-output-public-path-auto', done);
-  });
-
-  test('output.publicPath = function', (done) => {
-    compareFileListAndContent(PATHS, 'option-output-public-path-function', done);
-  });
-
-  test('output.publicPath = ""', (done) => {
-    compareFileListAndContent(PATHS, 'option-output-public-path-empty', done);
-  });
-
-  test('output.publicPath = "/"', (done) => {
-    compareFileListAndContent(PATHS, 'option-output-public-path-root', done);
-  });
-
-  test('publicPath = "http://localhost:8080"', (done) => {
-    compareFileListAndContent(PATHS, 'option-output-public-path-url', done);
-  });
-
-  test('output.filename', (done) => {
-    compareFileListAndContent(PATHS, 'option-output-filename', done);
-  });
-
-  test('options.enabled = false', (done) => {
-    compareFileListAndContent(PATHS, 'option-enabled', done);
-  });
-
-  test('options.test (extensions)', (done) => {
-    compareFileListAndContent(PATHS, 'option-extension-test', done);
-  });
-
-  test('options.filename as template', (done) => {
-    compareFileListAndContent(PATHS, 'option-filename-template', done);
-  });
-
-  test('options.filename as function', (done) => {
-    compareFileListAndContent(PATHS, 'option-filename-function', done);
-  });
-
-  test('options.filename as function for separate assets', (done) => {
-    compareFileListAndContent(PATHS, 'option-filename-separate-assets', done);
-  });
-
-  test('options.sourcePath and options.outputPath (default)', (done) => {
-    compareFileListAndContent(PATHS, 'option-default-path', done);
-  });
-
-  test('options.sourcePath and options.outputPath', (done) => {
-    compareFileListAndContent(PATHS, 'option-custom-path', done);
-  });
-
-  test('options.modules (extractCss)', (done) => {
-    compareFileListAndContent(PATHS, 'option-modules-css', done);
-  });
-
-  test('option module pug outputPath', (done) => {
-    compareFileListAndContent(PATHS, 'option-pug-outputPath', done);
-  });
-
-  test('option js.filename', (done) => {
-    compareFileListAndContent(PATHS, 'option-js-filename', done);
-  });
-
-  test('options js, css outputPath absolute', (done) => {
-    compareFileListAndContent(PATHS, 'option-js-css-outputPath-absolute', done);
-  });
-
-  test('options js, css outputPath relative', (done) => {
-    compareFileListAndContent(PATHS, 'option-js-css-outputPath-relative', done);
-  });
-
-  test('options.pretty', (done) => {
-    compareFileListAndContent(PATHS, 'option-pretty', done);
-  });
-
-  test('options.verbose', (done) => {
-    compareFileListAndContent(PATHS, 'option-verbose', done);
-  });
-
-  test('options.modules.postprocess', (done) => {
-    compareFileListAndContent(PATHS, 'option-modules-postprocess', done);
-  });
-
-  test('options.postprocess', (done) => {
-    compareFileListAndContent(PATHS, 'option-postprocess', done);
-  });
-
-  test('options.extractComments = false', (done) => {
-    compareFileListAndContent(PATHS, 'option-extract-comments-false', done);
-  });
-
-  test('options.extractComments = true', (done) => {
-    compareFileListAndContent(PATHS, 'option-extract-comments-true', done);
-  });
+  test('default webpack config', () => compareFiles('webpack-config-default'));
+  test('output.publicPath = auto', () => compareFiles('option-output-public-path-auto'));
+  test('output.publicPath = function', () => compareFiles('option-output-public-path-function'));
+  test('output.publicPath = ""', () => compareFiles('option-output-public-path-empty'));
+  test('publicPath = "http://localhost:8080"', () => compareFiles('option-output-public-path-root'));
+  test('output.publicPath = "/"', () => compareFiles('option-output-public-path-url'));
+  test('output.filename', () => compareFiles('option-output-filename'));
+  test('options.enabled = false', () => compareFiles('option-enabled'));
+  test('options.test (extensions)', () => compareFiles('option-extension-test'));
+  test('options.filename as template', () => compareFiles('option-filename-template'));
+  test('options.filename as function', () => compareFiles('option-filename-function'));
+  test('options.filename as function for separate assets', () => compareFiles('option-filename-separate-assets'));
+  test('options.sourcePath and options.outputPath (default)', () => compareFiles('option-default-path'));
+  test('options.sourcePath and options.outputPath', () => compareFiles('option-custom-path'));
+  test('options.modules (extractCss)', () => compareFiles('option-modules-css'));
+  test('option module pug outputPath', () => compareFiles('option-pug-outputPath'));
+  test('option js.filename', () => compareFiles('option-js-filename'));
+  test('options js, css outputPath absolute', () => compareFiles('option-js-css-outputPath-absolute'));
+  test('options js, css outputPath relative', () => compareFiles('option-js-css-outputPath-relative'));
+  test('options.pretty', () => compareFiles('option-pretty'));
+  test('options.verbose', () => compareFiles('option-verbose'));
+  test('options.modules.postprocess', () => compareFiles('option-modules-postprocess'));
+  test('options.postprocess', () => compareFiles('option-postprocess'));
+  test('options.extractComments = false', () => compareFiles('option-extract-comments-false'));
+  test('options.extractComments = true', () => compareFiles('option-extract-comments-true'));
 });
 
 describe('source map', () => {
-  test('css with source-map', (done) => {
-    compareFileListAndContent(PATHS, 'devtool-source-map', done);
-  });
-
-  test('css with inline-source-map', (done) => {
-    compareFileListAndContent(PATHS, 'devtool-inline-source-map', done);
-  });
-
-  test('css without source-map', (done) => {
-    compareFileListAndContent(PATHS, 'devtool-no-source-map', done);
-  });
+  test('css with source-map', () => compareFiles('devtool-source-map'));
+  test('css with inline-source-map', () => compareFiles('devtool-inline-source-map'));
+  test('css without source-map', () => compareFiles('devtool-no-source-map'));
 });
 
 describe('integration tests', () => {
-  test('Hello World!', (done) => {
-    compareFileListAndContent(PATHS, 'hello-world', done);
-  });
-
-  test('entry: html, pug', (done) => {
-    compareFileListAndContent(PATHS, 'entry-html-pug', done);
-  });
-
-  test('entry: load styles from entry with same base names using generator', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-with-same-names', done);
-  });
-
-  test('entry: js, pug', (done) => {
-    compareFileListAndContent(PATHS, 'entry-js-pug', done);
-  });
-
-  test('entry styles bypass to other plugin', (done) => {
-    compareFileListAndContent(PATHS, 'entry-styles-bypass', done);
-  });
-
-  test('entry: pass data via query', (done) => {
-    compareFileListAndContent(PATHS, 'entry-pug-query', done);
-  });
-
-  test('entry: pug require data, method compile', (done) => {
-    compareFileListAndContent(PATHS, 'require-data-compile', done);
-  });
-
-  test('entry: pug require data, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-data-render', done);
-  });
-
-  test('entry: pug require data, method html', (done) => {
-    compareFileListAndContent(PATHS, 'require-data-html', done);
-  });
-
-  test('entry: alias resolve.plugins, method compile', (done) => {
-    compareFileListAndContent(PATHS, 'entry-alias-resolve-compile', done);
-  });
-
-  test('entry: keep all output folder structure for pug', (done) => {
-    compareFileListAndContent(PATHS, 'entry-pug-keep-all-output-dir', done);
-  });
-
-  test('entry: keep single output folder structure for pug', (done) => {
-    compareFileListAndContent(PATHS, 'entry-pug-keep-single-output-dir', done);
-  });
-
-  test('pug-loader config: pug in entry and require pug in js with query `pug-compile`', (done) => {
-    compareFileListAndContent(PATHS, 'pug-in-entry-and-js-query', done);
-  });
-
-  test('pug-loader config: pug in entry and require pug in js with multiple config', (done) => {
-    compareFileListAndContent(PATHS, 'pug-in-entry-and-js-config', done);
-  });
+  test('Hello World!', () => compareFiles('hello-world'));
+  test('entry: html, pug', () => compareFiles('entry-html-pug'));
+  test('entry: load styles from entry with same base names using generator', () => compareFiles('entry-sass-with-same-names'));
+  test('entry: js, pug', () => compareFiles('entry-js-pug'));
+  test('entry styles bypass to other plugin', () => compareFiles('entry-styles-bypass'));
+  test('entry: pass data via query', () => compareFiles('entry-pug-query'));
+  test('entry: pug require data, method compile', () => compareFiles('require-data-compile'));
+  test('entry: pug require data, method render', () => compareFiles('require-data-render'));
+  test('entry: pug require data, method html', () => compareFiles('require-data-html'));
+  test('entry: alias resolve.plugins, method compile', () => compareFiles('entry-alias-resolve-compile'));
+  test('entry: keep all output folder structure for pug', () => compareFiles('entry-pug-keep-all-output-dir'));
+  test('entry: keep single output folder structure for pug', () => compareFiles('entry-pug-keep-single-output-dir'));
+  test('pug-loader config: pug in entry and require pug in js with query `pug-compile`', () => compareFiles('pug-in-entry-and-js-query'));
+  test('pug-loader config: pug in entry and require pug in js with multiple config', () => compareFiles('pug-in-entry-and-js-config'));
 });
 
 describe('extract css', () => {
-  test('entry: css font-face src', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-font-face-src', done);
-  });
-
-  test('entry: sass resolve url', (done) => {
-    // tested for: compile, render
-    compareFileListAndContent(PATHS, 'entry-sass-resolve-url', done);
-  });
-
-  test('entry: pug require style used url', (done) => {
-    compareFileListAndContent(PATHS, 'entry-pug-sass-import-url', done);
-  });
-
-  test('entry: sass, pug (production)', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-pug-prod', done);
-  });
-
-  test('entry: sass, pug (development)', (done) => {
-    compareFileListAndContent(PATHS, 'entry-sass-pug-devel', done);
-  });
-
-  test('@import url() in CSS', (done) => {
-    compareFileListAndContent(PATHS, 'import-url-in-css', done);
-  });
-
-  test('@import url() in SCSS', (done) => {
-    compareFileListAndContent(PATHS, 'import-url-in-scss', done);
-  });
+  test('entry: css font-face src', () => compareFiles('entry-sass-font-face-src'));
+  test('entry: sass resolve url', () => compareFiles('entry-sass-resolve-url')); // tested for: compile, render
+  test('entry: pug require style used url', () => compareFiles('entry-pug-sass-import-url'));
+  test('entry: sass, pug (production)', () => compareFiles('entry-sass-pug-prod'));
+  test('entry: sass, pug (development)', () => compareFiles('entry-sass-pug-devel'));
+  test('@import url() in CSS', () => compareFiles('import-url-in-css'));
+  test('@import url() in SCSS', () => compareFiles('import-url-in-scss'));
 });
 
+//
 describe('require images', () => {
-  test('require images in pug, method compile', (done) => {
-    compareFileListAndContent(PATHS, 'require-images-compile', done);
-  });
-
-  test('require images in pug, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-images-render', done);
-  });
-
-  test('require images in pug, method html', (done) => {
-    compareFileListAndContent(PATHS, 'require-images-html', done);
-  });
-
-  test('require image variable in pug, method compile', (done) => {
-    compareFileListAndContent(PATHS, 'require-images-variable-compile', done);
-  });
-
-  test('require image variable in pug, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-images-variable-render', done);
-  });
-
-  test('require image variable in pug, method html', (done) => {
-    compareFileListAndContent(PATHS, 'require-images-variable-html', done);
-  });
-
-  test('svg with fragment', (done) => {
-    compareFileListAndContent(PATHS, 'require-img-svg-fragment', done);
-  });
-
-  test('svg href with fragment, filename', (done) => {
-    compareFileListAndContent(PATHS, 'require-img-svg-fragment-filename', done);
-  });
+  test('require images in pug, method compile', () => compareFiles('require-images-compile'));
+  test('require images in pug, method render', () => compareFiles('require-images-render'));
+  test('require images in pug, method html', () => compareFiles('require-images-html'));
+  test('require image variable in pug, method compile', () => compareFiles('require-images-variable-compile'));
+  test('require image variable in pug, method render', () => compareFiles('require-images-variable-render'));
+  test('require image variable in pug, method html', () => compareFiles('require-images-variable-html'));
+  test('svg with fragment', () => compareFiles('require-img-svg-fragment'));
+  test('svg href with fragment, filename', () => compareFiles('require-img-svg-fragment-filename'));
 });
 
 describe('require assets', () => {
-  test('require fonts in pug', (done) => {
-    compareFileListAndContent(PATHS, 'require-fonts', done);
-  });
-
-  test('require assets in pug, method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-assets-render', done);
-  });
-
-  test('require assets in pug, method html', (done) => {
-    compareFileListAndContent(PATHS, 'require-assets-html', done);
-  });
-
-  test('resolve styles in pug', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-styles', done);
-  });
-
-  test('resolve styles in pug from node_modules', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-styles-from-module', done);
-  });
-
-  test('resolve styles in pug from node_modules with .ext in module name', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-styles-from-module.ext', done);
-  });
-
-  test('resolve styles with same name', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-styles-with-same-name', done);
-  });
-
-  test('resolve styles with same name, hash', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-styles-with-same-name-hash', done);
-  });
-
-  test('require styles in pug and use compiled styles from webpack entry', (done) => {
-    compareFileListAndContent(PATHS, 'require-and-entry-styles', done);
-  });
-
-  test('require same asset with different raw request', (done) => {
-    compareFileListAndContent(PATHS, 'require-assets-same-pug-scss', done);
-  });
-
-  test('multiple-chunks-same-filename', (done) => {
-    compareFileListAndContent(PATHS, 'multiple-chunks-same-filename', done);
-  });
-
-  test('resolve the url(image) in CSS, method render', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-url-in-css-render', done);
-  });
-
+  test('require fonts in pug', () => compareFiles('require-fonts'));
+  test('require assets in pug, method render', () => compareFiles('require-assets-render'));
+  test('require assets in pug, method html', () => compareFiles('require-assets-html'));
+  test('resolve styles in pug', () => compareFiles('resolve-styles'));
+  test('resolve styles in pug from node_modules', () => compareFiles('resolve-styles-from-module'));
+  test('resolve styles in pug from node_modules with .ext in module name', () => compareFiles('resolve-styles-from-module.ext'));
+  test('resolve styles with same name', () => compareFiles('resolve-styles-with-same-name'));
+  test('resolve styles with same name, hash', () => compareFiles('resolve-styles-with-same-name-hash'));
+  test('require styles in pug and use compiled styles from webpack entry', () => compareFiles('require-and-entry-styles'));
+  test('require same asset with different raw request', () => compareFiles('require-assets-same-pug-scss'));
+  test('multiple-chunks-same-filename', () => compareFiles('multiple-chunks-same-filename'));
+  test('resolve the url(image) in CSS, method render', () => compareFiles('resolve-url-in-css-render'));
   // TODO: fix the issue
-  // test('resolve the url(image) in CSS, method html', (done) => {
-  //   compareFileListAndContent(PATHS, 'resolve-url-in-css-html', done);
-  // });
+  //test('resolve the url(image) in CSS, method html', () => compareFiles('resolve-url-in-css-html'));
 });
 
 describe('inline style & script', () => {
-  test('inline script using URL query `?inline`', (done) => {
-    compareFileListAndContent(PATHS, 'inline-script-query', done);
-  });
-
-  test('inline style using URL query `?inline` and resolve url() in CSS', (done) => {
-    compareFileListAndContent(PATHS, 'inline-style-query', done);
-  });
-
-  test('inline style with source map using URL query `?inline`', (done) => {
-    compareFileListAndContent(PATHS, 'inline-style-query-with-source-map', done);
-  });
-
-  test('inline style using asset/source', (done) => {
-    compareFileListAndContent(PATHS, 'inline-style-asset-source', done);
-  });
-
-  test('inline style using asset/source with source-map', (done) => {
-    compareFileListAndContent(PATHS, 'inline-style-asset-source-with-source-map', done);
-  });
-
-  test('inline style using asset/source and style as file', (done) => {
-    compareFileListAndContent(PATHS, 'inline-style-asset-source-as-inline-and-file', done);
-  });
+  test('inline script using URL query `?inline`', () => compareFiles('inline-script-query'));
+  test('inline style using URL query `?inline` and resolve url() in CSS', () => compareFiles('inline-style-query'));
+  test('inline style with source map using URL query `?inline`', () => compareFiles('inline-style-query-with-source-map'));
+  test('inline style using asset/source', () => compareFiles('inline-style-asset-source'));
+  test('inline style using asset/source with source-map', () => compareFiles('inline-style-asset-source-with-source-map'));
+  test('inline style using asset/source and style as file', () => compareFiles('inline-style-asset-source-as-inline-and-file'));
 });
 
 describe('resolve paths in root context', () => {
-  test('require same image in pug and scss', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-context-image-pug-scss', done);
-  });
-
-  test('resolve script with auto publicPath', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-context-script', done);
-  });
-
-  test('resolve script with and w/o extension', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-context-script-ext', done);
-  });
+  test('require same image in pug and scss', () => compareFiles('resolve-context-image-pug-scss'));
+  test('resolve script with auto publicPath', () => compareFiles('resolve-context-script'));
+  test('resolve script with and w/o extension', () => compareFiles('resolve-context-script-ext'));
 });
 
 describe('resolve assets in pug with url query', () => {
-  test('resolve-assets-multi-lang-page', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-assets-multi-lang-page', done);
-  });
-
-  test('resolve-css-in-diff-output-html', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-css-in-diff-output-html', done);
-  });
-
-  test('resolve-js-in-diff-output-html', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-js-in-diff-output-html', done);
-  });
-
+  test('resolve-assets-multi-lang-page', () => compareFiles('resolve-assets-multi-lang-page'));
+  test('resolve-css-in-diff-output-html', () => compareFiles('resolve-css-in-diff-output-html'));
+  test('resolve-js-in-diff-output-html', () => compareFiles('resolve-js-in-diff-output-html'));
   // TODO: optimize code to pass the test
-  // test('resolve-js-pug-same-name', (done) => {
-  //   compareFileListAndContent(PATHS, 'resolve-js-pug-same-name', done);
-  // });
+  //test('resolve-js-pug-same-name', () => compareFiles('resolve-js-pug-same-name'));
 });
 
 describe('split chunks', () => {
-  test('extract css and js w/o runtime code of css-loader', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-css-js', done);
-  });
-
-  test('import source scripts and styles from many node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-node-module-many-vendors', done);
-  });
-
-  test('import source scripts and styles from node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-node-module-source', done);
-  });
-
-  test('resolve assets when used split chunk, development', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-dev', done);
-  });
-
-  test('resolve assets when used split chunk, production', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-resolve-assets-prod', done);
-  });
-
-  test('load vendor scripts from node module', (done) => {
-    compareFileListAndContent(PATHS, 'split-chunk-vendor', done);
-  });
+  test('extract css and js w/o runtime code of css-loader', () => compareFiles('split-chunk-css-js'));
+  test('import source scripts and styles from many node module', () => compareFiles('split-chunk-node-module-many-vendors'));
+  test('import source scripts and styles from node module', () => compareFiles('split-chunk-node-module-source'));
+  test('resolve assets when used split chunk, development', () => compareFiles('split-chunk-resolve-assets-dev'));
+  test('resolve assets when used split chunk, production', () => compareFiles('split-chunk-resolve-assets-prod'));
+  test('load vendor scripts from node module', () => compareFiles('split-chunk-vendor'));
 });
 
 describe('resolve url in style', () => {
-  test('alias in url', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-url-alias', done);
-  });
-
-  test('alias and relative in url', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-url-alias-relative', done);
-  });
-
-  test('relative path in url', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-url-relative', done);
-  });
-
-  test('relative public path', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-url-relative-public-path', done);
-  });
-
-  test('resolve-url-deep', (done) => {
-    compareFileListAndContent(PATHS, 'resolve-url-deep', done);
-  });
+  test('alias in url', () => compareFiles('resolve-url-alias'));
+  test('alias and relative in url', () => compareFiles('resolve-url-alias-relative'));
+  test('relative path in url', () => compareFiles('resolve-url-relative'));
+  test('relative public path', () => compareFiles('resolve-url-relative-public-path'));
+  test('resolve-url-deep', () => compareFiles('resolve-url-deep'));
 });
 
 describe('inline assets', () => {
-  test('inline-asset-bypass-data-url', (done) => {
-    compareFileListAndContent(PATHS, 'inline-asset-bypass-data-url', done);
-  });
-
-  test('query ?inline, method render', (done) => {
-    compareFileListAndContent(PATHS, 'inline-asset-query', done);
-  });
-
-  test('svgo loader', (done) => {
-    compareFileListAndContent(PATHS, 'inline-asset-query-svgo', done);
-  });
-
-  test('data-URL and inline-SVG in pug and css, method render', (done) => {
-    compareFileListAndContent(PATHS, 'inline-asset-pug-css', done);
-  });
-
-  test('decide by size data-URL/inline-SVG or file, method render', (done) => {
-    compareFileListAndContent(PATHS, 'inline-asset-decide-size', done);
-  });
-
-  test('data-URL and inline-SVG exclude fonts, method render', (done) => {
-    compareFileListAndContent(PATHS, 'inline-asset-exclude-svg-fonts', done);
-  });
+  test('inline-asset-bypass-data-url', () => compareFiles('inline-asset-bypass-data-url'));
+  test('query ?inline, method render', () => compareFiles('inline-asset-query'));
+  test('svgo loader', () => compareFiles('inline-asset-query-svgo'));
+  test('data-URL and inline-SVG in pug and css, method render', () => compareFiles('inline-asset-pug-css'));
+  test('decide by size data-URL/inline-SVG or file, method render', () => compareFiles('inline-asset-decide-size'));
+  test('data-URL and inline-SVG exclude fonts, method render', () => compareFiles('inline-asset-exclude-svg-fonts'));
 });
 
 describe('require in script tag', () => {
-  test('method compile', (done) => {
-    compareFileListAndContent(PATHS, 'require-scripts-compile', done);
-  });
-
-  test('method render', (done) => {
-    compareFileListAndContent(PATHS, 'require-scripts-render', done);
-  });
-
-  test('method html', (done) => {
-    compareFileListAndContent(PATHS, 'require-scripts-html', done);
-  });
-
-  test('require scripts with same name', (done) => {
-    compareFileListAndContent(PATHS, 'require-scripts-same-src', done);
-  });
+  test('method compile', () => compareFiles('require-scripts-compile'));
+  test('method render', () => compareFiles('require-scripts-render'));
+  test('method html', () => compareFiles('require-scripts-html'));
+  test('require scripts with same name', () => compareFiles('require-scripts-same-src'));
 });
 
 describe('extras: responsive images', () => {
-  test('responsive images in template', (done) => {
-    compareFileListAndContent(PATHS, 'responsive-images', done);
-  });
-
-  test('require images in pug and in style', (done) => {
-    compareFileListAndContent(PATHS, 'responsive-images-pug-scss', done);
-  });
-
-  test('require many duplicate images in pug and styles', (done) => {
-    compareFileListAndContent(PATHS, 'responsive-images-many-duplicates', done);
-  });
+  test('responsive images in template', () => compareFiles('responsive-images'));
+  test('require images in pug and in style', () => compareFiles('responsive-images-pug-scss'));
+  test('require many duplicate images in pug and styles', () => compareFiles('responsive-images-many-duplicates'));
 });
 
 describe('special cases', () => {
-  // TODO: fix it. Note: in html bundler plugin it is already fixed.
-  // test('resolve manifest.json', (done) => {
-  //   compareFileListAndContent(PATHS, 'resolve-manifest.json', done);
-  // });
-
-  test('require-esm-script', (done) => {
-    compareFileListAndContent(PATHS, 'require-esm-script', done);
-  });
-
-  test('js-import-image', (done) => {
-    compareFileListAndContent(PATHS, 'js-import-image', done);
-  });
-
-  test('compile template function in js', (done) => {
-    compareFileListAndContent(PATHS, 'js-tmpl-entry-js', done);
-  });
+  // // TODO: fix it. Note: in html bundler plugin it is already fixed.
+  //test('resolve-manifest.json', () => compareFiles('resolve-manifest.json'));
+  test('require-esm-script', () => compareFiles('require-esm-script'));
+  test('js-import-image', () => compareFiles('js-import-image'));
+  test('compile template function in js', () => compareFiles('js-tmpl-entry-js'));
 });
 
 // Test Messages
-
 describe('warning tests', () => {
-  test('duplicate scripts', (done) => {
+  test('duplicate scripts', () => {
     const containString = 'Duplicate scripts are not allowed';
-    stdoutContain(PATHS, 'msg-warning-duplicate-scripts', containString, done);
+    return stdoutContain('msg-warning-duplicate-scripts', containString);
   });
 
-  test('duplicate scripts using alias', (done) => {
+  test('duplicate scripts using alias', () => {
     const containString = 'Duplicate scripts are not allowed';
-    stdoutContain(PATHS, 'msg-warning-duplicate-scripts-alias', containString, done);
+    return stdoutContain('msg-warning-duplicate-scripts-alias', containString);
   });
 
-  test('duplicate styles', (done) => {
+  test('duplicate styles', () => {
     const containString = 'Duplicate styles are not allowed';
-    stdoutContain(PATHS, 'msg-warning-duplicate-styles', containString, done);
+    return stdoutContain('msg-warning-duplicate-styles', containString);
   });
 });
 
@@ -572,40 +257,40 @@ describe('exception tests', () => {
     }
   });
 
-  test('exception: execute template function', (done) => {
+  test('exception: execute template function', () => {
     const containString = 'Failed to execute the template function';
-    exceptionContain(PATHS, 'msg-exception-execute-template', containString, done);
+    return exceptionContain('msg-exception-execute-template', containString);
   });
 
-  test('exception: resolve required file', (done) => {
+  test('exception: resolve required file', () => {
     const containString = `Can't resolve the file`;
-    exceptionContain(PATHS, 'msg-exception-resolve-file', containString, done);
+    return exceptionContain( 'msg-exception-resolve-file', containString);
   });
 
-  test('exception: @import CSS is not supported', (done) => {
+  test('exception: @import CSS is not supported', () => {
     const containString = `Disable the 'import' option in 'css-loader'`;
-    exceptionContain(PATHS, 'msg-exception-import-css-rule', containString, done);
+    return exceptionContain( 'msg-exception-import-css-rule', containString);
   });
 
-  test('exception: option modules', (done) => {
+  test('exception: option modules', () => {
     const containString = 'must be the array of';
-    exceptionContain(PATHS, 'msg-exception-option-modules', containString, done);
+    return exceptionContain('msg-exception-option-modules', containString);
   });
 
-  test('exception: execute postprocess', (done) => {
+  test('exception: execute postprocess', () => {
     const containString = 'Postprocess is failed';
-    exceptionContain(PATHS, 'msg-exception-execute-postprocess', containString, done);
+    return exceptionContain('msg-exception-execute-postprocess', containString);
   });
 
-  test('exception: multiple chunks with same filename', (done) => {
+  test('exception: multiple chunks with same filename', () => {
     const containString = 'Multiple chunks emit assets to the same filename';
-    exceptionContain(PATHS, 'msg-exception-multiple-chunks-same-filename', containString, done);
+    return exceptionContain('msg-exception-multiple-chunks-same-filename', containString);
   });
 });
 
 describe('DEPRECATE tests', () => {
-  test('deprecate-option-extractCss', (done) => {
+  test('deprecate-option-extractCss', () => {
     const containString = `Use the 'css' option name instead of 'extractCss'`;
-    stdoutContain(PATHS, 'msg-deprecate-option-extractCss', containString, done);
+    return stdoutContain('msg-deprecate-option-extractCss', containString);
   });
 });
