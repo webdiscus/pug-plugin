@@ -1,0 +1,1 @@
+(self.webpackChunk=self.webpackChunk||[]).push([[740],{645:e=>{e.exports={methodA:()=>"module A",methodB:()=>"module B",methodC:()=>"common used module"}},740:(e,o,m)=>{const d=m(645).methodC();e.exports=d}}]);

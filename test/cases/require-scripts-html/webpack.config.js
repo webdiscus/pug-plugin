@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -7,7 +7,6 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    publicPath: '/',
   },
 
   entry: {
@@ -27,26 +26,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        use: [
-          {
-            loader: 'html-loader',
-            options: {
-              sources: {
-                // ignore static resources
-                urlFilter: (attribute, value, resourcePath) => !/\/static\/vendor/.test(value),
-              },
-            },
-          },
-          {
-            loader: PugPlugin.loader,
-            options: {
-              method: 'html',
-            },
-          },
-        ],
-      },
       {
         test: /\.(css)$/,
         loader: 'css-loader',

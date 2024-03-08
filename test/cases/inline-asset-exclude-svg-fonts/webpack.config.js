@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 // Free icon fonts
 // - Material icons: https://fonts.google.com/icons
@@ -51,13 +51,7 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
+
 
       {
         test: /\.(css|sass|scss)$/,

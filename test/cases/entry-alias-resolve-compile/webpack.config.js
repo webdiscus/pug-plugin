@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
@@ -26,13 +26,7 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'compile',
-        },
-      },
+
 
       {
         test: /\.(png|jpg|jpeg)/,

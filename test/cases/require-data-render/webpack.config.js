@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 const isProduction = false;
 
@@ -7,15 +7,14 @@ module.exports = {
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? false : 'source-map',
 
+  output: {
+    path: path.join(__dirname, 'dist/'),
+  },
+
   resolve: {
     alias: {
       Images: path.join(__dirname, './src/images/'),
     },
-  },
-
-  output: {
-    path: path.join(__dirname, 'dist/'),
-    publicPath: '/',
   },
 
   entry: {
@@ -23,24 +22,10 @@ module.exports = {
     about: './src/views/about.pug',
   },
 
-  plugins: [
-    new PugPlugin({
-      js: {
-        filename: isProduction ? '[name].[contenthash:8].js' : '[name].js',
-      },
-    }),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-
       {
         test: /\.(png|jpg|jpeg)/,
         type: 'asset/resource',

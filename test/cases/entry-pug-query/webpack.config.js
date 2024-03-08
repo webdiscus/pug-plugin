@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -11,20 +11,9 @@ module.exports = {
 
   entry: {
     // pass custom data as JSON string via query
-    index: './src/index.pug?customData=' + JSON.stringify({ options: { title: 'My title' } }),
+    // TODO: fix the space char in values, e.g. `a b` will be incorrect decoded into `a+b`
+    index: './src/index.pug?' + JSON.stringify({ customData: { options: { title: 'MyTitle' } } }),
   },
 
   plugins: [new PugPlugin()],
-
-  module: {
-    rules: [
-      {
-        test: /\.(pug)$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-    ],
-  },
 };

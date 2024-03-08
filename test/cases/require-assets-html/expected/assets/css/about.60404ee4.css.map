@@ -1,0 +1,1 @@
+{"version":3,"file":"assets/css/about.60404ee4.css","mappings":"AAEA,OACE,UAHM","sources":["webpack:///./src/about.scss"],"sourcesContent":["$color: blue;\n\n.about {\n  color: $color;\n}"],"names":[],"sourceRoot":""}

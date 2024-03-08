@@ -1,5 +1,9 @@
 html
   head
-    style=require('./style.css?raw')
+    //- BREAKING CHANGE: since version 5.x the old syntax of version 4.x is not supported:
+    //- style=require('./style.css?raw')
+
+    //- Since version 5.x to inline CSS use the NEW syntax:
+    link(rel='stylesheet' href=require('./style.css?inline'))
   body
     h1 Hello World!

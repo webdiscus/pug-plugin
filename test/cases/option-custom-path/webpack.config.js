@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 const templatePath = path.join(__dirname, 'src/views/');
 const htmlPath = path.join(__dirname, 'dist/www/');
@@ -39,13 +39,7 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
+
       {
         test: /\.(png|jpg|jpeg)$/,
         type: 'asset/resource',

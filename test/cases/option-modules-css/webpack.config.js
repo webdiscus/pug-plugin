@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 const basePath = path.resolve(__dirname);
 
@@ -29,24 +29,10 @@ module.exports = {
     'assets/css/home': './src/views/home/style.css',
   },
 
-  plugins: [
-    new PugPlugin({
-      // test defaults 'css' options, it is equivalent to:
-      // css: {
-      //   filename: '[name].css',
-      // },
-    }),
-  ],
+  plugins: [new PugPlugin({})],
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'compile',
-        },
-      },
       {
         test: /\.(css)$/,
         use: ['css-loader'],

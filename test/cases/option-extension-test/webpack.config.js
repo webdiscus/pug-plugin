@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -19,16 +19,4 @@ module.exports = {
       test: /\.(pug|jade)$/,
     }),
   ],
-
-  module: {
-    rules: [
-      {
-        test: /\.(pug|jade)$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-    ],
-  },
 };

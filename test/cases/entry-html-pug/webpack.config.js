@@ -1,41 +1,22 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
 
   output: {
     path: path.join(__dirname, 'dist/'),
-    publicPath: '/',
   },
 
   entry: {
+    // test: render both the HTML and Pug templates
     index: './src/index.pug',
     about: './src/about.html',
   },
 
   plugins: [
     new PugPlugin({
-      modules: [
-        //{ test: /\.(html)$/, filename: '[name].html' }, // this is equivalent to `PugPlugin.extractHtml()`
-        PugPlugin.extractHtml(),
-      ],
+      test: /\.pug|html$/,
     }),
   ],
-
-  module: {
-    rules: [
-      {
-        test: /\.(pug)$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-      {
-        test: /\.html$/,
-        loader: 'html-loader',
-      },
-    ],
-  },
 };

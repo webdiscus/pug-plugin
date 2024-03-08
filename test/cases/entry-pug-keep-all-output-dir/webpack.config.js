@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 const sourcePath = path.join(__dirname, 'src'); // => /absolute/path/to/src
 const keepPugFolderStructure = (pathData) => {
@@ -30,13 +30,4 @@ module.exports = {
       filename: keepPugFolderStructure,
     }),
   ],
-
-  module: {
-    rules: [
-      {
-        test: /\.(pug)$/,
-        loader: PugPlugin.loader,
-      },
-    ],
-  },
 };

@@ -1,8 +1,6 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
-const isProduction = true;
 
 module.exports = {
   mode: 'production',
@@ -40,14 +38,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-
       // style loader for webpack entry and processing via require() in pug
       {
         test: /\.(css|sass|scss)$/,

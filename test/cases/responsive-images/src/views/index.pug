@@ -2,20 +2,24 @@ html
   head
     link(rel='icon' href=require('~Images/favicon.png?size=32'))
   body
+    //- resize & convert image
+    img(src=require("~Images/image.png?prop=src&format=webp&size=105") alt="responsive image 105px")
+    img(src=require("~Images/image.png?prop=src&format=webp&size=100") srcset=require('~Images/image.png?sizes[]=110,sizes[]=120&format=jpg') alt="responsive image srcset")
+
     -
       const img = {
-        src: require('~Images/image.png?size=200'),
-        srcSet: require('~Images/image.png?sizes[]=100,sizes[]=200,sizes[]=300&format=jpg'),
+        src: require('~Images/image.png?size=50'),
+        srcSet: require('~Images/image.png?sizes[]=50,sizes[]=60,sizes[]=70&format=jpg'),
       }
 
     p.default= require('~Images/image.png')
     img.responsible(srcset=img.srcSet src=img.src alt="responsive image")
-    img.json(src=require('~Images/image.png?{size:105, format:"webp"}'))
+    img.json(src=require('~Images/image.png?{size:75, format:"webp"}'))
 
-    p src webp: #{require("~Images/image.png?prop=src&format=webp&size=200")}
-    p srcSet: #{require("~Images/image.png?prop=srcSet&format=webp&sizes[]=100,sizes[]=200,sizes[]=300&placeholder=true")}
+    p src webp: #{require("~Images/image.png?prop=src&format=webp&size=80")}
+    p srcSet: #{require("~Images/image.png?prop=srcSet&format=webp&sizes[]=80,sizes[]=85,sizes[]=90&placeholder=true")}
 
     p.
       Image
       width: #{require("~Images/image.png?prop=width")}
-      height: #{require("~Images/image.png?prop=height&sizes[]=100,sizes[]=200")}
+      height: #{require("~Images/image.png?prop=height&sizes[]=130,sizes[]=140")}

@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack://./src/assets/styles/common.scss"],"names":[],"mappings":"AAGA,KACE,SAJc,CAOhB,EACE,WAPgB","sourcesContent":["$primary-color: red;\n$secondary-color: green;\n\nbody {\n  color: $primary-color;\n}\n\np {\n  color: $secondary-color;\n}"],"sourceRoot":""}

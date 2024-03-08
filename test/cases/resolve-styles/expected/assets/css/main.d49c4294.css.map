@@ -1,1 +1,1 @@
-{"version":3,"sources":["webpack://./src/assets/styles/main.scss"],"names":[],"mappings":"AACA,GACE,UAFM","sourcesContent":["$color: blue;\nh1 {\n  color: $color;\n}"],"sourceRoot":""}
+{"version":3,"file":"assets/css/main.d49c4294.css","mappings":"AACA,GACE,UAFM","sources":["webpack:///./src/assets/styles/main.scss"],"sourcesContent":["$color: blue;\nh1 {\n  color: $color;\n}"],"names":[],"sourceRoot":""}

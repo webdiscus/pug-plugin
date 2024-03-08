@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 const isProduction = true;
 
@@ -19,7 +19,7 @@ module.exports = {
   },
 
   entry: {
-    index: './src/views/index.pug?customData=' + JSON.stringify({ options: { title: 'The title' } }),
+    index: './src/views/index.pug?' + JSON.stringify({ customData: { options: { title: 'MyTitle' } } }),
   },
 
   plugins: [
@@ -33,15 +33,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'compile',
-          esModule: true,
-        },
-      },
-
       {
         test: /\.(png|jpg|jpeg|ico)/,
         type: 'asset/resource',

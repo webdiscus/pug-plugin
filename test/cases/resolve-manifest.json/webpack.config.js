@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -9,12 +9,11 @@ module.exports = {
     publicPath: '/',
   },
 
-  entry: {
-    index: './src/index.pug',
-  },
-
   plugins: [
     new PugPlugin({
+      entry: {
+        index: './src/index.pug',
+      },
       js: {
         filename: 'js/[name].[contenthash:8].js',
       },
@@ -26,11 +25,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-      },
-
       {
         test: /\.css$/,
         use: ['css-loader'],
@@ -49,8 +43,6 @@ module.exports = {
         test: /\.(png|jpe?g|ico|svg)$/,
         type: 'asset/resource',
         generator: {
-          // TODO: replace in manifest the source images
-          //filename: 'assets/img/[name].[hash:8][ext]',
           filename: 'img/[name][ext]',
         },
       },

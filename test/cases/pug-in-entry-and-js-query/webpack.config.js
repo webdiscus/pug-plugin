@@ -1,9 +1,13 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
   devtool: false,
+
+  output: {
+    path: path.join(__dirname, 'dist/'),
+  },
 
   resolve: {
     alias: {
@@ -12,25 +16,9 @@ module.exports = {
     },
   },
 
-  output: {
-    path: path.join(__dirname, 'dist/'),
-  },
-
   entry: {
     index: './src/views/index.pug',
   },
 
   plugins: [new PugPlugin()],
-
-  module: {
-    rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          //method: 'compile',
-        },
-      },
-    ],
-  },
 };

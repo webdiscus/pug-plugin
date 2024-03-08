@@ -1,1 +1,1 @@
-{"version":3,"sources":["webpack://./src/assets/styles/test.css"],"names":[],"mappings":"AAAA;EACE,oBAAoB;AACtB","sourcesContent":["h2 {\n  color: rebeccapurple;\n}"],"sourceRoot":""}
+{"version":3,"file":"assets/css/test.1947cf4d.css","mappings":"AAAA;EACE,oBAAoB;AACtB","sources":["webpack:///./src/assets/styles/test.css"],"sourcesContent":["h2 {\n  color: rebeccapurple;\n}"],"names":[],"sourceRoot":""}

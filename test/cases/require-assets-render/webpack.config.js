@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -18,20 +18,14 @@ module.exports = {
       css: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },
+      loaderOptions: {
+        esModule: true,
+      },
     }),
   ],
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-          esModule: true, // Test: transformation of ESM to CommonJS source in PugPlugin.extractHtml
-        },
-      },
-
       {
         test: /\.(css|sass|scss)$/,
         use: ['css-loader'],

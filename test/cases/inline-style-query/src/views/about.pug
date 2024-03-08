@@ -3,7 +3,7 @@ html
     //- load CSS as file
     link(href=require('Styles/main.css') rel='stylesheet')
     //- inline CSS
-    style=require('Styles/inline-style.css?inline')
+    link(rel='stylesheet' href=require('Styles/inline-style.css?inline'))
   body
     h1 About
     .img-file-style

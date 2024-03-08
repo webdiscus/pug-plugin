@@ -2,7 +2,12 @@ html
   head
     //- load CSS as file
     link(href=require('Styles/style.css') rel='stylesheet')
+
     //- inline CSS
-    style=require('Styles/inline-style.css?raw')
+    //- BREAKING CHANGE: since version 5.x the old syntax of version 4.x is not supported:
+    //- style=require('Styles/inline-style.css?raw')
+
+    //- Since version 5.x to inline CSS use the NEW syntax:
+    link(rel='stylesheet' href=require('Styles/inline-style.css?inline'))
   body
     h1 Hello World!

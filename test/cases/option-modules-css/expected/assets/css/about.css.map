@@ -1,1 +1,1 @@
-{"version":3,"sources":["webpack://./src/views/about/style.css"],"names":[],"mappings":"AAAA;EACE,YAAY;AACd","sourcesContent":["p {\n  color: green;\n}"],"sourceRoot":""}
+{"version":3,"file":"assets/css/about.css","mappings":"AAAA;EACE,YAAY;AACd","sources":["webpack:///./src/views/about/style.css"],"sourcesContent":["p {\n  color: green;\n}"],"names":[],"sourceRoot":""}

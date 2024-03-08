@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -13,25 +13,12 @@ module.exports = {
     index: './src/index.pug',
   },
 
-  plugins: [
-    // zero config
-    new PugPlugin(),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
       {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-
-      {
         test: /\.css$/,
-        resourceQuery: /raw/,
-        type: 'asset/source',
         use: [
           {
             loader: 'css-loader',

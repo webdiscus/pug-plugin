@@ -1,5 +1,104 @@
 # Change log
 
+## 5.0.0 (2024-02-08)
+
+> **Note**
+> 
+> The `pug-plugin` since the version `5.0.0` has completely new code based on the [html-bundler-webpack-plugin](https://github.com/webdiscus/html-bundler-webpack-plugin) version `3.5.5`.
+> 
+> The new version have many many new cool features, but contains some `BREAKING CHANGES`.
+
+## BREAKING CHANGES
+
+### Pug loader
+
+The Pug loader should not be defined in the `module.rules` anymore.
+The plugin add the pug loader automatically.
+Please remove the `PugPlugin.loader` from the config:
+
+```diff
+module.exports = {
+  mode: 'production',
+  output: {
+    path: path.join(__dirname, 'dist/'),
+  },
+  entry: {
+    index: './src/index.pug',
+  },
+  plugins: [
+    new PugPlugin(),
+  ],
+  module: {
+    rules: [
+-      {
+-        test: /\.pug$/,
+-        loader: PugPlugin.loader,
+-      },
+    ],
+  },
+};
+```
+
+Only if you need to define the [Pug options](https://pugjs.org/api/reference.html#options) then use the new `preprocessorOptions` plugin option:
+```diff
+module.exports = {
+  plugins: [
+    new PugPlugin({
++      preprocessorOptions: {
++        basedir: path: path.join(__dirname, 'src/'),
++      }
+    }),
+  ],
+};
+```
+
+### The `modules` option
+
+The `modules` option is removed. Use the plugin [js](https://github.com/webdiscus/html-bundler-webpack-plugin#option-js) and [css](https://github.com/webdiscus/html-bundler-webpack-plugin#option-css) options.
+Instead of the `modules.test` option you can use following:
+- [test](https://github.com/webdiscus/html-bundler-webpack-plugin#option-test) option for template extensions
+- [js.test](https://github.com/webdiscus/html-bundler-webpack-plugin#option-js) option for script extensions
+- [css.test](https://github.com/webdiscus/html-bundler-webpack-plugin#option-css) option for style extensions
+
+See new [plugin options](https://github.com/webdiscus/html-bundler-webpack-plugin#plugin-options).
+
+### Inline JS
+
+JS code can be [inlined](https://github.com/webdiscus/html-bundler-webpack-plugin#recipe-inline-js) using the `js.inline: true` option or using the `?ìnline` query:
+```diff
+//- OLD syntax
+- script=require('./main.js?inline')
+
+//- NEW syntax
++ script(src='./main.js?inline')
+```
+
+### Inline CSS
+
+CSS code can be [inlined](https://github.com/webdiscus/html-bundler-webpack-plugin#recipe-inline-css) using the `css.inline: true` option or using the `?ìnline` query:
+```diff
+//- OLD syntax
+- style=require('./style.css?inline' rel='stylesheet')
+
+//- NEW syntax
++ link(href='./style.css?inline' rel='stylesheet')
+```
+
+### Using require() in srcset attribute
+
+The require() function in srcset attribute works anymore.
+```diff
+//- OLD syntax
+    Note: the required file is relative to the current pug partial file, recommends to use an webpack alias
+- img(srcset=`${require('./image1.png')} 400w, ${require('@images/image2.png')} 800w` src=require('./image.png'))
+
+//- NEW syntax
+    Note: the file is relative to the main entrypoint pug file, recommends to use an webpack alias
++ img(srcset=`./image1.png 400w, @images/image2.png 800w` src='./image.png')
+```
+
+
+
 ## 4.9.9 (2023-08-12)
 - fix: resolve filename containing a URI fragment, e.g.:
   ```pug

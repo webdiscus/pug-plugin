@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -48,10 +48,7 @@ module.exports = {
           outputPath: 'cdn-assets/',
         },
       },
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-      },
+
       {
         test: /\.scss$/,
         use: ['css-loader', 'sass-loader'],

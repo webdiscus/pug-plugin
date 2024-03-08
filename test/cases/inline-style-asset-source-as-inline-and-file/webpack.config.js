@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
@@ -19,32 +19,13 @@ module.exports = {
     index: './src/views/index.pug',
   },
 
-  plugins: [
-    // zero config
-    new PugPlugin(),
-  ],
+  plugins: [new PugPlugin()],
 
   module: {
     rules: [
       {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-      },
-
-      {
         test: /\.(css|sass|scss)$/,
-        oneOf: [
-          // inline styles in HTML
-          {
-            resourceQuery: /^\?raw/u, // match exact first URL query `?raw`
-            type: 'asset/source',
-            use: ['css-loader', 'sass-loader'],
-          },
-          // load styles as file
-          {
-            use: ['css-loader', 'sass-loader'],
-          },
-        ],
+        use: ['css-loader', 'sass-loader'],
       },
     ],
   },

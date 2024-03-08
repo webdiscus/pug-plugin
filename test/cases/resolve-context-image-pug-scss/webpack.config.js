@@ -1,5 +1,5 @@
 const path = require('path');
-const PugPlugin = require('../../../');
+const PugPlugin = require('@test/pug-plugin');
 
 const srcPath = path.resolve(__dirname, 'src');
 
@@ -33,19 +33,15 @@ module.exports = {
       css: {
         filename: 'assets/css/[name].[contenthash:8].css',
       },
+      preprocessorOptions: {
+        // Pug compiler option
+        basedir: srcPath,
+      },
     }),
   ],
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-
       {
         test: /\.(css|sass|scss)$/,
         use: ['css-loader', 'sass-loader'],

@@ -27,13 +27,7 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
+
       {
         test: /\.(css|sass|scss)$/,
         use: ['css-loader'],

@@ -2,40 +2,27 @@ const path = require('path');
 const PugPlugin = require('../../..');
 
 module.exports = {
-  mode: 'production',
+  //mode: 'production', // no error
+  mode: 'development', // no error
 
   output: {
     path: path.join(__dirname, 'dist/'),
     clean: true,
   },
 
-  entry: {
-    index: './src/index.pug',
-  },
-
   plugins: [
     new PugPlugin({
+      entry: {
+        index: './src/index.pug',
+      },
       js: {
         filename: '[name].[contenthash:8].js',
       },
     }),
   ],
 
-  module: {
-    rules: [
-      {
-        test: /\.pug$/,
-        loader: PugPlugin.loader,
-        options: {
-          method: 'render',
-        },
-      },
-    ],
-  },
-
   // enable HMR with live reload
   devServer: {
-    //hot: false,
     static: path.join(__dirname, 'dist'),
     watchFiles: {
       paths: ['src/**/*.*'],
