@@ -62,7 +62,7 @@
     "@webdiscus/pug-loader": "2.10.5",
     "ansis": "1.5.5",
     "json5": "^2.2.3",
-    "js-beautify": "^1.14.11"
+    "js-beautify": "^1.15.0"
   },
   "devDependencies": {
     "@babel/core": "7.23.6",
