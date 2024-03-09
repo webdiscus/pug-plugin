@@ -1,1 +1,0 @@
-{"version":3,"file":"assets/js/main.1.221276c2.js","mappings":"AAAAA,QAAQC,IAAI","sources":["webpack://hello-world/./src/views/pages/contact/main.js"],"sourcesContent":["console.log('\\n>> Contact page');\n"],"names":["console","log"],"sourceRoot":""}

@@ -11,7 +11,7 @@
     "css-loader": "^6.10.0",
     "http-server": "^14.1.1",
     "prismjs": "^1.29.0",
-    "pug-plugin": "^4.9.9",
+    "pug-plugin": "^5.0.0",
     "sass": "^1.71.1",
     "sass-loader": "^14.1.1",
     "webpack": "^5.90.3",

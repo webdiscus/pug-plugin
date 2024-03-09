@@ -19,16 +19,16 @@ html(lang='en' dir='ltr')
     title= title
 
     //- Favicons
-    link(rel='icon' href=require('Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
+    link(rel='icon' href='@images/favicons/favicon.svg' type='image/svg+xml' sizes='any')
 
     //- Page styles
     block style
       //- common used styles
-      link(rel='stylesheet' href=require('Styles/main.scss'))
+      link(href='@styles/main.scss' rel='stylesheet')
 
     //- Additional head block, e.g. for preload scripts in head
     block head
-      script(src=require('Scripts/common.js') defer)
+      script(src='@scripts/common.js' defer)
 
   body
     //- Main header

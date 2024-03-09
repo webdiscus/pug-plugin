@@ -19,7 +19,6 @@ block header
       placeholder: require('Images/abstract.webp?prop=placeholder&placeholder=true&placeholderSize=100')
     }
 
-  //-.header-container(style=`background-image: url(${responsiveImage.placeholder})`)
   .header-container
     .header-content
       h1.text Responsive image
@@ -68,11 +67,11 @@ block body
     p To resize an single image use the #[:code size] query parameter:
 
     +code: :highlight(pug)
-      img(src=require('./image.jpg?size=200'))
+      img(src='./image.jpg?size=200')
 
     p To convert an image in other format, e.g. #[:code webp], use the #[:code format] query parameter:
     +code: :highlight(pug)
-      img(src=require('./image.jpg?size=200&format=webp'))
+      img(src='./image.jpg?size=200&format=webp')
 
     p Usage of the image in SCSS as the background-image:
     +code: :highlight(scss)
@@ -84,14 +83,14 @@ block body
 
     table.image-preview
       tr
-        td: img(src=require('Images/image.webp?size=100') alt="fix image")
-        td: +code: :highlight(pug) img(src=require('./image.webp?size=100'))
+        td: img(src='Images/image.webp?size=100' alt="fix image")
+        td: +code: :highlight(pug) img(src='./image.webp?size=100')
       tr
-        td: img(src=require('Images/image.webp?size=120&format=png') alt="fix image")
-        td: +code: :highlight(pug) img(src=require('./image.webp?size=120&format=png'))
+        td: img(src='Images/image.webp?size=120&format=png' alt="fix image")
+        td: +code: :highlight(pug) img(src='./image.webp?size=120&format=png')
       tr
-        td: img(src=require('Images/image.webp?size=140&format=jpg') alt="fix image")
-        td: +code: :highlight(pug) img(src=require('./image.webp?size=140&format=jpg'))
+        td: img(src='Images/image.webp?size=140&format=jpg' alt="fix image")
+        td: +code: :highlight(pug) img(src='./image.webp?size=140&format=jpg')
 
       tr
         //- see the styles for this demo in `main.scss`
@@ -199,10 +198,8 @@ block body
     p
     div The generated HTML:
     +code: :highlight(html)
-      <div
-        class="box"
-        style="background-image: url(data:image/jpeg;base64,...); width:200px; height:110px; background-size:cover;">
-      </div>
+      <div class="box"
+           style="background-image: url(data:image/jpeg;base64,...); width:200px; height:110px; background-size:cover;">
 
     p
     div What you see in the browser:
@@ -223,3 +220,17 @@ block body
       p placeholder: #{require("./image.jpg?prop=placeholder&emitFile=false&placeholder=true&placeholderSize=50")}
       p width of original image size: #{require("./image.jpg?prop=width&emitFile=false")}
       p height of resised image: #{require("./image.jpg?prop=height&size=200")}
+
+    h3 Notes
+
+    ul
+      li
+        div To resolve a source image file in the #[:code src] attribute of the #[:code img] tag is not need to use the #[:code require()] function:
+        +code: :highlight(pug)
+          img(src='./image.jpg?size=200')
+
+      li
+        div Use the #[:code require()] function only to resolve a source file in a Pug code or in text:
+        +code: :highlight(pug)
+          - const imageSrc = require('./image.jpg?size=640')
+          img(src=imageSrc)

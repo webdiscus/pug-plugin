@@ -1,81 +1,71 @@
 const path = require('path');
 const PugPlugin = require('pug-plugin');
 
-module.exports = (env, argv) => {
-  const isDev = argv.mode === 'development';
+module.exports = {
+  mode: 'production',
+  devtool: 'source-map',
+  stats: 'minimal',
 
-  return {
-    mode: isDev ? 'development' : 'production',
-    devtool: isDev ? 'inline-source-map' : 'source-map',
+  output: {
+    path: path.join(__dirname, 'dist'),
+    clean: true,
+  },
 
-    output: {
-      path: path.join(__dirname, 'dist'),
+  resolve: {
+    alias: {
+      // use Webpack aliases instead of relative paths like `../../`
+      '@images': path.join(__dirname, 'src/assets/images/'),
     },
+  },
 
-    entry: {
-      // Define your Pug templates here
-      index: 'src/views/home/index.pug', // => dist/index.html
-      contact: 'src/views/contact/index.pug', // => dist/contact.html
-      about: 'src/views/about/index.pug', // => dist/about.html
-    },
-
-    resolve: {
-      alias: {
-        // use Webpack aliases instead of relative paths like ../../
-        Images: path.join(__dirname, 'src/assets/images/'),
+  plugins: [
+    new PugPlugin({
+      // auto precessing all Pug templates in the directory
+      entry: 'src/views/',
+      // OR you can define the templates manually
+      // entry: {
+      //   index: 'src/views/pages/index.pug', // => dist/index.html
+      //   'contact/index': 'src/views/pages/contact/index.pug', // => dist/contact/index.html
+      //   'about/index': 'src/views/pages/about/index.pug', // => dist/about/index.html
+      // },
+      js: {
+        // JS output filename
+        filename: 'assets/js/[name].[contenthash:8].js',
       },
-    },
+      css: {
+        // CSS output filename
+        filename: 'assets/css/[name].[contenthash:8].css',
+      },
+    }),
+  ],
 
-    plugins: [
-      new PugPlugin({
-        js: {
-          // output name of a generated JS file
-          filename: 'assets/js/[name].[contenthash:8].js',
+  module: {
+    rules: [
+      {
+        test: /\.(s?css|sass)$/,
+        use: ['css-loader', 'sass-loader'],
+      },
+      {
+        test: /\.(png|svg|jpe?g|webp)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/img/[name].[hash:8][ext]',
         },
-        css: {
-          // output name of a generated CSS file
-          filename: 'assets/css/[name].[contenthash:8].css',
-        },
-      }),
+      },
     ],
+  },
 
-    module: {
-      rules: [
-        // templates
-        {
-          test: /\.pug$/,
-          loader: PugPlugin.loader,
-        },
-
-        // styles
-        {
-          test: /\.(css|sass|scss)$/,
-          use: ['css-loader', 'sass-loader'],
-        },
-
-        // images
-        {
-          test: /[\\/]images[\\/].+\.(png|svg|jpe?g|webp)$/i,
-          type: 'asset/resource',
-          generator: {
-            filename: 'assets/img/[name].[hash:8][ext]',
-          },
-        },
-      ],
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'dist'),
     },
-
-    devServer: {
-      static: {
-        directory: path.join(__dirname, 'dist'),
-      },
-      compress: true,
-      //open: true, // open in default browser
-      watchFiles: {
-        paths: ['src/**/*.*'],
-        options: {
-          usePolling: true,
-        },
+    compress: true,
+    open: true, // open in default browser
+    watchFiles: {
+      paths: ['src/**/*.*'],
+      options: {
+        usePolling: true,
       },
     },
-  };
+  },
 };

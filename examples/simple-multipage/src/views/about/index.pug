@@ -2,14 +2,14 @@ doctype html
 html
   head
     title About
-    link(rel='icon' href=require('Images/favicon.svg') type='image/svg+xml' sizes='any')
-    link(href=require('./styles.scss') rel='stylesheet')
-    script(src=require('./main.js') defer)
+    link(rel='icon' href='@images/favicon.svg' type='image/svg+xml' sizes='any')
+    link(href='./styles.scss' rel='stylesheet')
+    script(src='./main.js' defer)
 
 body
   h1 About
   div.nav
-    a(href="index.html") Home
+    a(href="/") Home
     span &nbsp|&nbsp
-    a(href="contact.html") Contact
-  img(src=require('Images/apple.png') alt="apple")
+    a(href="/contact/") Contact
+  img(src='@images/apple.png' alt="apple")

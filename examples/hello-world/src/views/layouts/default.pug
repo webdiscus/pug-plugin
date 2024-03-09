@@ -13,35 +13,36 @@ html(lang='en' dir='ltr')
     meta(property='description' content='Hello world')
 
     //- Favicons
-    link(rel='icon' href=require('Images/favicons/favicon.svg') type='image/svg+xml' sizes='any')
-    link(rel='icon' href=require('Images/favicons/favicon-32px.png') type='image/png' sizes='32x32')
+    link(href='@images/favicons/favicon.svg' rel='icon' type='image/svg+xml' sizes='any')
+    link(href='@images/favicons/favicon-32px.png' rel='icon' type='image/png' sizes='32x32')
 
     //- Page title
     title= title
 
     //- Page styles
     block style
-      //- common used styles
-      link(rel='stylesheet' href=require('Styles/base/main.scss'))
+      //- Common styles
+      link(href='@styles/base/main.scss' rel='stylesheet')
 
     //- Additional head block, e.g. for preload scripts in head
     block head
-      script(src=require('Scripts/common.js') defer)
+      script(src='@scripts/common.js' defer)
 
-      // Demo how to inline CSS
-      style=require('Styles/inline-styles.scss?inline')
+      // Demo how to inline single CSS file using the `?inline` query
+      link(href='@styles/inline-style.scss?inline' rel='stylesheet')
 
   body
     //- Main header
     .header-container
       .header-content
         a(href="index.html").header-left
-          img.app-logo(src=require('Images/app-logo.svg'))
+          img.app-logo(src='@images/app-logo.svg')
           span App demo
         .header-middle
-          a(href="index.html") Home
-          a(href="contact.html") Contact
-          a(href="about.html") About
+          //- Note: publicPath is the external variable passed from webpack config
+          a(href=publicPath) Home
+          a(href=publicPath + "contact/") Contact
+          a(href=publicPath + "about/") About
         .header-right
           span.glyphicon.glyphicon-user.mr-m
           span Login

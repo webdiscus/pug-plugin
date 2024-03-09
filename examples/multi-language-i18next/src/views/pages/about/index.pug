@@ -1,4 +1,4 @@
-extends Views/layouts/default.pug
+extends @views/layouts/default.pug
 
 //- set variables used in layout
 block variables
@@ -8,11 +8,11 @@ block variables
 
 //- add page specifically styles
 append style
-  link(href=require('./styles.scss') rel='stylesheet')
+  link(href='./styles.scss' rel='stylesheet')
 
 //- add page specifically scripts
 append script
-  script(src=require('./main.js') defer='')
+  script(src='./main.js' defer='')
 
 block content
   section

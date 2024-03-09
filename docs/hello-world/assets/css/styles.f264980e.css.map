@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack://./src/views/pages/contact/styles.scss"],"names":[],"mappings":"AAAA,GACE,aAAA,CAGF,cACE,YAAA","sourcesContent":["h1 {\n  color: #1993ff;\n}\n\n.contact-logo {\n  height: 125px;\n}\n"],"sourceRoot":""}

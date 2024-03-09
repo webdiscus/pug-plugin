@@ -1,0 +1,1 @@
+{"version":3,"file":"assets/css/style.2c4f572d.css","mappings":"AAAA,GACE,cAGF,YACE","sources":["webpack://hello-world/./src/views/pages/about/style.scss"],"sourcesContent":["h1 {\n  color: mediumseagreen;\n}\n\n.about-logo {\n  height: 125px;\n}\n"],"names":[],"sourceRoot":""}

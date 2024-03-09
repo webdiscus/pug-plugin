@@ -1,0 +1,1 @@
+{"version":3,"file":"assets/js/main.1.6e4bc4a2.js","mappings":"AAAAA,QAAQC,IAAI","sources":["webpack://multi-language-i18next/./src/views/pages/about/main.js"],"sourcesContent":["console.log('\\n>> About page');\n"],"names":["console","log"],"sourceRoot":""}

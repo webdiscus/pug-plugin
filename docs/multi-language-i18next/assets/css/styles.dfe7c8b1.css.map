@@ -1,0 +1,1 @@
+{"version":3,"file":"assets/css/styles.dfe7c8b1.css","mappings":"AAAA,GACE","sources":["webpack://multi-language-i18next/./src/views/pages/home/styles.scss"],"sourcesContent":["h1 {\n  color: coral;\n}\n"],"names":[],"sourceRoot":""}

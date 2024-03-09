@@ -1,0 +1,1 @@
+{"version":3,"file":"assets/css/style.510da095.css","mappings":"AAAA,GACE,cAGF,cACE","sources":["webpack://hello-world/./src/views/pages/contact/style.scss"],"sourcesContent":["h1 {\n  color: #1993ff;\n}\n\n.contact-logo {\n  height: 125px;\n}\n"],"names":[],"sourceRoot":""}

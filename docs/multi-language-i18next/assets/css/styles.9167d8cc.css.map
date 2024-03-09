@@ -1,0 +1,1 @@
+{"version":3,"file":"assets/css/styles.9167d8cc.css","mappings":"AAAA,GACE","sources":["webpack://multi-language-i18next/./src/views/pages/about/styles.scss"],"sourcesContent":["h1 {\n  color: seagreen;\n}\n"],"names":[],"sourceRoot":""}
