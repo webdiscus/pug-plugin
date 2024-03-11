@@ -1,5 +1,9 @@
 # Change log
 
+## 5.0.1 (2024-03-11)
+
+- fix: avoid recompiling all entry templates after changes of a non-entry partial file, #66
+
 ## 5.0.0 (2024-02-08)
 
 > **Note**
