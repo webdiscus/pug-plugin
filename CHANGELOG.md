@@ -1,5 +1,9 @@
 # Change log
 
+## 5.0.3 (2024-03-17)
+
+- fix: catching of the error when a peer dependency for a Pug filter is not installed
+
 ## 5.0.2 (2024-03-14)
 
 - fix: resolving asset files on windows
