@@ -74,6 +74,8 @@ See the [full list of features](https://github.com/webdiscus/html-bundler-webpac
 
 ### 📋 [Table of Contents](https://github.com/webdiscus/html-bundler-webpack-plugin#contents)
 
+### ⚙️ [Pug Plugin options](#options)
+
 ### 📜 [History of Pug Plugin](#history-pug-plugin)
 
 ---
@@ -167,8 +169,66 @@ The generated HTML contains URLs of the output filenames:
 </html>
 ```
 
+<a id="options" name="options"></a>
+
+## Pug Plugin options
+
+The Pug plugin has all the [options](https://github.com/webdiscus/html-bundler-webpack-plugin?#plugin-options) of the `HTML Bundler Plugin`, plus a few options specific to Pug plugin.
+
+<a id="option-pretty" name="option-pretty"></a>
+### `pretty`
+
+Type: `'auto'|boolean|Object` Default: `false`
+
+The Pug compiler generate minimized HTML.
+For formatting generated HTML is used the [js-beautify](https://github.com/beautifier/js-beautify) with the following `default options`:
+
+```js
+{
+  html: {
+    indent_size: 2,
+    end_with_newline: true,
+    indent_inner_html: true,
+    preserve_newlines: true,
+    max_preserve_newlines: 0,
+    wrap_line_length: 120,
+    extra_liners: [],
+    space_before_conditional: true,
+    js: {
+      end_with_newline: false,
+      preserve_newlines: true,
+      max_preserve_newlines: 2,
+      space_after_anon_function: true,
+    },
+    css: {
+      end_with_newline: false,
+      preserve_newlines: false,
+      newline_between_rules: false,
+    },
+  },
+}
+```
+
+Possible values:
+
+- `false` - disable formatting
+- `true` - enable formatting with default options
+- `'auto'` - in `development` mode enable formatting with default options, in `production` mode disable formatting,
+  use [prettyOptions](#option-pretty-options) to customize options
+- `{}` - enable formatting with custom options, this object are merged with `default options`\
+  see [options reference](https://github.com/beautifier/js-beautify#options)
+
+  
+<a id="option-pretty-options" name="option-pretty-options"></a>
+### `prettyOptions`
+
+Type: `Object` Default: `null`
+
+When the [pretty](#option-pretty) option is set to `auto` or `true`, you can configure minification options using the `prettyOptions`.
+
 <a id="history-pug-plugin" name="history-pug-plugin"></a>
 
+---
 ## History of Pug Plugin
 
 **Why the Pug Plugin since `v5.0` based on [html-bundler-webpack-plugin][html-bundler-webpack-plugin]?**
@@ -223,7 +283,7 @@ module.exports = {
 };
 ```
 
-> The `pug-plugin`'s heart 🧡 now lives in the `html-bundler-webpack-plugin`'s body 🏋️‍♂️.
+> The `pug-plugin`'s heart now lives in the `html-bundler-webpack-plugin`.
 > 
 > `@webdiscus/pug-loader` -> `pug-plugin` -> `html-bundler-webpack-plugin` -> `pug-plugin`
 > 

@@ -24,10 +24,12 @@ describe('options', () => {
   test('option js.filename', () => compareFiles('option-js-filename'));
   test('options js, css outputPath absolute', () => compareFiles('option-js-css-outputPath-absolute'));
   test('options js, css outputPath relative', () => compareFiles('option-js-css-outputPath-relative'));
-  // TODO: implement the pretty option in v5.x
-  //test('options.pretty', () => compareFiles('option-pretty'));
+  test('options.pretty default', () => compareFiles('option-pretty'));
+  test('options.pretty auto with option', () => compareFiles('option-pretty-options'));
+  test('options.pretty as object', () => compareFiles('option-pretty-object'));
   test('options.verbose', () => compareFiles('option-verbose'));
-  test('options.postprocess', () => compareFiles('option-postprocess'));
+  test('options.postprocess default', () => compareFiles('option-postprocess'));
+  test('options.postprocess pretty', () => compareFiles('option-postprocess-pretty'));
   test('options.extractComments = false', () => compareFiles('option-extract-comments-false'));
   test('options.extractComments = true', () => compareFiles('option-extract-comments-true'));
 });
@@ -92,7 +94,7 @@ describe('require assets', () => {
 });
 
 describe('inline style & script', () => {
-  test('inline js using URL query `?inline`', () => compareFiles('inline-script-query'));
+  test('inline js using URL query `?inline`, pretty', () => compareFiles('inline-script-query-pretty'));
   test('inline css using URL query `?inline` and resolve url() in CSS', () => compareFiles('inline-style-query'));
   test('inline css with source map, query `?inline`', () => compareFiles('inline-style-query-with-source-map'));
   test('inline css via asset/source', () => compareFiles('inline-style-asset-source'));

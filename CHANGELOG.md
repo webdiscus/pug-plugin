@@ -1,5 +1,9 @@
 # Change log
 
+## 5.1.0 (2024-03-21)
+
+- feat: app the `pretty` and `prettyOptions` options to format the generated HTML
+
 ## 5.0.3 (2024-03-17)
 
 - fix: catching of the error when a peer dependency for a Pug filter is not installed

@@ -2,8 +2,8 @@ const path = require('path');
 const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
-  //mode: 'development',
-  mode: 'production',
+  mode: 'development',
+  //mode: 'production',
 
   output: {
     path: path.join(__dirname, 'dist/'),
@@ -17,13 +17,13 @@ module.exports = {
     new PugPlugin({
       // test pretty option
 
-      pretty: true, // enabled with default options
-      // if pretty is an object, then pretty is enabled for dev and prod
-      // pretty: {
-      //   html: {
-      //     indent_size: 4,
-      //   },
-      // },
+      //pretty: true, // enabled for dev and prod
+      pretty: 'auto', // in dev is true, in prod is false
+      prettyOptions: {
+        html: {
+          indent_size: 4,
+        },
+      },
     }),
   ],
 };
