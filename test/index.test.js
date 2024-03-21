@@ -159,6 +159,10 @@ describe('special cases', () => {
   test('compile template function in js', () => compareFiles('js-tmpl-entry-js'));
 });
 
+describe('experimental', () => {
+  test('option-pretty-beforeEmit', () => compareFiles('_experimental/option-pretty-beforeEmit'));
+});
+
 // Test Messages
 
 describe('exception tests', () => {
