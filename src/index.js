@@ -8,31 +8,6 @@ const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 const formatHtml = require('js-beautify').html;
 
 /**
- * Resolve undefined|true|false|''|'auto' value depend on current Webpack mode dev/prod.
- *
- * @param {boolean|string|undefined} value The value one of the values: true, false, 'auto'.
- * @param {boolean} autoDevValue Returns the autoValue in dev mode when value is 'auto'.
- * @param {boolean} autoProdValue Returns the autoValue in prod mode when value is 'auto'.
- * @param {boolean|string} defaultValue Returns default value when value is undefined.
- * @param {boolean} isProd Is production mode.
- * @return {boolean}
- */
-const toBool = (value, { autoDevValue, autoProdValue, defaultValue, isProd }) => {
-  if (value == null) value = defaultValue;
-  // note: if a parameter is defined without a value or value is empty, then the value is true
-  if (value === '' || value === 'true') return true;
-  if (value === 'false') return false;
-  if (value === true || value === false) return value;
-
-  if (value === 'auto') {
-    if (!isProd && autoDevValue != null) return autoDevValue;
-    if (isProd && autoProdValue != null) return autoProdValue;
-  }
-
-  return false;
-};
-
-/**
  * @typedef {PluginOptions} HtmlBundlerPluginOptions
  */
 
@@ -109,16 +84,11 @@ class PugPlugin extends HtmlBundlerPlugin {
       isPretty = true;
       prettyOption = { ...defaultPrettyOptions, ...userPrettyOptions };
     } else {
-      isPretty = toBool(pretty, {
-        defaultValue: false,
-        autoDevValue: true,
-        isProd: PugPlugin.option.productionMode,
-      });
+      isPretty = PugPlugin.option.toBool(pretty, false, false);
       prettyOption = defaultPrettyOptions;
     }
 
     if (isPretty) {
-      //console.log({ prettyOption });
       PugPlugin.option.addProcess('postprocess', (content) => formatHtml(content, prettyOption));
     }
   }

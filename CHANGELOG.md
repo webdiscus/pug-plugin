@@ -1,5 +1,18 @@
 # Change log
 
+## 5.2.0 (2024-04-06)
+
+- feat: add experimental (undocumented) syntax to include (using `?include` query) compiled CSS directly into style tag to allow keep tag attributes
+  ```pug
+  style(scope='some')=require('./component.scss?include')
+  ```
+  will be generate
+  ```html
+  <style scope="some">
+    ... CSS ...
+  </style>
+  ```
+
 ## 5.1.0 (2024-03-21)
 
 - feat: app the `pretty` and `prettyOptions` options to format the generated HTML
