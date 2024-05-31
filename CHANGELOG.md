@@ -1,5 +1,59 @@
 # Change log
 
+## 5.3.0 (2024-05-31)
+
+- chore: update html-bundler-webpack-plugin
+- feat: add `watchFiles.includes` and `watchFiles.excludes` options to allow watch specifically external file,
+  e.g. *.md file included via Pug filter from any location outer project directory
+- feat: add resolving the url() value in the style attribute:
+  ```pug
+  div(style="background-image: url(./image.png);")
+  ```
+- feat: add support for the `css-loader` option `exportType` as [css-style-sheet](https://github.com/webpack-contrib/css-loader?#exporttype)
+- feat: add `entryFilter` option to include or exclude entry files when the `entry` option is the path
+- feat: add support the [CSS Modules](https://github.com/css-modules/css-modules) for styles imported in JS using the [css-loader modules](https://github.com/webpack-contrib/css-loader#modules) option.\
+  Required: `css-loader` >= `7.0.0`\
+  The CSS _module rule_ in the webpack config:
+  ```js
+  {
+    test: /\.(css)$/,
+    use: [
+      {
+        loader: 'css-loader',
+        options: {
+          modules: {
+            localIdentName: '[name]__[local]__[hash:base64:5]',
+            exportLocalsConvention: 'camelCase',
+          },
+        },
+      },
+    ],
+  },
+  ```
+  CSS:
+  ```css
+  .red {
+    color: red;
+  }
+  .green {
+    color: green;
+  }
+  ```
+  Using in JS:
+  ```js
+  // the styles contains CSS class names: { red: 'main__red__us4Tv', green: 'main__green__bcpRp' }
+  import styles from './main.css';
+  ```
+
+- feat: add support for dynamic import of styles
+  ```
+  const loadStyles = () => import('./component.scss');
+  loadStyles();
+  ```
+- fix: issue when used js dynamic import with magic comments /* webpackPrefetch: true */ and css.inline=true
+- fix: ansi colors for verbose output in some terminals  
+- fix: extract CSS from styles imported in dynamically imported JS
+
 ## 5.2.0 (2024-04-06)
 
 - feat: add experimental (undocumented) syntax to include (using `?include` query) compiled CSS directly into style tag to allow keep tag attributes

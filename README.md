@@ -24,6 +24,13 @@
 ## Pug template as entry point
 
 The **Pug Plugin** generates static HTML or [template function](https://github.com/webdiscus/html-bundler-webpack-plugin#template-in-js) from **Pug template** containing source files of scripts, styles, images, fonts and other resources, similar to how it works in [Vite](https://vitejs.dev/guide/#index-html-and-project-root).
+This plugin allows using a template file as an [entry point](https://github.com/webdiscus/html-bundler-webpack-plugin#option-entry).
+
+The plugin resolves source files of assets in templates and replaces them with correct output URLs in the generated HTML.
+The resolved assets will be processed via Webpack plugins/loaders and placed into the output directory.
+You can use a relative path or Webpack alias to a source file.
+
+A template imported in JS will be compiled into [template function](https://github.com/webdiscus/html-bundler-webpack-plugin#template-in-js). You can use the **template function** in JS to render the template with variables in runtime on the client-side in the browser.
 
 ## 💡 Highlights
 

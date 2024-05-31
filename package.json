@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "description": "Pug plugin for webpack handles a template as an entry point, extracts CSS and JS from their sources referenced in Pug.",
   "keywords": [
     "html",
@@ -67,9 +67,9 @@
   },
   "dependencies": {
     "ansis": "2.0.3",
-    "html-bundler-webpack-plugin": "3.8.0",
+    "html-bundler-webpack-plugin": "3.14.0",
     "js-beautify": "^1.15.1",
-    "pug": "3.0.2"
+    "pug": "3.0.3"
   },
   "devDependencies": {
     "@babel/core": "7.24.4",
