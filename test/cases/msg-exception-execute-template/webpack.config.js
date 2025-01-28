@@ -3,6 +3,7 @@ const PugPlugin = require('@test/pug-plugin');
 
 module.exports = {
   mode: 'production',
+  stats: 'none',
 
   output: {
     path: path.join(__dirname, 'dist/'),
