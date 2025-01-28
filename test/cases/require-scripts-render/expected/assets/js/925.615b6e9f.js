@@ -1,1 +1,0 @@
-(self.webpackChunk=self.webpackChunk||[]).push([[925],{925:e=>{e.exports=function(e){return""+"<h2>Component</h2>"}}}]);

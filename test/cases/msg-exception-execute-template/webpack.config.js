@@ -15,6 +15,4 @@ module.exports = {
   },
 
   plugins: [new PugPlugin({})],
-
-
 };

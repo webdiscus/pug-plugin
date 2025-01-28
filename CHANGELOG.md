@@ -1,5 +1,11 @@
 # Change log
 
+## 6.0.0 (2025-01-29)
+
+- feat: upgrade the html-bundler-webpack-plugin from `v3.14` tp `v4.16`
+- chore: update dependencies
+- test: update tests for new bundler version
+
 ## 5.3.0 (2024-05-31)
 
 - chore: update html-bundler-webpack-plugin

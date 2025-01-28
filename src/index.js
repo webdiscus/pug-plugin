@@ -37,6 +37,8 @@ class PugPlugin extends HtmlBundlerPlugin {
       ...PluginOptions,
       ...options,
     });
+
+    //this.option = options;
   }
 
   /**
@@ -46,8 +48,8 @@ class PugPlugin extends HtmlBundlerPlugin {
    * @param {Compiler} compiler The instance of the webpack compilation.
    */
   init(compiler) {
-    const pretty = PugPlugin.option.options.pretty;
-    const userPrettyOptions = PugPlugin.option.options.prettyOptions;
+    const pretty = this.option.options.pretty;
+    const userPrettyOptions = this.option.options.prettyOptions;
 
     // formatting options: https://github.com/beautifier/js-beautify
     const defaultPrettyOptions = {
@@ -84,12 +86,12 @@ class PugPlugin extends HtmlBundlerPlugin {
       isPretty = true;
       prettyOption = { ...defaultPrettyOptions, ...userPrettyOptions };
     } else {
-      isPretty = PugPlugin.option.toBool(pretty, false, false);
+      isPretty = this.option.toBool(pretty, false, false);
       prettyOption = defaultPrettyOptions;
     }
 
     if (isPretty) {
-      PugPlugin.option.addProcess('postprocess', (content) => formatHtml(content, prettyOption));
+      this.option.addProcess('postprocess', (content) => formatHtml(content, prettyOption));
     }
   }
 }

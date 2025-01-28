@@ -1,0 +1,1 @@
+(self.webpackChunk=self.webpackChunk||[]).push([[652],{652:(e,s,c)=>{const k=c(925);console.log(k())}}]);

@@ -40,9 +40,14 @@ module.exports = {
   optimization: {
     // test injection of chunks in html
     splitChunks: {
-      chunks: 'all',
       minChunks: 1,
       minSize: 50,
+      cacheGroups: {
+        app: {
+          test: /\.(js|ts)$/, // <= IMPORTANT: split only script files
+          chunks: 'all',
+        },
+      },
     },
   },
 };

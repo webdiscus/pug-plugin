@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[197],{197:(e,s,n)=>{var c=n(817);const k=n.n(c)().render("SCRIPT A");console.log(k)}}]);

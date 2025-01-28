@@ -28,7 +28,6 @@ module.exports = {
 
   module: {
     rules: [
-
       {
         test: /\.(css|sass|scss)$/,
         use: ['css-loader', 'sass-loader'],
@@ -39,7 +38,6 @@ module.exports = {
   optimization: {
     runtimeChunk: 'single', // extract runtime script from all modules
     splitChunks: {
-      chunks: 'all',
       minSize: 10000, // extract modules bigger than 10KB, defaults is 30KB
       cacheGroups: {
         vendor: {
@@ -50,6 +48,7 @@ module.exports = {
             return `${groupName}.${moduleName}`;
           },
           enforce: true,
+          chunks: 'all',
         },
       },
     },

@@ -54,26 +54,27 @@ A template imported in JS will be compiled into [template function](https://gith
 See the [full list of features](https://github.com/webdiscus/html-bundler-webpack-plugin#features).
 
 
-> **Note**
+> ‼️ **Note**
 >
-> ‼️ All [features](https://github.com/webdiscus/html-bundler-webpack-plugin#features) and [options](https://github.com/webdiscus/html-bundler-webpack-plugin?#plugin-options) of the [html-bundler-webpack-plugin](https://github.com/webdiscus/html-bundler-webpack-plugin) available now in the `pug-plugin` too.
+> The `pug-plugin` since version `5.0.0` is essentially the [html-bundler-webpack-plugin](https://github.com/webdiscus/html-bundler-webpack-plugin) under the hood, pre-configured to use [Pug templates](https://github.com/webdiscus/html-bundler-webpack-plugin?#using-template-pug).
+> All [features](https://github.com/webdiscus/html-bundler-webpack-plugin#features) and [options](https://github.com/webdiscus/html-bundler-webpack-plugin?#plugin-options) of [html-bundler-webpack-plugin](https://github.com/webdiscus/html-bundler-webpack-plugin) are now available in `pug-plugin`.
 
-
-> **Warning**
-> 
-> Since the version `5.0.0`, the **Pug plugin** is essentially the [html-bundler-webpack-plugin](https://github.com/webdiscus/html-bundler-webpack-plugin) preconfigured for using [Pug templates](https://github.com/webdiscus/html-bundler-webpack-plugin?#using-template-pug).
-
-> **Warning**
+> ⚠️ **Warning**
 > 
 > Compared to the version `4.x`, in the new version `5.x` the source asset file can be specified in a template without the `require()` function.
 > For compatibility, the `require()` function is still supported.
 > 
+> **OLD syntax**
 > ```pug
-> //- OLD syntax: the path is relative to the partial file or can be as the webpack alias
 > link(href=require("./style.scss") rel="stylesheet")
-> //- NEW syntax: the path is relative to the entry file or can be as the webpack alias
+> ```
+> The asset path is _relative to the **partial template**_ or can be as the webpack alias.
+> 
+> **NEW syntax**
+> ```pug
 > link(href="./style.scss" rel="stylesheet")
 > ```
+> The asset path is _relative to the **entry template**_ or can be as the webpack alias.
 > 
 > See the full list of the [BREAKING CHANGES in v5](https://github.com/webdiscus/pug-plugin/blob/master/CHANGELOG.md#500-2024-02-08).
 
@@ -118,7 +119,7 @@ html
 The minimal webpack config:
 
 ```js
-const PugPlugin = require('PugPlugin');
+const PugPlugin = require('pug-plugin');
 
 module.exports = {
   plugins: [
@@ -242,20 +243,21 @@ When the [pretty](#option-pretty) option is set to `auto` or `true`, you can con
 
 **2021**\
 The history of the creation of the `pug-plugin` began back in October 2021.
-Then, at the end of 2021, I created the [@webdiscus/pug-loader][pug-loader] that had all the features of the original [pug-loader](https://github.com/pugjs/pug-loader).
+In late 2021 I implemented the [@webdiscus/pug-loader][pug-loader] as а replacement for [pug-loader](https://github.com/pugjs/pug-loader) because `pug-loader` was outdated and had many issues.
 
 **2022**\
-Using, then without an alternative, `html-webpack-plugin` caused me pain and suffering to configure webpack for rendering Pug templates containing various assets.
-At the beginning of 2022, I started creating the `pug-plugin` as a complete replacement for the `html-webpack-plugin` and many other _"crutches"_.
-During of the year, the `pug-plugin` has gained a lot of useful features and was able to replace the `html-webpack-plugin`, `mini-css-extract-plugin` and many other [plugins and loaders](https://github.com/webdiscus/html-bundler-webpack-plugin?tab=readme-ov-file#list-of-plugins).
+Until 2022 `html-webpack-plugin` had no alternative.
+Using `html-webpack-plugin` caused me pain and suffering to configure webpack for rendering Pug templates containing various assets.
+In early 2022, I started developing the `pug-plugin` as a complete replacement for `html-webpack-plugin` and many other _"crutches"_.
+During the year, the `pug-plugin` has gained a lot of useful features and was able to replace the `html-webpack-plugin`, `mini-css-extract-plugin` and many other [plugins and loaders](https://github.com/webdiscus/html-bundler-webpack-plugin?tab=readme-ov-file#list-of-plugins).
 
 **2023**\
-Based on the `pug-plugin` code, I decided to create a universal [html-bundler-webpack-plugin][html-bundler-webpack-plugin] that would support all the most popular template engines, such as [Eta](https://eta.js.org), [EJS](https://ejs.co), [Handlebars](https://handlebarsjs.com), [Nunjucks](https://mozilla.github.io/nunjucks/), [Pug](https://pugjs.org/), [TwigJS](https://github.com/twigjs/twig.js), and would be [extendable](https://github.com/webdiscus/html-bundler-webpack-plugin#custom-templating-engine) for other template engines, e.g., [LiquidJS](https://github.com/webdiscus/html-bundler-webpack-plugin#using-the-liquidjs).
-During 2023, this plugin has gained even more [useful features](https://github.com/webdiscus/html-bundler-webpack-plugin#features) and absorbed all the functionality of the `pug-plugin` and the `@webdiscus/pug-loader`.
+Based on the `pug-plugin` code I decided to develop a universal [html-bundler-webpack-plugin][html-bundler-webpack-plugin] that would support all the most popular template engines, such as [Eta](https://eta.js.org), [EJS](https://ejs.co), [Handlebars](https://handlebarsjs.com), [Nunjucks](https://mozilla.github.io/nunjucks/), [Pug](https://pugjs.org/), [TwigJS](https://github.com/twigjs/twig.js), and would be [extendable](https://github.com/webdiscus/html-bundler-webpack-plugin#custom-templating-engine) for other template engines, e.g., [LiquidJS](https://github.com/webdiscus/html-bundler-webpack-plugin#using-the-liquidjs).
+During the year, this plugin has gained even more [useful features](https://github.com/webdiscus/html-bundler-webpack-plugin#features) and absorbed all the functionality of the `pug-plugin` and the `@webdiscus/pug-loader`.
 
 **2024**\
-At the beginning of 2024, the `pug-plugin` completely switched to the universal code `html-bundler-webpack-plugin`.
-Starting from version `5.0`, the `pug-plugin` is the `html-bundler-webpack-plugin` [pre-configured for Pug](https://github.com/webdiscus/html-bundler-webpack-plugin#using-template-pug) templates with the pre-installed `pug` package.
+In early 2024, the `pug-plugin` completely switched to the universal code of `html-bundler-webpack-plugin`.
+Starting from version `5.0`, the `pug-plugin` is the `html-bundler-webpack-plugin` unter the hood, [pre-configured for Pug templates](https://github.com/webdiscus/html-bundler-webpack-plugin#using-template-pug) with the pre-installed `pug` package.
 
 The config of `pug-plugin >= v5.0`:
 
@@ -273,7 +275,7 @@ module.exports = {
 };
 ```
 
-is the same as:
+The above configuration is equivalent to:
 
 ```js
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
@@ -290,7 +292,7 @@ module.exports = {
 };
 ```
 
-> The `pug-plugin`'s heart now lives in the `html-bundler-webpack-plugin`.
+> The heart of `pug-plugin` now beats in the `html-bundler-webpack-plugin`.
 > 
 > `@webdiscus/pug-loader` -> `pug-plugin` -> `html-bundler-webpack-plugin` -> `pug-plugin`
 > 
@@ -299,8 +301,8 @@ module.exports = {
 
 - [ansis][ansis] - The Node.js library for ANSI color styling of text in terminal
 - [pug-loader][pug-loader] - The Pug loader for webpack
-- [html-bundler-webpack-plugin][html-bundler-webpack-plugin] - The plugin handles HTML template as entry point, extracts CSS, JS, images from their sources loaded directly in HTML
-
+- [html-bundler-webpack-plugin][html-bundler-webpack-plugin] - Generates HTML with JS and CSS from [various templates](https://github.com/webdiscus/html-bundler-webpack-plugin#template-engine) containing source files of scripts, styles and other assets.
+  Advanced alternative to [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) and modern replacement of many [plugins and loaders](#list-of-plugins).
 ## License
 
 [ISC](https://github.com/webdiscus/pug-loader/blob/master/LICENSE)
