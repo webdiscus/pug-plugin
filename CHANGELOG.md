@@ -1,5 +1,11 @@
 # Change log
 
+## 6.1.0 (2026-03-09)
+
+- fix: force `minimatch@10` and `glob@13` in transitive dependencies to fix vulnerabilities
+- chore: update `html-bundler-webpack-plugin` to the latest version
+- chore: require Node.js 20 or newer
+
 ## 6.0.0 (2025-01-29)
 
 - feat: upgrade the html-bundler-webpack-plugin from `v3.14` tp `v4.16`

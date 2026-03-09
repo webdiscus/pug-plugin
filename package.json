@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "description": "Pug plugin for webpack handles a template as an entry point, extracts CSS and JS from their sources referenced in Pug.",
   "keywords": [
     "html",
@@ -60,15 +60,15 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "peerDependencies": {
     "webpack": ">=5.96.0"
   },
   "dependencies": {
-    "ansis": "3.10.0",
-    "html-bundler-webpack-plugin": "4.16.0",
-    "js-beautify": "^1.15.1",
+    "ansis": "4.2.0",
+    "html-bundler-webpack-plugin": "4.23.0",
+    "js-beautify": "^1.15.4",
     "pug": "3.0.3"
   },
   "devDependencies": {
@@ -94,7 +94,11 @@
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "webpack": "5.97.1",
     "webpack-cli": "6.0.1",
-    "webpack-dev-server": "^5.2.0",
+    "webpack-dev-server": "^5.2.3",
     "webpack-merge": "^6.0.1"
+  },
+  "overrides": {
+    "minimatch": "^10.0.0",
+    "glob": "^13.0.0"
   }
 }
