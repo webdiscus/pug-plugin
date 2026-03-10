@@ -6,6 +6,7 @@ const isLocalEnv = fs.existsSync(path.join(__dirname, '.local'));
 // https://jestjs.io/docs/en/configuration.html
 
 module.exports = {
+  rootDir: path.join(__dirname, '..'),
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -25,7 +26,7 @@ module.exports = {
   // collectCoverage: false,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  collectCoverageFrom: ['../src/**/*.js'],
+  collectCoverageFrom: ['<rootDir>/src/**/*.js'],
 
   // The directory where Jest should output its coverage files
   // coverageDirectory: null,
@@ -35,7 +36,7 @@ module.exports = {
 
   // Indicates which provider should be used to instrument code for coverage.
   // Allowed values are babel (default) or v8.
-  // coverageProvider: 'babel',
+  coverageProvider: 'v8',
 
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [
@@ -105,7 +106,9 @@ module.exports = {
   // ],
 
   // A map from regular expressions to module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    '^@test/pug-plugin$': '<rootDir>/src/index.js',
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
